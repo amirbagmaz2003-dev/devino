@@ -11,8 +11,8 @@ const SOCIAL_LINKS = [
 
 /**
  * Always on the light end of the palette (CLAUDE.md — "لوگو": "در فوتر ...
- * فقط نسخه‌ی مشکی لوگو استفاده شود"), so Logo just inherits this
- * section's matte-black text color — no light/dark variant needed here.
+ * فقط نسخه‌ی مشکی لوگو استفاده شود"), so Logo is pinned to the black
+ * variant — no scroll-driven crossfade needed here.
  */
 export default function Footer() {
   const t = useTranslations("footer");
@@ -44,7 +44,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="border-matte-black/10 text-matte-black/50 flex items-center justify-center gap-2 border-t px-6 py-4 text-center text-xs">
-        <Logo className="text-xs tracking-[0.15em]" />
+        <Logo variant="black" className="h-4" />
         <span>
           &copy; {year} — {t("rights")}
         </span>

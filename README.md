@@ -1,8 +1,9 @@
 # deVino
 
-Website skeleton for **deVino** — a premium women's evening-wear brand. See
+Website for **deVino** — a premium women's evening-wear brand. See
 `CLAUDE.md` for the brand and technical decisions this project follows, and
-`phase-2-skeleton-brief.md` for the brief this phase implements.
+`phase-2-skeleton-brief.md` / `phase-3-header-brief.md` for the briefs the
+project has implemented so far.
 
 ## Stack
 
@@ -77,18 +78,35 @@ sanity.config.ts           Studio config (standalone — see "Sanity Studio")
 surface on the site renders through (see `CLAUDE.md`). It takes normalized
 `{ type, asset, focalPoint, alt }` props and stays intentionally dumb about
 Sanity; `src/sanity/lib/mediaBox.ts` maps a raw Sanity `mediaBox` field
-value into those props. This phase only renders responsive, focal-point-
-aware images/video — the Ken Burns zoom and video autoplay behavior land in
-phase 3 inside this same component, with no changes needed at any call
-site.
+value into those props. Images get a one-time Ken Burns zoom around their
+focal point (CSS-only, `prefers-reduced-motion`-aware); videos autoplay
+muted/looped with no zoom — both live only here, so swapping an image for
+a video at a call site (once that's wired to Sanity) needs no code change.
 
-## Current phase (2 — skeleton)
+## Logo
 
-Every route renders a heading and placeholder copy only — no real content
-fetching, no final visual design, no header zoom/scroll-color effects (see
-`phase-2-skeleton-brief.md` for what's explicitly out of scope). Sanity
-schemas (`product`, `collection`, `mediaBox`, `siteSettings`) are defined
-and Studio runs standalone (see "Sanity Studio" above), ready for content
+`src/components/Logo.tsx` renders the real wordmark files in
+`public/logos/` (`devino-logo-black.png` / `devino-logo-white.png` —
+cropped from the originals, which had a lot of transparent padding/shadow
+around the actual glyphs, and downscaled for web use). `variant="auto"`
+(used in the header) stacks both images and crossfades their opacity as
+`HeroScrollController` toggles `.is-light` on the header; `variant="black"`
+(used in the footer, which is always on the light end of the palette) just
+pins one file — see `globals.css` for the crossfade rules.
+
+## Current phase (3 — header, done)
+
+The homepage has a real full-viewport hero (`public/photos/hero-editorial-bw.jpg`,
+the one fully black-and-white photo among the ones provided — it matches
+the site's strict black/pearl-white palette with no color clash) with the
+Ken Burns zoom, a scroll-linked dark→light background tween, and a fixed
+header whose text/logo crossfade with it. The other nine placeholder
+photos live in `public/photos/` for later phases (the phase 4 collections
+grid, the about page, etc.) — none of them are wired into any page yet.
+Everything else is still placeholder copy/routes (see
+`phase-2-skeleton-brief.md` and `phase-3-header-brief.md`). Sanity schemas
+(`product`, `collection`, `mediaBox`, `siteSettings`) are defined and
+Studio runs standalone (see "Sanity Studio" above), ready for content
 modeling in later phases.
 
 ## Scripts

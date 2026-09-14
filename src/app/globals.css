@@ -50,9 +50,9 @@ h6 {
  * Header foreground crossfade (CLAUDE.md — "لوگو", "رفتار اسکرول هدر").
  * The background color itself is scroll-linked and set imperatively by
  * HeroScrollController (continuous, must track scroll position exactly).
- * Text/logo color is a short, threshold-triggered crossfade instead of a
- * continuous tween — interpolating black/white through gray would read as
- * a muddy smear rather than a clean fade.
+ * Nav text color and the logo swap are a short, threshold-triggered
+ * crossfade instead of a continuous tween — interpolating black/white
+ * through gray would read as a muddy smear rather than a clean fade.
  */
 .site-header {
   color: #f8f6f0;
@@ -61,4 +61,26 @@ h6 {
 
 .site-header.is-light {
   color: #000000;
+}
+
+/* Logo (auto variant): two stacked images crossfading opacity, driven by
+   the same .is-light toggle as the nav text color above. */
+.logo-crossfade {
+  transition: opacity 400ms ease;
+}
+
+.logo-crossfade--white {
+  opacity: 1;
+}
+
+.logo-crossfade--black {
+  opacity: 0;
+}
+
+.site-header.is-light .logo-crossfade--white {
+  opacity: 0;
+}
+
+.site-header.is-light .logo-crossfade--black {
+  opacity: 1;
 }

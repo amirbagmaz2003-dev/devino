@@ -2,10 +2,12 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import MediaBox from "@/components/MediaBox";
 import HeroScrollController from "@/components/HeroScrollController";
-import {
-  heroPlaceholderUrl,
-  heroPlaceholderFocalPoint,
-} from "@/lib/placeholderHero";
+
+// Placeholder campaign photo (CLAUDE.md — "محتوای موقت"), provided directly
+// by the project owner as a real file — replaced with actual campaign
+// photography via Sanity in a later phase; nothing else needs to change.
+const HERO_IMAGE_URL = "/photos/hero-editorial-bw.jpg";
+const HERO_FOCAL_POINT = { x: 0.42, y: 0.18 };
 
 export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const { locale } = await params;
@@ -19,8 +21,8 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       <section className="relative h-dvh w-full overflow-hidden">
         <MediaBox
           type="image"
-          asset={{ url: heroPlaceholderUrl }}
-          focalPoint={heroPlaceholderFocalPoint}
+          asset={{ url: HERO_IMAGE_URL }}
+          focalPoint={HERO_FOCAL_POINT}
           alt={t("heroAlt")}
           priority
         />

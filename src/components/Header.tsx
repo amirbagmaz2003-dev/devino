@@ -21,7 +21,7 @@ export default function Header() {
     >
       <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-6">
         <Link href="/">
-          <Logo />
+          <Logo className="h-8" />
         </Link>
         <nav aria-label="Primary" className="font-body flex gap-8 text-sm">
           <Link href="/collections" className="hover:opacity-70">
