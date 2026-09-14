@@ -1,5 +1,3 @@
-"use client";
-
 import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
 import { visionTool } from "@sanity/vision";
@@ -7,8 +5,11 @@ import { apiVersion, dataset, projectId } from "./src/sanity/env";
 import { schema } from "./src/sanity/schemaTypes";
 import { structure } from "./src/sanity/structure";
 
+// Studio runs standalone via the Sanity CLI (`sanity dev` / `sanity deploy`),
+// not embedded in the Next.js app — see README, "Sanity Studio" section, for
+// why (a Cloudflare Workers runtime incompatibility with the embedded
+// next-sanity Studio route).
 export default defineConfig({
-  basePath: "/studio",
   name: "devino",
   title: "deVino",
   projectId,

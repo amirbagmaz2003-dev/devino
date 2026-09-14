@@ -10,9 +10,10 @@ Website skeleton for **deVino** — a premium women's evening-wear brand. See
 - **Tailwind CSS v4** — design tokens (colors, fonts) in `tailwind.config.ts`
 - **next-intl** — bilingual routing, `fa` (default) and `en`, with per-locale
   `dir` (`rtl`/`ltr`)
-- **Sanity** — CMS, embedded Studio at `/studio`
-- Deploys to **Vercel** (Preview only — see `CLAUDE.md` on the production
-  domain)
+- **Sanity** — CMS, standalone Studio (see "Sanity Studio" below)
+- Deploys to **Cloudflare Workers** via the OpenNext adapter
+  (`@opennextjs/cloudflare`) — Preview only, see `CLAUDE.md` on the
+  production domain
 
 ## Getting started
 
@@ -35,25 +36,40 @@ default locale (`/fa`). English lives under `/en`.
    NEXT_PUBLIC_SANITY_PROJECT_ID=<your-project-id>
    NEXT_PUBLIC_SANITY_DATASET=production
    ```
-3. Visit `/studio` to manage content. Until real credentials are set, the
-   public site still builds and runs fine — it doesn't fetch Sanity data
-   yet (see "Current phase" below).
+3. Run `npm run studio:dev` to manage content locally. Until real
+   credentials are set, the public site still builds and runs fine — it
+   doesn't fetch Sanity data yet (see "Current phase" below).
+
+## Sanity Studio
+
+Studio runs **standalone** via the Sanity CLI, not embedded in the Next.js
+app:
+
+```bash
+npm run studio:dev      # local Studio, defaults to localhost:3333
+npm run studio:deploy   # hosted Studio at <project-name>.sanity.studio
+```
+
+This is a deliberate change from the original plan to embed Studio at
+`/studio` inside the Next app: on Cloudflare Workers, that route 500'd with
+`ReferenceError: MessagePort is not defined` — the Sanity Studio bundle
+depends on a global the `workerd` runtime doesn't implement, and there's no
+compatibility flag for it. The public site is unaffected; this only ever
+broke the admin UI. `sanity.config.ts` and the schema types are unchanged
+and work the same way for both `sanity dev` and a future embedded attempt,
+if that gap in `workerd` closes later.
 
 ## Project structure
 
 ```
 src/app/(site)/[locale]/   Public site routes (localized: /fa/*, /en/*)
-src/app/studio/            Embedded Sanity Studio (not localized)
 src/components/            Header, Footer, NewsletterForm, MediaBox
 src/i18n/                  next-intl routing/navigation config
 src/lib/fonts.ts           next/font setup (Cormorant Garamond, Inter)
 src/sanity/                Sanity client, image builder, schema types
 messages/{fa,en}.json      UI copy per locale
+sanity.config.ts           Studio config (standalone — see "Sanity Studio")
 ```
-
-`(site)` and `studio` are separate Next.js route groups, each with its own
-root layout — this lets the public site set `<html lang dir>` per locale
-without affecting the Studio shell.
 
 ## MediaBox
 
@@ -72,22 +88,54 @@ Every route renders a heading and placeholder copy only — no real content
 fetching, no final visual design, no header zoom/scroll-color effects (see
 `phase-2-skeleton-brief.md` for what's explicitly out of scope). Sanity
 schemas (`product`, `collection`, `mediaBox`, `siteSettings`) are defined
-and Studio is wired up, ready for content modeling in later phases.
+and Studio runs standalone (see "Sanity Studio" above), ready for content
+modeling in later phases.
 
 ## Scripts
 
 ```bash
-npm run dev           # start dev server
-npm run build          # production build
-npm run lint            # ESLint
-npm run format          # Prettier (writes)
-npm run format:check    # Prettier (check only)
+npm run dev            # start dev server
+npm run build           # production build (plain Next.js)
+npm run lint             # ESLint
+npm run format           # Prettier (writes)
+npm run format:check     # Prettier (check only)
+npm run preview          # build for Cloudflare + run it locally via Wrangler
+npm run deploy           # build for Cloudflare + deploy to Workers
+npm run cf-typegen       # regenerate cloudflare-env.d.ts from wrangler.jsonc
 ```
 
-## Deployment
+## Deployment (Cloudflare Workers)
 
-Push to a branch and open a PR — Vercel builds a Preview deployment
-automatically. Per `CLAUDE.md`, the `devinomaison.ir` production domain
-must **not** be connected to any deployment until explicitly instructed by
-the project owner; all review happens on Vercel's own `*.vercel.app`
-preview URLs.
+The app deploys to Cloudflare Workers through
+[OpenNext's Cloudflare adapter](https://opennext.js.org/cloudflare), which
+converts the Next.js build into a Worker. Config lives in
+`open-next.config.ts` (adapter options) and `wrangler.jsonc` (Worker name,
+assets, bindings).
+
+```bash
+npx wrangler login   # first time only
+npm run deploy
+```
+
+This prints a `*.workers.dev` preview URL. Per `CLAUDE.md`, the
+`devinomaison.ir` production domain must **not** be connected to any
+deployment until explicitly instructed by the project owner — all review
+happens on the `*.workers.dev` URL, never a custom domain.
+
+To try a production build locally before deploying, use `npm run preview`
+instead (runs the Worker under Wrangler on `localhost`).
+
+### Cloudflare-specific notes
+
+- **Images**: Next's built-in image optimizer needs `sharp`, which isn't
+  available on the Workers runtime, so `next.config.ts` sets
+  `images.unoptimized = true`. This doesn't lose real optimization here —
+  Sanity's `urlForImage()` already returns resized, auto-format CDN URLs,
+  and the Unsplash/Pexels placeholders accept their own sizing params.
+- **Local dev with bindings**: `next.config.ts` calls
+  `initOpenNextCloudflareForDev()` so `next dev` behaves like the Workers
+  runtime. No bindings (KV/R2/etc.) are used yet.
+- **Caching**: no incremental cache override is configured yet since no
+  page fetches Sanity data or uses ISR in this phase. Add the R2
+  incremental cache in `open-next.config.ts` when that's needed — see
+  https://opennext.js.org/cloudflare/caching.

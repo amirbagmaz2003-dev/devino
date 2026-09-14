@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "devino",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2024-09-23",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+  // Self-reference service binding, required by OpenNext for Cloudflare's
+  // request-context handling. Must match "name" above.
+  // See https://opennext.js.org/cloudflare/caching
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "devino",
+    },
+  ],
+}
