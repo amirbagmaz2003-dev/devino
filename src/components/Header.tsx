@@ -1,5 +1,8 @@
-import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+"use client";
+
+import { useLocale, useTranslations } from "next-intl";
+import { Link, usePathname } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
 import Logo from "./Logo";
 
 /**
@@ -12,6 +15,10 @@ import Logo from "./Logo";
  */
 export default function Header() {
   const t = useTranslations("nav");
+  const locale = useLocale();
+  const pathname = usePathname();
+  const otherLocale =
+    routing.locales.find((candidate) => candidate !== locale) ?? locale;
 
   return (
     <header
@@ -23,7 +30,10 @@ export default function Header() {
         <Link href="/">
           <Logo className="h-8" />
         </Link>
-        <nav aria-label="Primary" className="font-body flex gap-8 text-sm">
+        <nav
+          aria-label="Primary"
+          className="font-body flex items-center gap-8 text-sm"
+        >
           <Link href="/collections" className="hover:opacity-70">
             {t("collections")}
           </Link>
@@ -32,6 +42,18 @@ export default function Header() {
           </Link>
           <Link href="/contact" className="hover:opacity-70">
             {t("contact")}
+          </Link>
+          {/* Small, subtle locale switch — inherits the same color
+              crossfade as the rest of the header (see .site-header in
+              globals.css) since it sets no color of its own. Preserves
+              the current path, just swaps the locale segment. */}
+          <Link
+            href={pathname}
+            locale={otherLocale}
+            aria-label={`Switch language to ${otherLocale.toUpperCase()}`}
+            className="text-xs tracking-widest uppercase opacity-70 hover:opacity-100"
+          >
+            {otherLocale}
           </Link>
         </nav>
       </div>
