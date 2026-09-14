@@ -18,6 +18,14 @@ function mixColor(t: number) {
   return `rgb(${r}, ${g}, ${b})`;
 }
 
+// A 1:1 scroll->color mapping reads as a flat, artificial gray smear
+// through the middle of the scroll. Easing it holds near black/white a
+// little longer at each end and rushes through the middle instead, which
+// feels more natural.
+function easeInOutCubic(t: number) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
 /**
  * Drives the homepage's scroll-linked dark→light background (CLAUDE.md —
  * "رفتار اسکرول هدر") and the fixed header's crossfade (CLAUDE.md —
@@ -42,7 +50,8 @@ export default function HeroScrollController() {
     const apply = () => {
       rafId = null;
       const heroHeight = window.innerHeight;
-      const progress = Math.min(1, Math.max(0, window.scrollY / heroHeight));
+      const rawProgress = Math.min(1, Math.max(0, window.scrollY / heroHeight));
+      const progress = easeInOutCubic(rawProgress);
       const color = mixColor(progress);
 
       document.body.style.backgroundColor = color;

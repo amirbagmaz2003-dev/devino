@@ -26,13 +26,13 @@ export default function Header() {
       className="site-header bg-matte-black text-pearl-white fixed inset-x-0 top-0 z-50"
       style={{ height: "var(--header-h)" }}
     >
-      <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-6">
+      <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link href="/">
-          <Logo className="h-8" />
+          <Logo className="h-6 sm:h-8" />
         </Link>
         <nav
           aria-label="Primary"
-          className="font-body flex items-center gap-8 text-sm"
+          className="font-body flex items-center gap-3 text-xs sm:gap-8 sm:text-sm"
         >
           <Link href="/collections" className="hover:opacity-70">
             {t("collections")}
@@ -51,7 +51,7 @@ export default function Header() {
             href={pathname}
             locale={otherLocale}
             aria-label={`Switch language to ${otherLocale.toUpperCase()}`}
-            className="text-xs tracking-widest uppercase opacity-70 hover:opacity-100"
+            className="text-[10px] tracking-widest uppercase opacity-70 hover:opacity-100 sm:text-xs"
           >
             {otherLocale}
           </Link>
