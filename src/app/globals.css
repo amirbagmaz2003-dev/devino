@@ -53,10 +53,13 @@ h6 {
  * Nav text color and the logo swap are a short, threshold-triggered
  * crossfade instead of a continuous tween — interpolating black/white
  * through gray would read as a muddy smear rather than a clean fade.
+ * Kept quick (150ms) and triggered early (see LIGHT_THRESHOLD in
+ * HeroScrollController) so the foreground never lingers on a
+ * low-contrast mid-gray background.
  */
 .site-header {
   color: #f8f6f0;
-  transition: color 400ms ease;
+  transition: color 150ms ease;
 }
 
 .site-header.is-light {
@@ -66,7 +69,7 @@ h6 {
 /* Logo (auto variant): two stacked images crossfading opacity, driven by
    the same .is-light toggle as the nav text color above. */
 .logo-crossfade {
-  transition: opacity 400ms ease;
+  transition: opacity 150ms ease;
 }
 
 .logo-crossfade--white {

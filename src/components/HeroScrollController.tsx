@@ -4,7 +4,10 @@ import { useEffect } from "react";
 
 const DARK = [0, 0, 0] as const; // matte-black
 const LIGHT = [248, 246, 240] as const; // pearl-white
-const LIGHT_THRESHOLD = 0.5;
+// Switches well before the background finishes tweening to pearl-white —
+// waiting for the halfway point left header text sitting on a mid-gray
+// background with too little contrast to read comfortably mid-scroll.
+const LIGHT_THRESHOLD = 0.3;
 
 function mixChannel(from: number, to: number, t: number) {
   return Math.round(from + (to - from) * t);
