@@ -1,0 +1,45 @@
+{
+  "nav": {
+    "home": "Home",
+    "collections": "Collections",
+    "about": "About",
+    "contact": "Contact"
+  },
+  "home": {
+    "title": "DEVINO",
+    "tagline": "A Presence of Her Own.",
+    "body": "Placeholder copy — the homepage will be built in a later phase."
+  },
+  "collections": {
+    "title": "Collections",
+    "body": "Placeholder — the collections index will list every collection here."
+  },
+  "collectionDetail": {
+    "title": "Collection: {slug}",
+    "body": "Placeholder — this page will list the products of the \"{slug}\" collection."
+  },
+  "productDetail": {
+    "title": "Product: {slug}",
+    "body": "Placeholder — this page will show the full details of the \"{slug}\" product."
+  },
+  "about": {
+    "title": "About deVino",
+    "body": "Placeholder — the brand story will be written here."
+  },
+  "contact": {
+    "title": "Contact & Reservations",
+    "body": "Placeholder — a contact and reservation form will be built here."
+  },
+  "footer": {
+    "newsletter": {
+      "heading": "Newsletter",
+      "description": "Placeholder — be the first to know about new collections.",
+      "emailPlaceholder": "Your email address",
+      "submit": "Subscribe"
+    },
+    "social": {
+      "heading": "Follow"
+    },
+    "rights": "All rights reserved."
+  }
+}
