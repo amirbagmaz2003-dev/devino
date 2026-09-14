@@ -27,16 +27,16 @@ export default function NewsletterForm() {
         type="email"
         required
         placeholder={t("emailPlaceholder")}
-        className="border-pearl-white/30 text-pearl-white placeholder:text-pearl-white/50 focus:border-pearl-white w-full min-w-0 flex-1 border bg-transparent px-4 py-2 text-sm focus:outline-none"
+        className="border-matte-black/30 text-matte-black placeholder:text-matte-black/50 focus:border-matte-black w-full min-w-0 flex-1 border bg-transparent px-4 py-2 text-sm focus:outline-none"
       />
       <button
         type="submit"
-        className="border-pearl-white hover:bg-pearl-white hover:text-matte-black border px-5 py-2 text-sm tracking-wide uppercase transition-colors"
+        className="border-matte-black hover:bg-matte-black hover:text-pearl-white border px-5 py-2 text-sm tracking-wide uppercase transition-colors"
       >
         {t("submit")}
       </button>
       {submitted && (
-        <p role="status" className="text-pearl-white/70 text-xs sm:hidden">
+        <p role="status" className="text-matte-black/70 text-xs sm:hidden">
           ✓
         </p>
       )}

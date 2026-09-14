@@ -22,10 +22,10 @@ export interface MediaBoxProps {
 
 /**
  * Single, shared surface for every image/video block on the site
- * (CLAUDE.md — "معماری کامپوننت مدیا"). This phase only renders media
- * responsively around its focal point. The Ken Burns zoom (image) and
- * autoplay/muted/loop (video) behavior planned for phase 3 is added
- * inside this component alone — call sites never need to change.
+ * (CLAUDE.md — "معماری کامپوننت مدیا"). Images get a one-time Ken Burns
+ * zoom on load (scale 1 → 1.3, ~9s ease-in-out, around the focal point);
+ * videos autoplay/muted/loop with no zoom. Both behaviors live only here
+ * — call sites never change when phase 4+ swaps an image for a video.
  */
 export default function MediaBox({
   type,
@@ -60,8 +60,8 @@ export default function MediaBox({
           fill
           sizes={sizes}
           priority={priority}
-          className="object-cover"
-          style={{ objectPosition }}
+          className="media-box-zoom object-cover"
+          style={{ objectPosition, transformOrigin: objectPosition }}
         />
       )}
     </div>

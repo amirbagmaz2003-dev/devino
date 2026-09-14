@@ -8,7 +8,12 @@
   "home": {
     "title": "DEVINO",
     "tagline": "A Presence of Her Own.",
-    "body": "Placeholder copy — the homepage will be built in a later phase."
+    "heroAlt": "Placeholder hero backdrop — real campaign photography lands here later.",
+    "teaser": {
+      "heading": "The Collections",
+      "body": "Placeholder — the full collections grid arrives in a later phase.",
+      "cta": "View Collections"
+    }
   },
   "collections": {
     "title": "Collections",

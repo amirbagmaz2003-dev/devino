@@ -18,3 +18,47 @@ h5,
 h6 {
   @apply font-heading;
 }
+
+/* Fixed site header — height is shared with pages that need to offset its
+   overlay (see each non-hero page's top padding). */
+:root {
+  --header-h: 5.5rem;
+}
+
+/*
+ * MediaBox Ken Burns zoom (CLAUDE.md — "معماری کامپوننت مدیا"). Runs once
+ * on load, never loops. Kept as a plain CSS animation (no JS) so it costs
+ * nothing on the main thread; transform-origin is set inline by MediaBox
+ * to match the image's focal point.
+ */
+@keyframes media-box-ken-burns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.3);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .media-box-zoom {
+    animation: media-box-ken-burns 9s ease-in-out forwards;
+  }
+}
+
+/*
+ * Header foreground crossfade (CLAUDE.md — "لوگو", "رفتار اسکرول هدر").
+ * The background color itself is scroll-linked and set imperatively by
+ * HeroScrollController (continuous, must track scroll position exactly).
+ * Text/logo color is a short, threshold-triggered crossfade instead of a
+ * continuous tween — interpolating black/white through gray would read as
+ * a muddy smear rather than a clean fade.
+ */
+.site-header {
+  color: #f8f6f0;
+  transition: color 400ms ease;
+}
+
+.site-header.is-light {
+  color: #000000;
+}
