@@ -125,6 +125,29 @@ happens on the `*.workers.dev` URL, never a custom domain.
 To try a production build locally before deploying, use `npm run preview`
 instead (runs the Worker under Wrangler on `localhost`).
 
+### Deploying via Cloudflare Workers Builds (git integration)
+
+If the Cloudflare dashboard project is connected to this GitHub repo
+("Workers Builds"), its auto-detected **Deploy command** runs
+`opennextjs-cloudflare deploy` on its own — it does **not** also run
+`opennextjs-cloudflare build` first, so the deploy step fails with
+`ERROR Could not find compiled Open Next config, did you run the build
+command?` (the `.open-next/` bundle was never produced). This is a
+dashboard setting, not something fixable from the repo. Fix it once in the
+Cloudflare dashboard:
+
+1. **Workers & Pages** → select this Worker → **Settings** → **Builds**.
+2. Set **Build command** to `npx opennextjs-cloudflare build` (or set
+   **Deploy command** to `npm run deploy`, which already runs build then
+   deploy — either works, pick one).
+3. Confirm **Root directory** is the repo root (this isn't a monorepo).
+4. Retry the deployment (or push again).
+
+If Sanity env vars are ever required at build time (not the case yet — see
+"Current phase"), also add them under **Build variables and secrets** in
+the same Settings page, since Workers Builds runs in a clean environment
+that doesn't see your local `.env.local`.
+
 ### Cloudflare-specific notes
 
 - **Images**: Next's built-in image optimizer needs `sharp`, which isn't
