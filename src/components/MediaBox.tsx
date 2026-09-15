@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 
 export interface MediaBoxAsset {
   url: string;
@@ -22,10 +25,14 @@ export interface MediaBoxProps {
 
 /**
  * Single, shared surface for every image/video block on the site
- * (CLAUDE.md — "معماری کامپوننت مدیا"). Images get a one-time Ken Burns
- * zoom on load (scale 1 → 1.3, ~9s ease-in-out, around the focal point);
- * videos autoplay/muted/loop with no zoom. Both behaviors live only here
- * — call sites never change when phase 4+ swaps an image for a video.
+ * (CLAUDE.md — "معماری کامپوننت مدیا"). Images get a continuous,
+ * back-and-forth Ken Burns zoom around the focal point (see globals.css
+ * for the keyframes/timing); videos autoplay/muted/loop with no zoom.
+ * Both behaviors live only here — call sites never change when phase 4+
+ * swaps an image for a video.
+ *
+ * The zoom is paused (not unmounted) whenever the image scrolls out of
+ * view, so it never keeps animating off-screen.
  */
 export default function MediaBox({
   type,
@@ -36,12 +43,30 @@ export default function MediaBox({
   sizes = "100vw",
   priority = false,
 }: MediaBoxProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isInView, setIsInView] = useState(true);
+
+  useEffect(() => {
+    if (type !== "image") return;
+    const el = containerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(([entry]) =>
+      setIsInView(entry.isIntersecting),
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [type]);
+
   const objectPosition = focalPoint
     ? `${focalPoint.x * 100}% ${focalPoint.y * 100}%`
     : "50% 50%";
 
   return (
-    <div className={`relative h-full w-full overflow-hidden ${className}`}>
+    <div
+      ref={containerRef}
+      className={`relative h-full w-full overflow-hidden ${className}`}
+    >
       {type === "video" ? (
         <video
           src={asset.url}
@@ -61,7 +86,11 @@ export default function MediaBox({
           sizes={sizes}
           priority={priority}
           className="media-box-zoom object-cover"
-          style={{ objectPosition, transformOrigin: objectPosition }}
+          style={{
+            objectPosition,
+            transformOrigin: objectPosition,
+            animationPlayState: isInView ? "running" : "paused",
+          }}
         />
       )}
     </div>
