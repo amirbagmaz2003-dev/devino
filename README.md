@@ -149,6 +149,7 @@ npm run preview          # build for Cloudflare + run it locally via Wrangler
 npm run deploy           # build for Cloudflare + deploy to Workers
 npm run cf-typegen       # regenerate cloudflare-env.d.ts from wrangler.jsonc
 npm run seed             # seed demo collections/products into a real Sanity project
+npm run studio:build     # build Studio into studio-dist/ for its own Cloudflare Worker
 ```
 
 ## Deployment (Cloudflare Workers)
@@ -194,6 +195,48 @@ If Sanity env vars are ever required at build time (not the case yet — see
 "Current phase"), also add them under **Build variables and secrets** in
 the same Settings page, since Workers Builds runs in a clean environment
 that doesn't see your local `.env.local`.
+
+### Deploying Studio to Cloudflare Workers
+
+Studio can be built into a static bundle and deployed as its **own**
+Worker (`devino-studio`), separate from the main site's Worker:
+
+```bash
+NEXT_PUBLIC_SANITY_PROJECT_ID=<id> NEXT_PUBLIC_SANITY_DATASET=production \
+  npm run studio:build          # -> studio-dist/
+npx wrangler deploy --config wrangler.studio.jsonc
+```
+
+`scripts/build-studio.mjs` runs `sanity build` and then strips out
+whatever it copied from this repo's `public/` folder — Sanity's Vite-based
+builder defaults to treating the project root's `public/` (the Next.js
+app's own photos/logos) as its static-passthrough directory, same
+convention Next.js itself uses, so anything it copies from there needs to
+be removed since Studio never references those files.
+`wrangler.studio.jsonc` deploys `studio-dist/` as a pure static-assets
+Worker (`not_found_handling: "single-page-application"`, since Studio does
+its own client-side routing).
+
+This deploy step needs a real, authenticated `wrangler` (`npx wrangler
+login`, or a `CLOUDFLARE_API_TOKEN` with Workers edit scope) run somewhere
+with normal internet access — **not** from a sandboxed Claude Code session
+whose network is allowlisted to a handful of hosts (npm, PyPI, Anthropic's
+own APIs); `api.cloudflare.com` isn't on that list, so `wrangler deploy`
+(even the no-login `--temporary` mode) fails there with a proxy-level
+connection rejection before it ever reaches Cloudflare. Either run the two
+commands above from a machine with normal network access, or connect a new
+Cloudflare dashboard project to this repo the same way the main site is
+connected (Workers & Pages → Create → connect this GitHub repo → Build
+command `npm run studio:build`, deploy directory `studio-dist`, Wrangler
+config `wrangler.studio.jsonc`) — see "Deploying via Cloudflare Workers
+Builds" above for the equivalent main-site setup.
+
+**Before logging in works**, add the deployed Studio's URL as a CORS
+origin on the Sanity project (sanity.io/manage → your project → API →
+CORS origins → **Add CORS origin**, with **Allow credentials** checked) —
+Studio's login/data requests from a browser are rejected otherwise. This
+is a one-time step per new Studio URL and has to be done from
+sanity.io/manage directly (also unreachable from this sandbox's network).
 
 ### Cloudflare-specific notes
 

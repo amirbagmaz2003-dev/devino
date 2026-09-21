@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Separate Worker from the main site ("devino") — Studio is a pure
+  // static SPA, deployed independently so it has its own URL and can be
+  // redeployed without touching the public site.
+  "name": "devino-studio",
+  "compatibility_date": "2024-09-23",
+  "assets": {
+    "directory": "studio-dist",
+    // Studio is a client-side-routed SPA — unmatched paths (e.g.
+    // /structure/product) must still serve index.html, not a 404.
+    "not_found_handling": "single-page-application",
+  },
+}

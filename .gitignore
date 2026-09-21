@@ -40,6 +40,12 @@ yarn-error.log*
 cloudflare-env.d.ts
 .dev.vars*
 
+# Sanity Studio static build (scripts/build-studio.mjs) — rebuilt on demand,
+# never committed, same as .next/.
+/dist/
+/studio-dist/
+/.sanity/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

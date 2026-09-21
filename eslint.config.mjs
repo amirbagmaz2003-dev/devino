@@ -14,6 +14,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Sanity Studio static build output (scripts/build-studio.mjs) —
+    // generated, not source.
+    "dist/**",
+    "studio-dist/**",
   ]),
 ]);
 
