@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
-import { getDb, getMediaBucket } from "@/db/client";
+import { getDb, getMediaKv } from "@/db/client";
 
 /**
- * Streams an R2 object by its media.id — the only way any image/video URL
- * on the site is ever formed (see src/db/media.ts, mediaUrl()). Keeps R2
- * objects private (no public bucket/custom domain needed) while still
- * giving every asset a stable, cacheable URL.
+ * Streams a media asset by its media.id from Workers KV (not R2 — R2
+ * needed billing/activation the project owner couldn't do; see
+ * wrangler.jsonc). The only way any image/video URL on the site is ever
+ * formed (see src/db/media.ts, mediaUrl()) — keeps the storage layer
+ * private while still giving every asset a stable, cacheable URL.
  */
 export async function GET(
   _request: Request,
@@ -22,13 +23,13 @@ export async function GET(
     return new NextResponse("Not found", { status: 404 });
   }
 
-  const bucket = await getMediaBucket();
-  const object = await bucket.get(row.r2_key);
-  if (!object) {
+  const kv = await getMediaKv();
+  const value = await kv.get(row.r2_key, "arrayBuffer");
+  if (!value) {
     return new NextResponse("Not found", { status: 404 });
   }
 
-  return new NextResponse(object.body as unknown as ReadableStream, {
+  return new NextResponse(value, {
     headers: {
       "Content-Type": row.content_type,
       "Cache-Control": "public, max-age=31536000, immutable",

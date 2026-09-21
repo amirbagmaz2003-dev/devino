@@ -10,7 +10,7 @@ export interface MediaRow {
 }
 
 /** Every media asset is served through this route (src/app/media/[id]/route.ts),
- * which streams the R2 object by id — never a direct R2/public URL. */
+ * which streams it from Workers KV by id — never a direct storage URL. */
 export function mediaUrl(id: string) {
   return `/media/${id}`;
 }

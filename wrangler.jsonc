@@ -17,25 +17,22 @@
       "service": "devino",
     },
   ],
-  // "database_id" is a placeholder — local dev (`--local`) doesn't need a
-  // real one, but a real deploy does. Run `wrangler d1 create devino-db`
-  // (needs real Cloudflare API access — see README) and replace this
-  // value with the id it prints before deploying.
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "devino-db",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "f6fa65e3-6c69-461e-9124-65fbe19dc929",
       "migrations_dir": "migrations",
     },
   ],
-  // Same placeholder situation: `wrangler r2 bucket create devino-media`
-  // needs real Cloudflare API access before a real deploy; local dev
-  // emulates this bucket on disk without it.
-  "r2_buckets": [
+  // Media storage: Workers KV, not R2 — R2 needed billing/activation the
+  // project owner couldn't do; KV works on the existing free account.
+  // Image/video bytes are stored directly under key "media:{id}" (see
+  // src/db/admin.ts, src/app/media/[id]/route.ts).
+  "kv_namespaces": [
     {
       "binding": "MEDIA",
-      "bucket_name": "devino-media",
+      "id": "6db50f050c9549e5a5786a2f2282de64",
     },
   ],
 }

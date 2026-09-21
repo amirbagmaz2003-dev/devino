@@ -5,7 +5,8 @@ export async function getDb() {
   return env.DB;
 }
 
-export async function getMediaBucket() {
+/** Media storage is Workers KV (not R2 — see wrangler.jsonc). */
+export async function getMediaKv() {
   const { env } = await getCloudflareContext({ async: true });
   return env.MEDIA;
 }

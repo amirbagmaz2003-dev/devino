@@ -1,4 +1,4 @@
-import { getDb, getMediaBucket } from "./client";
+import { getDb, getMediaKv } from "./client";
 
 /** Slugify a name for the auto-suggested slug field in the admin forms. */
 export function slugify(input: string) {
@@ -14,6 +14,9 @@ export function slugify(input: string) {
 export interface MediaAdminRow {
   id: string;
   type: "image" | "video";
+  /** Despite the column name (unchanged from the R2 version of this
+   * schema), this now holds a Workers KV key ("media:{id}"), not an R2
+   * object key — see wrangler.jsonc. */
   r2_key: string;
   content_type: string;
   focal_x: number;
@@ -31,11 +34,11 @@ export async function uploadMedia(params: {
   altEn: string;
 }): Promise<string> {
   const id = crypto.randomUUID();
-  const r2Key = `${id}/${params.file.name}`;
-  const bucket = await getMediaBucket();
-  await bucket.put(r2Key, await params.file.arrayBuffer(), {
-    httpMetadata: { contentType: params.file.type || "application/octet-stream" },
-  });
+  const kvKey = `media:${id}`;
+  const kv = await getMediaKv();
+  // Raw bytes, not base64 — KV accepts an ArrayBuffer directly, and
+  // base64 would just inflate size ~33% for no benefit here.
+  await kv.put(kvKey, await params.file.arrayBuffer());
 
   const db = await getDb();
   await db
@@ -46,7 +49,7 @@ export async function uploadMedia(params: {
     .bind(
       id,
       params.type,
-      r2Key,
+      kvKey,
       params.file.type || "application/octet-stream",
       params.focalX ?? 0.5,
       params.focalY ?? 0.5,
@@ -73,8 +76,8 @@ export async function deleteMedia(id: string) {
     .bind(id)
     .first<{ r2_key: string }>();
   if (row) {
-    const bucket = await getMediaBucket();
-    await bucket.delete(row.r2_key);
+    const kv = await getMediaKv();
+    await kv.delete(row.r2_key);
   }
   await db.prepare("DELETE FROM media WHERE id = ?").bind(id).run();
 }
