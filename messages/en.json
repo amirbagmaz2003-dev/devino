@@ -17,15 +17,22 @@
   },
   "collections": {
     "title": "Collections",
-    "body": "Placeholder — the collections index will list every collection here."
+    "empty": "No collections have been published yet — check back soon."
   },
   "collectionDetail": {
-    "title": "Collection: {slug}",
-    "body": "Placeholder — this page will list the products of the \"{slug}\" collection."
+    "notFound": "This collection could not be found.",
+    "empty": "No products have been added to this collection yet — check back soon."
   },
   "productDetail": {
-    "title": "Product: {slug}",
-    "body": "Placeholder — this page will show the full details of the \"{slug}\" product."
+    "notFound": "This product could not be found.",
+    "currencyUnit": "Toman",
+    "inStock": "In stock",
+    "outOfStock": "Out of stock",
+    "orderHeading": "To place an order",
+    "orderDescription": "This site is a showcase, not an online store — reach out through one of the channels below to inquire about this piece.",
+    "phoneLabel": "Call",
+    "telegramLabel": "Telegram",
+    "instagramLabel": "Instagram"
   },
   "about": {
     "title": "About deVino",

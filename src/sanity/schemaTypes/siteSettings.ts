@@ -61,6 +61,20 @@ export default defineType({
       type: "string",
     }),
     defineField({
+      name: "telegramUrl",
+      title: "Telegram link",
+      type: "url",
+      description: "Used by the product page's quiet \"place an order\" contact section.",
+      validation: (Rule) => Rule.uri({ scheme: ["http", "https"] }),
+    }),
+    defineField({
+      name: "instagramUrl",
+      title: "Instagram link",
+      type: "url",
+      description: "Used by the product page's quiet \"place an order\" contact section.",
+      validation: (Rule) => Rule.uri({ scheme: ["http", "https"] }),
+    }),
+    defineField({
       name: "address",
       title: "Address",
       type: "text",

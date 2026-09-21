@@ -21,6 +21,13 @@ export interface MediaBoxProps {
   className?: string;
   sizes?: string;
   priority?: boolean;
+  /**
+   * Opt out of the continuous Ken Burns zoom for surfaces that want a
+   * static image instead (e.g. collection grid cards — phase 4 brief asks
+   * for "no zoom effect here, just a simple hover"). Videos never zoom
+   * regardless of this prop. Defaults to true.
+   */
+  zoom?: boolean;
 }
 
 /**
@@ -42,12 +49,13 @@ export default function MediaBox({
   className = "",
   sizes = "100vw",
   priority = false,
+  zoom = true,
 }: MediaBoxProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isInView, setIsInView] = useState(true);
 
   useEffect(() => {
-    if (type !== "image") return;
+    if (type !== "image" || !zoom) return;
     const el = containerRef.current;
     if (!el) return;
 
@@ -56,7 +64,7 @@ export default function MediaBox({
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [type]);
+  }, [type, zoom]);
 
   const objectPosition = focalPoint
     ? `${focalPoint.x * 100}% ${focalPoint.y * 100}%`
@@ -85,11 +93,11 @@ export default function MediaBox({
           fill
           sizes={sizes}
           priority={priority}
-          className="media-box-zoom object-cover"
+          className={`object-cover ${zoom ? "media-box-zoom" : ""}`}
           style={{
             objectPosition,
             transformOrigin: objectPosition,
-            animationPlayState: isInView ? "running" : "paused",
+            animationPlayState: zoom && isInView ? "running" : "paused",
           }}
         />
       )}

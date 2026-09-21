@@ -64,10 +64,15 @@ if that gap in `workerd` closes later.
 
 ```
 src/app/(site)/[locale]/   Public site routes (localized: /fa/*, /en/*)
-src/components/            Header, Footer, NewsletterForm, MediaBox
+src/components/            Header, Footer, NewsletterForm, MediaBox,
+                           CollectionCard, ProductCard, ProductGallery,
+                           ContactChannels
 src/i18n/                  next-intl routing/navigation config
 src/lib/fonts.ts           next/font setup (Cormorant Garamond, Inter)
-src/sanity/                Sanity client, image builder, schema types
+src/lib/formatPrice.ts     Locale-aware Toman price formatting
+src/sanity/                Sanity client, image builder, schema types,
+                           lib/queries.ts (GROQ query layer)
+scripts/seed.mjs           One-time demo content seed (see below)
 messages/{fa,en}.json      UI copy per locale
 sanity.config.ts           Studio config (standalone — see "Sanity Studio")
 ```
@@ -76,12 +81,35 @@ sanity.config.ts           Studio config (standalone — see "Sanity Studio")
 
 `src/components/MediaBox.tsx` is the single component every image/video
 surface on the site renders through (see `CLAUDE.md`). It takes normalized
-`{ type, asset, focalPoint, alt }` props and stays intentionally dumb about
-Sanity; `src/sanity/lib/mediaBox.ts` maps a raw Sanity `mediaBox` field
-value into those props. Images get a one-time Ken Burns zoom around their
-focal point (CSS-only, `prefers-reduced-motion`-aware); videos autoplay
-muted/looped with no zoom — both live only here, so swapping an image for
-a video at a call site (once that's wired to Sanity) needs no code change.
+`{ type, asset, focalPoint, alt, zoom }` props and stays intentionally dumb
+about Sanity; `src/sanity/lib/mediaBox.ts` maps a raw Sanity `mediaBox`
+field value into those props. Images get a continuous, back-and-forth Ken
+Burns zoom around their focal point by default (CSS-only,
+`prefers-reduced-motion`-aware, paused while off-screen); pass `zoom={false}`
+to opt out for static surfaces like the phase 4 collection/product grids,
+where the brief calls for no zoom. Videos autoplay muted/looped with no
+zoom regardless — both behaviors live only here, so swapping an image for
+a video at a call site needs no code change.
+
+## Collections and product pages (phase 4)
+
+`src/sanity/lib/queries.ts` holds every GROQ read the public site does
+(`getCollections`, `getCollectionBySlug`, `getProductBySlug`,
+`getSiteSettings`), each wrapped so a missing/misconfigured Sanity project
+degrades to an empty result instead of breaking the page — `/collections`,
+`/collections/[slug]`, and `/products/[slug]` all render an explicit empty
+or not-found state rather than fabricated content. The presentational
+pieces (`CollectionCard`, `ProductCard`, `ProductGallery`,
+`ContactChannels`) take already-resolved props, not raw Sanity shapes, so
+they can be reviewed with mock data independently of live content. The
+product page's "to place an order" section reads phone/Telegram/Instagram
+from `siteSettings` in Sanity — never hardcoded — and is deliberately quiet
+(no cart, no buy button; see `CLAUDE.md` on the first version's scope).
+
+Once a real Sanity project is connected, run `npm run seed` (see
+`scripts/seed.mjs`) to populate a few demo collections/products from the
+photos already in `public/photos/` — it uploads images and creates draft
+documents for review in Studio, it never publishes on its own.
 
 ## Logo
 
@@ -94,20 +122,20 @@ around the actual glyphs, and downscaled for web use). `variant="auto"`
 (used in the footer, which is always on the light end of the palette) just
 pins one file — see `globals.css` for the crossfade rules.
 
-## Current phase (3 — header, done)
+## Current phase (4 — collections & product pages, done)
 
-The homepage has a real full-viewport hero (`public/photos/hero-editorial-bw.jpg`,
-the one fully black-and-white photo among the ones provided — it matches
-the site's strict black/pearl-white palette with no color clash) with the
-Ken Burns zoom, a scroll-linked dark→light background tween, and a fixed
-header whose text/logo crossfade with it. The other nine placeholder
-photos live in `public/photos/` for later phases (the phase 4 collections
-grid, the about page, etc.) — none of them are wired into any page yet.
-Everything else is still placeholder copy/routes (see
-`phase-2-skeleton-brief.md` and `phase-3-header-brief.md`). Sanity schemas
-(`product`, `collection`, `mediaBox`, `siteSettings`) are defined and
-Studio runs standalone (see "Sanity Studio" above), ready for content
-modeling in later phases.
+The homepage hero, scroll-linked header tween, and logo crossfade from
+phase 3 are unchanged. Phase 4 adds the real `/collections`,
+`/collections/[slug]`, and `/products/[slug]` pages (see "Collections and
+product pages (phase 4)" above) — all backed by the GROQ query layer, with
+graceful empty states since no real Sanity project is connected yet
+(`projectId` still defaults to `"placeholder"`, see
+`phase-4-collections-product-brief.md`). Eight of the nine remaining
+placeholder photos in `public/photos/` are now referenced by `scripts/seed.mjs`
+for demo content; `about`/`contact` remain phase-2 placeholder copy on
+purpose (out of scope for this phase). Sanity schemas (`product`,
+`collection`, `mediaBox`, `siteSettings`) are defined and Studio runs
+standalone (see "Sanity Studio" above).
 
 ## Scripts
 
@@ -120,6 +148,7 @@ npm run format:check     # Prettier (check only)
 npm run preview          # build for Cloudflare + run it locally via Wrangler
 npm run deploy           # build for Cloudflare + deploy to Workers
 npm run cf-typegen       # regenerate cloudflare-env.d.ts from wrangler.jsonc
+npm run seed             # seed demo collections/products into a real Sanity project
 ```
 
 ## Deployment (Cloudflare Workers)
