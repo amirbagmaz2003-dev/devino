@@ -12,21 +12,14 @@
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
-    "studio:dev": "sanity dev",
-    "studio:deploy": "sanity deploy",
-    "studio:build": "node scripts/build-studio.mjs",
-    "seed": "node scripts/seed.mjs"
+    "db:migrate:local": "wrangler d1 migrations apply devino-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply devino-db --remote"
   },
   "dependencies": {
-    "@sanity/image-url": "^2.1.1",
-    "@sanity/vision": "^6.13.2",
     "next": "16.3.5",
     "next-intl": "^4.14.4",
-    "next-sanity": "^13.3.4",
     "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "sanity": "^6.13.2",
-    "styled-components": "^6.5.3"
+    "react-dom": "19.2.8"
   },
   "devDependencies": {
     "@opennextjs/cloudflare": "^1.20.6",

@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 
 /**
  * Skeleton newsletter form — captures input locally only. Wiring to a
- * real subscriber list (Sanity, or an email provider) is a later phase.
+ * real subscriber list (an email provider) is a later phase.
  */
 export default function NewsletterForm() {
   const t = useTranslations("footer.newsletter");

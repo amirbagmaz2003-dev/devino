@@ -8,7 +8,7 @@ export interface MediaBoxAsset {
 }
 
 export interface MediaBoxFocalPoint {
-  /** Fractional coordinates, 0–1, matching Sanity's hotspot format. */
+  /** Fractional coordinates, 0–1, as set by the admin panel's focal-point picker. */
   x: number;
   y: number;
 }

@@ -1,0 +1,11 @@
+## Copy to .dev.vars for local dev (git-ignored). In production these are
+## set with `wrangler secret put ADMIN_PASSWORD` / `wrangler secret put SESSION_SECRET`.
+
+# Shared password for the single /admin login. Pick something long and
+# random — this is the only thing standing between the internet and the
+# admin panel.
+ADMIN_PASSWORD=
+
+# Random secret used to sign the admin session cookie (HMAC). Generate one
+# with: openssl rand -hex 32
+SESSION_SECRET=

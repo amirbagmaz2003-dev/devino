@@ -17,9 +17,9 @@ interface ContactChannelsProps {
 /**
  * Quiet, understated order-inquiry section for the product page — never a
  * bold CTA button (CLAUDE.md / phase-4 brief: the site is display-only,
- * not an instant-purchase storefront). All three channels come from
- * Sanity's siteSettings, never hardcoded here; a channel with no value set
- * is simply omitted.
+ * not an instant-purchase storefront). All three channels come from the
+ * site_settings table (editable in /admin), never hardcoded here; a
+ * channel with no value set is simply omitted.
  */
 export default function ContactChannels({
   heading,

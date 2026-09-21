@@ -1,6 +1,8 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { getCollectionBySlug } from "@/sanity/lib/queries";
+import { getCollectionBySlug } from "@/db/queries";
 import ProductCard from "@/components/ProductCard";
+
+export const dynamic = "force-dynamic";
 
 export default async function CollectionDetailPage({
   params,
@@ -9,7 +11,7 @@ export default async function CollectionDetailPage({
   setRequestLocale(locale);
   const t = await getTranslations("collectionDetail");
   const tProduct = await getTranslations("productDetail");
-  const collection = await getCollectionBySlug(slug);
+  const collection = await getCollectionBySlug(slug, locale);
 
   if (!collection) {
     return (

@@ -1,6 +1,10 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { getCollections } from "@/sanity/lib/queries";
+import { getCollections } from "@/db/queries";
 import CollectionCard from "@/components/CollectionCard";
+
+// D1 data changes via /admin at any time — always read it fresh rather
+// than baking an empty result in at build time.
+export const dynamic = "force-dynamic";
 
 export default async function CollectionsPage({
   params,
@@ -8,7 +12,7 @@ export default async function CollectionsPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("collections");
-  const collections = await getCollections();
+  const collections = await getCollections(locale);
 
   return (
     <div className="mx-auto max-w-6xl px-6 pt-[calc(var(--header-h)+2rem)] pb-24">

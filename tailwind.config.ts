@@ -8,7 +8,7 @@ import type { Config } from "tailwindcss";
  * uses these three colors. Do not add more colors to this palette.
  */
 const config: Config = {
-  content: ["./src/**/*.{js,ts,jsx,tsx,mdx}", "./sanity/**/*.{js,ts,jsx,tsx}"],
+  content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
       colors: {

@@ -17,4 +17,25 @@
       "service": "devino",
     },
   ],
+  // "database_id" is a placeholder — local dev (`--local`) doesn't need a
+  // real one, but a real deploy does. Run `wrangler d1 create devino-db`
+  // (needs real Cloudflare API access — see README) and replace this
+  // value with the id it prints before deploying.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "devino-db",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations",
+    },
+  ],
+  // Same placeholder situation: `wrangler r2 bucket create devino-media`
+  // needs real Cloudflare API access before a real deploy; local dev
+  // emulates this bucket on disk without it.
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "devino-media",
+    },
+  ],
 }

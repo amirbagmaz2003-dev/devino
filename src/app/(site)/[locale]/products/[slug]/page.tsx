@@ -1,8 +1,10 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { getProductBySlug, getSiteSettings } from "@/sanity/lib/queries";
+import { getProductBySlug, getSiteSettings } from "@/db/queries";
 import { formatPrice } from "@/lib/formatPrice";
 import ProductGallery from "@/components/ProductGallery";
 import ContactChannels from "@/components/ContactChannels";
+
+export const dynamic = "force-dynamic";
 
 export default async function ProductDetailPage({
   params,
@@ -11,7 +13,7 @@ export default async function ProductDetailPage({
   setRequestLocale(locale);
   const t = await getTranslations("productDetail");
   const [product, siteSettings] = await Promise.all([
-    getProductBySlug(slug),
+    getProductBySlug(slug, locale),
     getSiteSettings(),
   ]);
 
