@@ -3,11 +3,12 @@ import { getDb } from "./client";
 import { resolveMedia } from "./media";
 
 /**
- * Every read here is wrapped so a not-yet-provisioned D1 database (see
- * README — the real database_id in wrangler.jsonc is a placeholder until
- * `wrangler d1 create` is run somewhere with real Cloudflare API access)
- * degrades to an empty result instead of crashing the page. Pages render
- * their own empty state rather than fabricated content.
+ * Every read here is wrapped so a D1 failure (missing binding, a bad
+ * migration, a transient outage) degrades to an empty result instead of
+ * crashing the page — pages render their own empty state rather than
+ * fabricated content. Each catch logs the real error via console.error so
+ * failures are visible in `wrangler tail` / the Cloudflare dashboard
+ * instead of silently looking like "no data yet".
  */
 
 export interface CollectionSummary {
@@ -113,7 +114,8 @@ export async function getCollections(locale: string): Promise<CollectionSummary[
       .prepare(`${COLLECTION_SELECT} ORDER BY c.sort_order ASC, c.created_at ASC`)
       .all<CollectionRow>();
     return results.map((row) => toCollectionSummary(row, locale));
-  } catch {
+  } catch (error) {
+    console.error("[getCollections] D1 query failed:", error);
     return [];
   }
 }
@@ -212,7 +214,8 @@ export async function getCollectionBySlug(
         null,
       products: productRows.map((row) => toProductSummary(row, locale)),
     };
-  } catch {
+  } catch (error) {
+    console.error("[getCollectionBySlug] D1 query failed:", error);
     return null;
   }
 }
@@ -299,7 +302,8 @@ export async function getProductBySlug(
             }
           : null,
     };
-  } catch {
+  } catch (error) {
+    console.error("[getProductBySlug] D1 query failed:", error);
     return null;
   }
 }
@@ -330,7 +334,8 @@ export async function getSiteSettings(): Promise<SiteSettingsData | null> {
       telegramUrl: row.telegram_url,
       instagramUrl: row.instagram_url,
     };
-  } catch {
+  } catch (error) {
+    console.error("[getSiteSettings] D1 query failed:", error);
     return null;
   }
 }
