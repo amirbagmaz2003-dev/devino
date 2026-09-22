@@ -11,6 +11,9 @@ interface ProductCardProps {
   mainImage: MediaBoxProps | null;
   inStock: boolean;
   outOfStockLabel: string;
+  /** Above-the-fold cards (the first visible slide of a carousel, say)
+   * should skip lazy-loading so they don't dominate LCP. */
+  priority?: boolean;
 }
 
 export default function ProductCard({
@@ -22,6 +25,7 @@ export default function ProductCard({
   mainImage,
   inStock,
   outOfStockLabel,
+  priority = false,
 }: ProductCardProps) {
   return (
     <Link href={`/products/${slug}`} className="group block">
@@ -31,6 +35,7 @@ export default function ProductCard({
             <MediaBox
               {...mainImage}
               zoom={false}
+              priority={priority}
               sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
             />
           </div>

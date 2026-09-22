@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getCollectionBySlug } from "@/db/queries";
-import ProductCard from "@/components/ProductCard";
+import ProductGroupCarousel from "@/components/carousel/ProductGroupCarousel";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +11,7 @@ export default async function CollectionDetailPage({
   setRequestLocale(locale);
   const t = await getTranslations("collectionDetail");
   const tProduct = await getTranslations("productDetail");
+  const tCarousel = await getTranslations("carousel");
   const collection = await getCollectionBySlug(slug, locale);
 
   if (!collection) {
@@ -33,20 +34,40 @@ export default async function CollectionDetailPage({
       {collection.products.length === 0 ? (
         <p className="text-matte-black/70 mt-14 text-center">{t("empty")}</p>
       ) : (
-        <div className="mt-14 grid grid-cols-2 gap-x-6 gap-y-12 sm:gap-x-8 lg:grid-cols-4">
-          {collection.products.map((product) => (
-            <ProductCard
-              key={product.id}
-              name={product.name}
-              slug={product.slug}
-              price={product.price}
-              currencyUnit={tProduct("currencyUnit")}
-              locale={locale}
-              mainImage={product.mainImage}
-              inStock={product.inStock}
-              outOfStockLabel={tProduct("outOfStock")}
-            />
-          ))}
+        <div className="mt-14">
+          <ProductGroupCarousel
+            products={collection.products}
+            itemsPerSlide={1}
+            visibilityClassName="block sm:hidden"
+            locale={locale}
+            currencyUnit={tProduct("currencyUnit")}
+            outOfStockLabel={tProduct("outOfStock")}
+            carouselLabel={collection.name}
+            prevLabel={tCarousel("previous")}
+            nextLabel={tCarousel("next")}
+          />
+          <ProductGroupCarousel
+            products={collection.products}
+            itemsPerSlide={2}
+            visibilityClassName="hidden sm:block lg:hidden"
+            locale={locale}
+            currencyUnit={tProduct("currencyUnit")}
+            outOfStockLabel={tProduct("outOfStock")}
+            carouselLabel={collection.name}
+            prevLabel={tCarousel("previous")}
+            nextLabel={tCarousel("next")}
+          />
+          <ProductGroupCarousel
+            products={collection.products}
+            itemsPerSlide={4}
+            visibilityClassName="hidden lg:block"
+            locale={locale}
+            currencyUnit={tProduct("currencyUnit")}
+            outOfStockLabel={tProduct("outOfStock")}
+            carouselLabel={collection.name}
+            prevLabel={tCarousel("previous")}
+            nextLabel={tCarousel("next")}
+          />
         </div>
       )}
     </div>

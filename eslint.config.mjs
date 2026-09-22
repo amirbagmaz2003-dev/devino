@@ -18,6 +18,8 @@ const eslintConfig = defineConfig([
     "cloudflare-env.d.ts",
     // OpenNext's Cloudflare build output (npm run preview/deploy) — not source.
     ".open-next/**",
+    // Wrangler's local bundling/state directory (npm run preview/db:migrate:local) — not source.
+    ".wrangler/**",
   ]),
 ]);
 

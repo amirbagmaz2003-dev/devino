@@ -17,11 +17,17 @@
   },
   "collections": {
     "title": "کالکشن‌ها",
-    "empty": "هنوز کالکشنی منتشر نشده — به‌زودی برمی‌گردیم."
+    "empty": "هنوز کالکشنی منتشر نشده — به‌زودی برمی‌گردیم.",
+    "viewCollection": "مشاهده‌ی کالکشن"
   },
   "collectionDetail": {
     "notFound": "این کالکشن پیدا نشد.",
     "empty": "هنوز محصولی به این کالکشن اضافه نشده — به‌زودی برمی‌گردیم."
+  },
+  "carousel": {
+    "previous": "قبلی",
+    "next": "بعدی",
+    "slideStatus": "اسلاید {current} از {total}"
   },
   "productDetail": {
     "notFound": "این محصول پیدا نشد.",

@@ -17,11 +17,17 @@
   },
   "collections": {
     "title": "Collections",
-    "empty": "No collections have been published yet — check back soon."
+    "empty": "No collections have been published yet — check back soon.",
+    "viewCollection": "View Collection"
   },
   "collectionDetail": {
     "notFound": "This collection could not be found.",
     "empty": "No products have been added to this collection yet — check back soon."
+  },
+  "carousel": {
+    "previous": "Previous",
+    "next": "Next",
+    "slideStatus": "Slide {current} of {total}"
   },
   "productDetail": {
     "notFound": "This product could not be found.",

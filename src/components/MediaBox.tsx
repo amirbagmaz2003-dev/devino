@@ -93,6 +93,7 @@ export default function MediaBox({
           fill
           sizes={sizes}
           priority={priority}
+          fetchPriority={priority ? "high" : undefined}
           className={`object-cover ${zoom ? "media-box-zoom" : ""}`}
           style={{
             objectPosition,
