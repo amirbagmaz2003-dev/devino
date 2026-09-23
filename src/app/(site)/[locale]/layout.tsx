@@ -6,6 +6,7 @@ import { routing, localeDirection, type Locale } from "@/i18n/routing";
 import { headingFont, bodyFont, headingFontFa, bodyFontFa } from "@/lib/fonts";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ScrollToTop from "@/components/ScrollToTop";
 import "../../globals.css";
 
 export function generateStaticParams() {
@@ -40,6 +41,7 @@ export default async function LocaleLayout({
     >
       <body className="flex min-h-full flex-col antialiased">
         <NextIntlClientProvider>
+          <ScrollToTop />
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
