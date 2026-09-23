@@ -34,7 +34,6 @@ export default async function CollectionsPage({
           description: collection.description,
           coverImage: collection.coverImage,
         }))}
-        locale={locale}
         carouselLabel={t("title")}
         viewCollectionLabel={t("viewCollection")}
         prevLabel={tCarousel("previous")}

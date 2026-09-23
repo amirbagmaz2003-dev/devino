@@ -52,10 +52,8 @@ export default function ProductCarousel({
   nextLabel,
 }: ProductCarouselProps) {
   const tCarousel = useTranslations("carousel");
-  const isRtl = locale === "fa";
   const [emblaRef, emblaApi] = useEmblaCarousel({
-    direction: isRtl ? "rtl" : "ltr",
-    loop: false,
+    loop: true,
   });
   const containerRef = useRef<HTMLDivElement>(null);
   const clickGuard = useDragClickGuard();
@@ -76,7 +74,7 @@ export default function ProductCarousel({
   const canScrollPrev = emblaApi?.canScrollPrev() ?? false;
   const canScrollNext = emblaApi?.canScrollNext() ?? false;
 
-  useCarouselKeyboardNav(emblaApi, containerRef, isRtl);
+  useCarouselKeyboardNav(emblaApi, containerRef);
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
@@ -131,7 +129,6 @@ export default function ProductCarousel({
             onNext={scrollNext}
             canScrollPrev={canScrollPrev}
             canScrollNext={canScrollNext}
-            isRtl={isRtl}
             prevLabel={prevLabel}
             nextLabel={nextLabel}
             variant="overlay"

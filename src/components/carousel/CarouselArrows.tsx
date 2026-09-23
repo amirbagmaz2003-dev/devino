@@ -3,7 +3,6 @@ interface CarouselArrowsProps {
   onNext: () => void;
   canScrollPrev: boolean;
   canScrollNext: boolean;
-  isRtl: boolean;
   prevLabel: string;
   nextLabel: string;
   /** "overlay" = pearl-white icon on a dark scrim, for a poster sitting
@@ -13,20 +12,19 @@ interface CarouselArrowsProps {
 }
 
 /**
- * Prev/next buttons always call the same semantic action (scrollPrev /
- * scrollNext) — Embla itself handles which visual direction that pans in
- * RTL mode (see CollectionPosterCarousel / ProductCarousel, where
- * Embla is initialized with `direction: "rtl"`). Only the arrow glyph and
- * the physical corner (via CSS logical start/end, which auto-mirrors with
- * `dir`) need to flip here — per the brief: "دکمه‌های فلش هم باید جهتشان
- * در حالت فارسی معکوس شود".
+ * Fixed physical layout in both languages: the left button always calls
+ * scrollPrev and points left, the right button always calls scrollNext
+ * and points right — no RTL-driven flip (see CollectionPosterCarousel /
+ * ProductCarousel, where Embla itself no longer sets `direction: "rtl"`
+ * either). Positioning uses literal `left-*`/`right-*`, not the logical
+ * `start-*`/`end-*` utilities, so it stays put regardless of the page's
+ * own `dir` attribute.
  */
 export default function CarouselArrows({
   onPrev,
   onNext,
   canScrollPrev,
   canScrollNext,
-  isRtl,
   prevLabel,
   nextLabel,
   variant = "plain",
@@ -45,18 +43,18 @@ export default function CarouselArrows({
         onClick={onPrev}
         disabled={!canScrollPrev}
         aria-label={prevLabel}
-        className={`${base} ${theme} start-2 sm:start-4`}
+        className={`${base} ${theme} left-2 sm:left-4`}
       >
-        <ArrowIcon direction={isRtl ? "right" : "left"} />
+        <ArrowIcon direction="left" />
       </button>
       <button
         type="button"
         onClick={onNext}
         disabled={!canScrollNext}
         aria-label={nextLabel}
-        className={`${base} ${theme} end-2 sm:end-4`}
+        className={`${base} ${theme} right-2 sm:right-4`}
       >
-        <ArrowIcon direction={isRtl ? "left" : "right"} />
+        <ArrowIcon direction="right" />
       </button>
     </>
   );

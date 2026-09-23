@@ -18,7 +18,6 @@ export interface PosterSlideData {
 
 interface CollectionPosterCarouselProps {
   collections: PosterSlideData[];
-  locale: string;
   carouselLabel: string;
   viewCollectionLabel: string;
   prevLabel: string;
@@ -28,23 +27,20 @@ interface CollectionPosterCarouselProps {
 /**
  * Full-bleed "poster" carousel — one collection per slide, static cover
  * image (no Ken Burns — the brief wants these to read like a magazine
- * cover, motion only from paging), overlaid name/description/CTA. Embla's
- * own `direction` option handles RTL so "next" always means "the next
- * collection", regardless of which way that pans visually.
+ * cover, motion only from paging), overlaid name/description/CTA. Paging
+ * is a fixed left=prev/right=next in both languages (no RTL flip), and
+ * loops from the last collection back to the first and vice versa.
  */
 export default function CollectionPosterCarousel({
   collections,
-  locale,
   carouselLabel,
   viewCollectionLabel,
   prevLabel,
   nextLabel,
 }: CollectionPosterCarouselProps) {
   const tCarousel = useTranslations("carousel");
-  const isRtl = locale === "fa";
   const [emblaRef, emblaApi] = useEmblaCarousel({
-    direction: isRtl ? "rtl" : "ltr",
-    loop: false,
+    loop: true,
   });
   const containerRef = useRef<HTMLDivElement>(null);
   const clickGuard = useDragClickGuard();
@@ -69,7 +65,7 @@ export default function CollectionPosterCarousel({
   const canScrollPrev = emblaApi?.canScrollPrev() ?? false;
   const canScrollNext = emblaApi?.canScrollNext() ?? false;
 
-  useCarouselKeyboardNav(emblaApi, containerRef, isRtl);
+  useCarouselKeyboardNav(emblaApi, containerRef);
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
@@ -123,7 +119,7 @@ export default function CollectionPosterCarousel({
                       {collection.name}
                     </h2>
                     {collection.description && (
-                      <p className="mt-3 max-w-md text-sm text-pearl-white/85 sm:text-base">
+                      <p className="text-pearl-white/85 mt-3 max-w-md text-sm sm:text-base">
                         {collection.description}
                       </p>
                     )}
@@ -144,7 +140,6 @@ export default function CollectionPosterCarousel({
           onNext={scrollNext}
           canScrollPrev={canScrollPrev}
           canScrollNext={canScrollNext}
-          isRtl={isRtl}
           prevLabel={prevLabel}
           nextLabel={nextLabel}
           variant="overlay"
