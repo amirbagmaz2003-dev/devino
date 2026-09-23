@@ -3,7 +3,7 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing, localeDirection, type Locale } from "@/i18n/routing";
-import { headingFont, bodyFont } from "@/lib/fonts";
+import { headingFont, bodyFont, headingFontFa, bodyFontFa } from "@/lib/fonts";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import "../../globals.css";
@@ -29,11 +29,14 @@ export default async function LocaleLayout({
 
   setRequestLocale(locale);
 
+  const heading = locale === "fa" ? headingFontFa : headingFont;
+  const body = locale === "fa" ? bodyFontFa : bodyFont;
+
   return (
     <html
       lang={locale}
       dir={localeDirection[locale as Locale]}
-      className={`${headingFont.variable} ${bodyFont.variable} h-full`}
+      className={`${heading.variable} ${body.variable} h-full`}
     >
       <body className="flex min-h-full flex-col antialiased">
         <NextIntlClientProvider>
