@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getCollectionBySlug } from "@/db/queries";
-import ProductGroupCarousel from "@/components/carousel/ProductGroupCarousel";
+import ProductCarousel from "@/components/carousel/ProductCarousel";
 
 export const dynamic = "force-dynamic";
 
@@ -35,32 +35,8 @@ export default async function CollectionDetailPage({
         <p className="text-matte-black/70 mt-14 text-center">{t("empty")}</p>
       ) : (
         <div className="mt-14">
-          <ProductGroupCarousel
+          <ProductCarousel
             products={collection.products}
-            itemsPerSlide={1}
-            visibilityClassName="block sm:hidden"
-            locale={locale}
-            currencyUnit={tProduct("currencyUnit")}
-            outOfStockLabel={tProduct("outOfStock")}
-            carouselLabel={collection.name}
-            prevLabel={tCarousel("previous")}
-            nextLabel={tCarousel("next")}
-          />
-          <ProductGroupCarousel
-            products={collection.products}
-            itemsPerSlide={2}
-            visibilityClassName="hidden sm:block lg:hidden"
-            locale={locale}
-            currencyUnit={tProduct("currencyUnit")}
-            outOfStockLabel={tProduct("outOfStock")}
-            carouselLabel={collection.name}
-            prevLabel={tCarousel("previous")}
-            nextLabel={tCarousel("next")}
-          />
-          <ProductGroupCarousel
-            products={collection.products}
-            itemsPerSlide={4}
-            visibilityClassName="hidden lg:block"
             locale={locale}
             currencyUnit={tProduct("currencyUnit")}
             outOfStockLabel={tProduct("outOfStock")}

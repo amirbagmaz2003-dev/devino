@@ -15,7 +15,7 @@ interface CarouselArrowsProps {
 /**
  * Prev/next buttons always call the same semantic action (scrollPrev /
  * scrollNext) — Embla itself handles which visual direction that pans in
- * RTL mode (see CollectionPosterCarousel / ProductGroupCarousel, where
+ * RTL mode (see CollectionPosterCarousel / ProductCarousel, where
  * Embla is initialized with `direction: "rtl"`). Only the arrow glyph and
  * the physical corner (via CSS logical start/end, which auto-mirrors with
  * `dir`) need to flip here — per the brief: "دکمه‌های فلش هم باید جهتشان
@@ -73,7 +73,11 @@ function ArrowIcon({ direction }: { direction: "left" | "right" }) {
       className="h-5 w-5"
     >
       {direction === "left" ? (
-        <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+        <path
+          d="M15 18l-6-6 6-6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       ) : (
         <path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
       )}
