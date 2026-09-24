@@ -1,81 +1,86 @@
-# پروژه: وب‌سایت deVino
+# Project: deVino Website
 
-## درباره‌ی برند
-deVino یک برند لباس شب زنانه (evening-wear) با پوزیشن پرمیوم است. مخاطب هدف: زنان ۲۵ تا ۳۵ ساله. تگ‌لاین برند: «حضوری از آنِ خودش» / "A Presence of Her Own." لحن برند: ترکیبی از رسمی و شاعرانه؛ هویت بصری: مینیمال، دراماتیک، زنانه — بدون اغراق، بدون فریاد زدن.
+## Communication
+- The project owner (Amir) is a native Persian speaker. **Always write your final reports/summaries to him in Persian.** Code, comments, commit messages and technical notes stay in English.
+- Prompts will usually arrive in English. Any user-facing text quoted in Persian inside a prompt (labels, button text, messages) must be used verbatim — do not translate or rephrase it.
 
-## پالت رنگی (نهایی — فقط سه رنگ)
-- اصلی ۱ (پس‌زمینه/متن تیره) — مشکی مات: `#000000`
-- اصلی ۲ (پس‌زمینه/متن روشن) — سفید صدفی (Pearlescent White): `#F8F6F0`
-- تاکیدی (فقط برای لمس‌های بسیار کوچک و کم‌تکرار — مثل یک آیکون، یک خط نازک، یک جزئیات کوچک؛ هرگز به‌عنوان رنگ زمینه یا رنگ غالب یک بخش) — سبز زیتونی: `#556B2F`
+## About the Brand
+deVino is a premium women's evening-wear brand. Target audience: women aged 25–35. Tagline: «حضوری از آنِ خودش» / "A Presence of Her Own." Brand voice: a blend of formal and poetic. Visual identity: minimal, dramatic, feminine — never exaggerated, never loud.
 
-هیچ رنگ دیگری در پالت استفاده نمی‌شود. کل هویت بصری سایت باید بر پایه‌ی کنتراست مشکی/سفید صدفی بنا شود؛ سبز زیتونی باید آنقدر کم‌مصرف باشد که کاربر آن را به‌عنوان یک امضای ظریف کشف کند، نه یک رنگ اصلی طراحی.
+## Color Palette (final — three colors only)
+- Primary 1 (dark background/text) — Matte Black: `#000000`
+- Primary 2 (light background/text) — Pearlescent White: `#F8F6F0`
+- Accent (only for very small, rare touches — an icon, a thin line, a tiny detail; never as a background or the dominant color of a section) — Olive Green: `#556B2F`
 
-**نکته‌ی مهم درباره‌ی برندبوک کامل:** فایل کامل برندبوک برند (`deVino_Brandbook_v06_2.docx`) نیز همراه این پروژه ارائه می‌شود و باید به‌عنوان مرجع اصلی فلسفه، لحن، پرسونا، و منطق طراحی کالکشن در نظر گرفته شود. با این حال، پالت رنگی کامل توی برندبوک (که شامل ۴ رنگ مکمل دیگر — بنفش انگوری، زرد لیمویی، آبی، زرشکی تیره — برای دسته‌بندی محصولات فیزیکی است) **عمداً** برای وب‌سایت استفاده نمی‌شود. تصمیم آگاهانه این است که وب‌سایت فقط بخشی از هویت برند را به نمایش بگذارد، نه همه‌ی آن؛ بنابراین فقط از همان سه رنگ (مشکی، سفید صدفی، سبز زیتونی) در طراحی وب استفاده شود، حتی اگر برندبوک رنگ‌های بیشتری برای خود کالکشن تعریف کرده باشد.
+No other colors are used. The entire visual identity of the site is built on black / pearlescent-white contrast. Olive green should be used so sparingly that users discover it as a subtle signature, not as a main design color.
 
-## تایپوگرافی
-- هدینگ/تیتر (انگلیسی): Cormorant Garamond (سریف ظریف)
-- بدنه‌ی متن (انگلیسی): Inter
-- هدینگ/تیتر (فارسی): Markazi Text (جایگزین Cormorant Garamond چون گلیف فارسی ندارد)
-- بدنه‌ی متن (فارسی): Vazirmatn (جایگزین Inter)
+**Important note about the full brand book:** The complete brand book (`deVino_Brandbook_v06_2.docx`) is also provided with this project and is the primary reference for the brand's philosophy, voice, persona and collection design logic. However, the brand book's full palette (which includes 4 additional complementary colors — grape purple, lemon yellow, blue, dark crimson — used to categorize physical products) is **intentionally** not used on the website. The deliberate decision is that the website shows only part of the brand identity, not all of it. Use only the three colors above in the web design, even though the brand book defines more colors for the collections themselves.
 
-## استک فنی (تایید شده — نهایی)
-- فریم‌ورک: Next.js (App Router)
-- استایلینگ: Tailwind CSS
-- CMS / پنل ادمین: **Cloudflare D1 + پنل ادمین اختصاصی** (نه Sanity — Sanity به‌عنوان سرویس شخص ثالث نیاز به ثبت‌نام و توکن جدا داشت و محیط اجرای Claude Code به api.sanity.io دسترسی شبکه نداشت؛ D1 دیتابیس داخلی خود Cloudflare است، بدون نیاز به اکانت/توکن اضافه). این دقیقاً همان الگویی است که در پروژه‌ی دیگر صاحب پروژه («بابونه») با موفقیت استفاده شده — پنل ادمین اختصاصی، ساده، و بدون کدنویسی برای مدیریت محتوا.
-- هاستینگ: **Cloudflare Workers** (نه Vercel — به‌دلیل نیاز Vercel به روش پرداخت که در حال حاضر برای صاحب پروژه ممکن نیست؛ اکانت Cloudflare از قبل فعال و بدون نیاز به پرداخت است). دیپلوی Next.js باید با آداپتور OpenNext (`@opennextjs/cloudflare`) انجام شود که تغییر کمی در پروژه‌ی موجود ایجاد می‌کند. مستندات رسمی: developers.cloudflare.com/workers/framework-guides/web-apps/opennext/
-- دامنه: `devinomaison.ir` — خریداری‌شده از نیک‌دامین (Nic.ir). **مهم: دامنه‌ی اصلی نباید تا اطلاع ثانویه و دستور صریح صاحب پروژه به هیچ Deployment متصل شود.** تمام فازهای توسعه و بررسی باید صرفاً از طریق آدرس موقت Preview که Cloudflare Workers به‌صورت خودکار می‌سازد (مثل `xxx.workers.dev`) انجام شود.
+## Typography
+- Headings (English): Cormorant Garamond (delicate serif)
+- Body (English): Inter
+- Headings (Persian): Markazi Text (replaces Cormorant Garamond, which has no Persian glyphs)
+- Body (Persian): Vazirmatn (replaces Inter)
 
-**استاندارد اجرا:** پیاده‌سازی باید در بالاترین سطح کیفیت و طبق بهترین شیوه‌های روز (best practices) هر یک از این ابزارها انجام شود — نه یک نسخه‌ی ساده‌شده یا حداقلی. این شامل بهینه‌سازی عملکرد (performance)، دسترسی‌پذیری (accessibility)، ساختار کد تمیز و قابل نگهداری، و ریسپانسیو بودن کامل در همه‌ی اندازه‌های صفحه می‌شود.
+## Tech Stack (approved — final)
+- Framework: Next.js (App Router)
+- Styling: Tailwind CSS
+- CMS / admin panel: **Cloudflare D1 + a custom admin panel** (not Sanity — Sanity is a third-party service requiring separate signup and tokens, and Claude Code's environment had no network access to api.sanity.io; D1 is Cloudflare's own database, needing no extra account or token). This is the same pattern successfully used in the owner's other project ("Baboneh") — a simple, custom admin panel for managing content without coding.
+- Media storage: **currently Cloudflare KV** (binding `MEDIA`; the `media.r2_key` column actually holds a KV key). Migration to R2 is planned before any video is added (KV has a 25 MiB per-value limit and the current `/media/[id]` route does not support HTTP Range requests, which iOS Safari requires for video).
+- Hosting: **Cloudflare Workers** (not Vercel — Vercel requires a payment method that is currently not possible for the owner; the Cloudflare account is already active and free). Next.js is deployed via the OpenNext adapter (`@opennextjs/cloudflare`). Official docs: developers.cloudflare.com/workers/framework-guides/web-apps/opennext/
+- Domain: `devinomaison.ir` — purchased from Nic.ir. **Important: the main domain must not be connected to any deployment until the owner explicitly says so.** All development and review happens only on the temporary preview URL that Cloudflare Workers generates automatically (e.g. `xxx.workers.dev`).
 
-## معماری کامپوننت مدیا (مهم — از همون اول رعایت شود)
-هر بخش تصویری/ویدیویی سایت (به‌خصوص هدر) باید از یک کامپوننت مشترک به نام `MediaBox` استفاده کند، نه مستقیماً از تگ `<img>` یا `<video>`. این کامپوننت باید این فیلدها را از دیتابیس (Cloudflare D1) بگیرد:
-- `type`: "image" یا "video"
-- `asset`: آدرس فایل تصویر یا ویدیو (ذخیره‌شده در Cloudflare R2 یا مشابه)
-- `focalPoint`: نقطه‌ی کانونی، به‌صورت دو مقدار ساده‌ی درصدی (x, y) که در فرم آپلود پنل ادمین قابل تنظیم است (یک ابزار ساده‌ی کلیک‌روی‌عکس یا دو فیلد عددی — جزئیات را خودت طراحی کن، هدف این است که کاربر غیرفنی بتواند به‌راحتی نقطه را مشخص کند)
+**Quality standard:** Implementation must be at the highest level of quality and follow current best practices for each of these tools — not a simplified or minimal version. This includes performance optimization, accessibility, clean and maintainable code structure, and full responsiveness at every screen size.
 
-رفتار کامپوننت:
-- اگر `type === "image"` باشد: افکت زوم آرام (Ken Burns — scale از ۱ به ~۱.۳ در طول چند ثانیه، ease-in-out) حول `focalPoint` اجرا شود.
-- اگر `type === "video"` باشد: ویدیو به‌صورت autoplay، muted، loop پخش شود و افکت زوم غیرفعال شود.
+## Media Component Architecture (important — must be followed from the start)
+Every image/video section of the site (especially the header) must use a shared component called `MediaBox`, never a raw `<img>` or `<video>` tag. The component gets these fields from the database (Cloudflare D1):
+- `type`: "image" or "video"
+- `asset`: URL of the image or video file
+- `focalPoint`: the focal point, as two simple percentage values (x, y), adjustable in the admin upload form (a simple click-on-image tool or two numeric fields — design the details yourself; the goal is that a non-technical user can easily set the point)
 
-هدف: در آینده، جایگزین کردن عکس با ویدیو فقط با تغییر یک فیلد در پنل ادمین انجام شود، بدون نیاز به تغییر کد.
+Component behavior:
+- If `type === "image"`: run a slow zoom effect (Ken Burns — scale from 1 to ~1.3 over several seconds, ease-in-out) around the `focalPoint`.
+- If `type === "video"`: play the video autoplay, muted, loop, with the zoom effect disabled.
 
-## رفتار اسکرول هدر
-هنگام اسکرول کاربر از هدر به بخش بعدی، رنگ پس‌زمینه باید به‌صورت نرم و پیوسته (نه پرشی) از تیره (رنگ مشکی/شب) به یک تن روشن‌تر (برای بخش کالکشن‌ها) تغییر کند — این تغییر باید مستقیماً با موقعیت اسکرول کاربر همگام باشد (scroll-linked)، نه یک انیمیشن زمان‌بندی‌شده‌ی مستقل.
+Goal: in the future, replacing an image with a video must be done by changing a single field in the admin panel, with no code changes.
 
-## لوگو
-دو فایل لوگوی شفاف (PNG با آلفا) در پروژه موجود است که باید جایگزین لوگوی متنی موقت `DEVINO` در هدر و فوتر شوند:
-- `devino-logo-black-transparent.png` — برای استفاده روی پس‌زمینه‌ی روشن
-- `devino-logo-white-transparent.png` — برای استفاده روی پس‌زمینه‌ی تیره
+## Header Scroll Behavior
+When the user scrolls from the header to the next section, the background color must change smoothly and continuously (not in jumps) from dark (black/night) to a lighter tone (for the collections section). This change must be directly synchronized with the user's scroll position (scroll-linked), not an independent timed animation.
 
-از آنجا که رنگ پس‌زمینه‌ی هدر هنگام اسکرول به‌صورت نرم از تیره به روشن تغییر می‌کند (طبق بخش «رفتار اسکرول هدر»)، کامپوننت لوگو باید بین این دو نسخه هماهنگ با همان موقعیت اسکرول جابه‌جا شود (مثلاً با یک کراس‌فید کوتاه)، نه یک‌بار برای همیشه ثابت بماند.
+## Logo
+Two transparent logo files (PNG with alpha) exist in the project and replace the temporary text logo `DEVINO` in the header and footer:
+- `devino-logo-black-transparent.png` — for use on light backgrounds
+- `devino-logo-white-transparent.png` — for use on dark backgrounds
 
-## کاروسل‌ها (پوستر کالکشن‌ها و محصولات داخل کالکشن)
-- صفحه‌ی `/collections`: هر کالکشن یک پوستر تمام‌صفحه (بدون افکت Ken Burns، فقط تصویر ثابت + گرادیانت + نام/توضیح/دکمه‌ی «مشاهده‌ی کالکشن»)
-- صفحه‌ی `/collections/[slug]`: محصولات یکی‌یکی نمایش داده می‌شوند (نه گرید چندتایی) — روی دسکتاپ کارت بزرگ‌تر است، ولی همیشه فقط یک محصول در هر اسلاید، در همه‌ی اندازه‌های صفحه
-- **جهت فلش‌ها:** برخلاف تصمیم اولیه، جهت فلش‌ها دیگر بر اساس RTL/LTR معکوس نمی‌شود — فلش چپ همیشه = قبلی، فلش راست همیشه = بعدی، در هر دو زبان (فارسی و انگلیسی) به یک شکل. موقعیت دکمه‌ها با `left-`/`right-` فیزیکی ثابت است، نه `start-`/`end-` منطقی
-- **لوپ بی‌نهایت:** هر دو کاروسل (پوستر کالکشن‌ها و محصولات) `loop: true` دارند — از آخرین اسلاید، دوباره به اول برمی‌گردد و برعکس
-- ناوبری ترکیبی: دکمه + درگ ماوس/لمسی + کلید جهت‌نما، با کتابخانه‌ی Embla Carousel
+Because the header background changes smoothly from dark to light on scroll (see "Header Scroll Behavior"), the logo component must switch between these two versions in sync with the same scroll position (e.g. with a short crossfade), not stay fixed.
 
-## فاز فعلی پروژه
-فاز ۰ تا ۴ تکمیل شده‌اند. سایت روی Cloudflare Workers زنده است: https://devino.amirbagmaz2003.workers.dev — دوزبانه (فارسی پیش‌فرض `/fa`، انگلیسی `/en`)، با هدر زنده (زوم هیرو + گذر رنگ اسکرول + لوگوی واقعی)، پنل ادمین اختصاصی روی `/admin` (نه Sanity — D1)، و صفحات کالکشن/محصول به‌صورت پوستر-اسلایدر (به‌جای گرید ساده‌ی اولیه‌ی فاز ۴، طبق بریف `poster-carousel-collections-brief.md`).
+## Carousels (collection posters and products within a collection)
+- `/collections` page: each collection is a full-screen poster (no Ken Burns effect — just a static image + gradient + name/description/"View Collection" button)
+- `/collections/[slug]` page: products are shown one at a time (not a multi-item grid) — the card is larger on desktop, but always exactly one product per slide, at every screen size
+- **Arrow direction:** contrary to the original decision, arrow direction is no longer flipped based on RTL/LTR — the left arrow always = previous, the right arrow always = next, identically in both languages (Persian and English). Button positions are fixed with physical `left-`/`right-`, not logical `start-`/`end-`
+- **Infinite loop:** both carousels (collection posters and products) have `loop: true` — from the last slide it wraps to the first, and vice versa
+- Combined navigation: buttons + mouse/touch drag + arrow keys, using the Embla Carousel library
+- **Movement direction:** Carousel movement is identical in both languages (always LTR track); only slide content follows the locale direction.
 
-داده‌ی واقعی (نه placeholder صرف) از طریق پنل ادمین وارد شده: چند محصول (با نام‌گذاری بر اساس انواع انگور/شراب — الگوی رسمی برند برای اسم محصولات) و سه کالکشن (برداشت اول/First Harvest، غروب شراب/Evening Pour، وینتیج/Vintage).
+## Current Project Phase
+Phases 0 through 4 are complete. The site is live on Cloudflare Workers: https://devino.amirbagmaz2003.workers.dev — bilingual (Persian default `/fa`, English `/en`), with a live header (hero zoom + scroll color transition + real logo), a custom admin panel at `/admin` (D1, not Sanity), and collection/product pages as poster sliders (instead of the simple grid from the original Phase 4, per the brief `poster-carousel-collections-brief.md`).
 
-**باگ باز فعلی (اولویت‌دار، قبل از هر فاز جدید حل شود):**
-تصاویر پوستر کالکشن‌ها (و احتمالاً محصولات) وقتی کاربر از طریق دکمه‌ی سوییچ زبان (نه رفرش کامل صفحه) از انگلیسی به فارسی می‌رود، خالی/سفید می‌مانند — با این‌که همان تصویر در بارگذاری مستقیم و تازه‌ی `/fa/...` (بدون سوییچ زبان) درست کار می‌کند. مشکوک‌ترین علت: کامپوننت `MediaBox` هنگام تغییر locale بدون full page reload به‌درستی re-render/re-fetch نمی‌شود. جدا از این، یک محصول (`petit-verdot`) کلاً بدون عکس ثبت شده (مشکل داده، نه کد).
+Real data (not just placeholders) has been entered through the admin panel: several products (named after grape/wine varieties — the brand's official naming pattern for products) and three collections (برداشت اول / First Harvest, غروب شراب / Evening Pour, وینتیج / Vintage).
 
-## نکات مهم درباره‌ی روش کار با Claude Code (رعایت شود)
-- پرامپت‌ها باید دقیق و محدود به فایل‌های مرتبط باشند؛ همیشه صریح گفته شود «به بقیه‌ی پروژه دست نزن، از اول ریویو نکن» تا مصرف توکن کم بماند
-- تغییرات بزرگ/چندبخشی → فایل بریف جداگانه؛ تغییرات کوچک و مشخص → متن مستقیم در پیام (نه فایل)
-- Claude Code به هیچ دامنه‌ی خارجی (از جمله خود دامنه‌ی زنده‌ی سایت) و به API واقعی Cloudflare/Sanity دسترسی شبکه ندارد — برای کارهایی مثل ساخت دیتابیس/باکت/اجرای migration واقعی، یا از طریق دسترسی مستقیم Claude (در چت) به Cloudflare انجام می‌شود، یا کاربر باید از داشبورد Cloudflare دستی انجام دهد
-- فایل‌هایی که کاربر می‌خواهد Claude Code از آن‌ها استفاده کند (لوگو، عکس محصول) باید به‌صورت **ضمیمه‌ی فایل واقعی** در همان سشن Claude Code آپلود شوند، نه صرفاً به‌عنوان تصویر داخل پیام چت (چند بار این اشتباه تکرار و باعث اتلاف وقت شده)
+**Open bug (priority — fix before any new phase):**
+In the Persian version (`/fa`), **both carousels** are broken: only the first slide renders; all other slides are completely empty (not just the image — name, price and description are missing too). The English version works correctly. The data, KV files and `MediaBox` have been verified as fine; the problem is slide positioning under RTL. Likely root cause: both carousels use `useEmblaCarousel({ loop: true })` with no `direction` option, while Embla requires `direction: 'rtl'` on `dir="rtl"` pages. The original report ("poster goes blank after switching language") is most likely the same bug. Test with at least 3 slides, since fewer slides may not reproduce it. Separately, one product (`petit-verdot`) was saved with no image at all (a data issue, not a code issue).
 
+## Important Notes on Working with Claude Code (must be followed)
+- Prompts must be precise and limited to the relevant files; always state explicitly "don't touch the rest of the project, don't re-review from scratch" to keep token usage low
+- Large/multi-part changes → a separate brief file; small, specific changes → direct text in the message (not a file)
+- Claude Code has no network access to any external domain (including the live site itself) or to the real Cloudflare/Sanity APIs — for tasks like creating a database/bucket or running a real migration, either Claude (in chat) does it through its direct Cloudflare access, or the owner does it manually in the Cloudflare dashboard
+- Files the owner wants Claude Code to use (logo, product photos) must be uploaded as **real file attachments** in the same Claude Code session, not just as images inside a chat message (this mistake has been repeated several times and wasted time)
 
-## تصمیم اضافه‌ی فاز ۲: دوزبانه‌بودن سایت
-سایت به‌صورت دوزبانه ساخته شده: فارسی (`/fa`، پیش‌فرض) و انگلیسی (`/en`)، با next-intl، جهت پویای rtl/ltr، و فچ‌بک فونت برای هدینگ فارسی (چون Cormorant Garamond گلیف فارسی ندارد). این تصمیم باید در تمام فازهای بعدی (طراحی بصری، محتوا، پنل ادمین) رعایت شود — یعنی هر محتوایی که در دیتابیس (D1) تعریف می‌شود باید فیلد جداگانه برای هر دو زبان داشته باشد.
+## Additional Phase 2 Decision: Bilingual Site
+The site is built bilingual: Persian (`/fa`, default) and English (`/en`), with next-intl, dynamic rtl/ltr direction, and a font fallback for Persian headings (since Cormorant Garamond has no Persian glyphs). This decision must be respected in all later phases (visual design, content, admin panel) — i.e. any content defined in the database (D1) must have separate fields for both languages.
 
-## محدوده‌ی نسخه‌ی اول (مهم)
-نسخه‌ی اول سایت **بدون** سبد خرید و درگاه پرداخت ساخته می‌شود — فقط نمایش برند، کالکشن‌ها، و فرم تماس/رزرو. قابلیت خرید مستقیم آنلاین در فاز جداگانه‌ی آینده اضافه خواهد شد. لطفاً معماری اولیه را طوری بساز که افزودن سبد خرید در آینده بدون بازنویسی اساسی ساختار محصولات امکان‌پذیر باشد (مثلاً هر محصول از همین حالا فیلد قیمت و موجودی داشته باشد، حتی اگر دکمه‌ی خرید فعلاً وجود نداشته باشد).
+## Scope of Version 1 (important)
+The first version of the site is built **without** a shopping cart or payment gateway — only brand presentation, collections, and a contact/booking form. Direct online purchasing will be added in a separate future phase. Build the initial architecture so that adding a cart later is possible without fundamentally rewriting the product structure (e.g. every product already has price and stock fields, even though there is no buy button yet).
 
-## محتوای موقت (Placeholder)
-تا زمان عکاسی/فیلم‌برداری کالکشن اول، از عکس‌های موقت با مجوز تجاری (Unsplash/Pexels) یا عکس‌های ارسالی صاحب پروژه استفاده می‌شود. این عکس‌ها بعداً توسط صاحب پروژه از طریق پنل ادمین اختصاصی جایگزین خواهند شد — بدون نیاز به کدنویسی مجدد.
+## Placeholder Content
+Until the first collection is photographed/filmed, temporary images with a commercial license (Unsplash/Pexels) or photos sent by the owner are used. These will later be replaced by the owner through the custom admin panel — with no code changes needed.

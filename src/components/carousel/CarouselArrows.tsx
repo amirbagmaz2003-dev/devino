@@ -14,9 +14,8 @@ interface CarouselArrowsProps {
 /**
  * Fixed physical layout in both languages: the left button always calls
  * scrollPrev and points left, the right button always calls scrollNext
- * and points right — no RTL-driven flip, even though Embla itself runs
- * with `direction: "rtl"` on /fa (so its slide layout matches the page).
- * Positioning uses literal `left-*`/`right-*`, not the logical
+ * and points right — no RTL-driven flip; the carousel track itself is
+ * always LTR (see CollectionPosterCarousel / ProductCarousel). Positioning uses literal `left-*`/`right-*`, not the logical
  * `start-*`/`end-*` utilities, so it stays put regardless of the page's
  * own `dir` attribute.
  */
