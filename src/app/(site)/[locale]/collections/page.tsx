@@ -1,10 +1,25 @@
+import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { pageMetadata } from "@/lib/seo";
 import { getCollections } from "@/db/queries";
 import CollectionPosterCarousel from "@/components/carousel/CollectionPosterCarousel";
 
 // D1 data changes via /admin at any time — always read it fresh rather
 // than baking an empty result in at build time.
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: PageProps<"/[locale]/collections">): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "meta" });
+  return pageMetadata({
+    locale,
+    path: "/collections",
+    title: t("collectionsTitle"),
+    description: t("collectionsDescription"),
+  });
+}
 
 export default async function CollectionsPage({
   params,

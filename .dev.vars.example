@@ -9,3 +9,9 @@ ADMIN_PASSWORD=
 # Random secret used to sign the admin session cookie (HMAC). Generate one
 # with: openssl rand -hex 32
 SESSION_SECRET=
+
+# Optional: Telegram bot token (from @BotFather) for new-booking
+# notifications. Unset = notifications are skipped. In production:
+# `wrangler secret put TELEGRAM_BOT_TOKEN`. The chat id is not a secret —
+# it's captured in /admin/settings («اتصال تلگرام»).
+TELEGRAM_BOT_TOKEN=

@@ -8,6 +8,8 @@ import {
   type AdminFormState,
 } from "@/lib/adminForm";
 import { updateSiteSettings } from "@/db/admin";
+import { getTelegramChatId, setTelegramChatId } from "@/db/bookings";
+import { findLatestPrivateChatId, isTelegramBotConfigured, sendTelegramMessage } from "@/lib/telegram";
 
 export async function updateSiteSettingsAction(
   _prev: AdminFormState,
@@ -36,6 +38,57 @@ export async function updateSiteSettingsAction(
     return { error: MESSAGES.saveFailed };
   }
   revalidatePath("/admin/settings");
-  revalidatePath("/[locale]/products/[slug]", "page");
+  // Footer links, contact page and hero tagline read these on every page.
+  revalidatePath("/", "layout");
   return {};
+}
+
+const TELEGRAM_MESSAGES = {
+  noBot: "ربات تلگرام هنوز روی سرور تنظیم نشده است.",
+  noMessage: "پیامی از طرف شما پیدا نشد. ابتدا در تلگرام به ربات پیام /start بدهید.",
+  connected: "اتصال برقرار شد.",
+  notConnected: "ابتدا تلگرام را متصل کنید.",
+  testText: "پیام آزمایشی از پنل مدیریت deVino — اتصال برقرار است.",
+  testSent: "پیام آزمایشی ارسال شد.",
+} as const;
+
+/** «اتصال»: takes the chat id of the latest private message to the bot and saves it. */
+export async function connectTelegramAction(
+  _prev: AdminFormState,
+  _formData: FormData,
+): Promise<AdminFormState> {
+  await requireAdmin();
+  void _formData;
+  try {
+    if (!(await isTelegramBotConfigured())) return { error: TELEGRAM_MESSAGES.noBot };
+    const chatId = await findLatestPrivateChatId();
+    if (!chatId) return { error: TELEGRAM_MESSAGES.noMessage };
+    await setTelegramChatId(chatId);
+  } catch (error) {
+    console.error("[admin] connecting Telegram failed", error);
+    return { error: MESSAGES.saveFailed };
+  }
+  revalidatePath("/admin/settings");
+  return { success: TELEGRAM_MESSAGES.connected };
+}
+
+/** «ارسال پیام آزمایشی». */
+export async function sendTelegramTestAction(
+  _prev: AdminFormState,
+  _formData: FormData,
+): Promise<AdminFormState> {
+  await requireAdmin();
+  void _formData;
+  try {
+    if (!(await isTelegramBotConfigured())) return { error: TELEGRAM_MESSAGES.noBot };
+    const chatId = await getTelegramChatId();
+    if (!chatId) return { error: TELEGRAM_MESSAGES.notConnected };
+    if (!(await sendTelegramMessage(chatId, TELEGRAM_MESSAGES.testText))) {
+      return { error: MESSAGES.saveFailed };
+    }
+  } catch (error) {
+    console.error("[admin] Telegram test message failed", error);
+    return { error: MESSAGES.saveFailed };
+  }
+  return { success: TELEGRAM_MESSAGES.testSent };
 }

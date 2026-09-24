@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import MediaBox from "@/components/MediaBox";
 import HeroScrollController from "@/components/HeroScrollController";
+import { getSiteSettings } from "@/db/queries";
 
 // Placeholder campaign photo (CLAUDE.md — "محتوای موقت"), provided directly
 // by the project owner as a real file — replaced with actual campaign
@@ -12,7 +13,14 @@ const HERO_FOCAL_POINT = { x: 0.42, y: 0.18 };
 export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations("home");
+  const [t, settings] = await Promise.all([
+    getTranslations("home"),
+    getSiteSettings(),
+  ]);
+  // Admin-editable tagline (site_settings) wins; the translation is the fallback.
+  const tagline =
+    (locale === "fa" ? settings?.tagline?.fa : settings?.tagline?.en)?.trim() ||
+    t("tagline");
 
   return (
     <>
@@ -28,7 +36,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         />
         <div className="text-pearl-white relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
           <h1 className="font-heading text-5xl md:text-6xl">{t("title")}</h1>
-          <p className="font-heading mt-4 text-xl italic">{t("tagline")}</p>
+          <p className="font-heading mt-4 text-xl italic">{tagline}</p>
         </div>
       </section>
 

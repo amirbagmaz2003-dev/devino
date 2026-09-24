@@ -36,7 +36,9 @@ export default function ProductCard({
               {...mainImage}
               zoom={false}
               priority={priority}
-              sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+              // One card per slide; the carousel caps its width at
+              // max-w-xs/sm/md/lg (320/384/448/512px) — see ProductCarousel.
+              sizes="(min-width: 1024px) 512px, (min-width: 768px) 448px, (min-width: 640px) 384px, min(320px, calc(100vw - 48px))"
             />
           </div>
         )}

@@ -1,6 +1,6 @@
 "use server";
 
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { createSessionToken, safeEqual } from "@/lib/adminSession";
@@ -11,21 +11,11 @@ import {
   recordLoginFailure,
 } from "@/db/admin";
 import type { AdminFormState } from "@/lib/adminForm";
+import { getClientIp } from "@/lib/requestIp";
 
 const LOCKED_MESSAGE =
   "تعداد تلاش‌های ناموفق زیاد بود. لطفاً ۱۵ دقیقه دیگر دوباره امتحان کنید.";
 const WRONG_PASSWORD_MESSAGE = "رمز عبور اشتباه است.";
-
-async function clientIp() {
-  const h = await headers();
-  // Cloudflare sets CF-Connecting-IP on every request and overwrites any
-  // client-supplied value, so it can't be spoofed in production.
-  return (
-    h.get("cf-connecting-ip") ??
-    h.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    "unknown"
-  );
-}
 
 /** The only admin action that doesn't call requireAdmin(). */
 export async function loginAction(
@@ -33,7 +23,7 @@ export async function loginAction(
   formData: FormData,
 ): Promise<AdminFormState> {
   const password = String(formData.get("password") ?? "");
-  const ip = await clientIp();
+  const ip = await getClientIp();
 
   if (await isLoginLocked(ip)) {
     return { error: LOCKED_MESSAGE };

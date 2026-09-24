@@ -46,12 +46,15 @@ export default function Header() {
           {/* Small, subtle locale switch — inherits the same color
               crossfade as the rest of the header (see .site-header in
               globals.css) since it sets no color of its own. Preserves
-              the current path, just swaps the locale segment. */}
+              the current path, just swaps the locale segment. The aria-label is
+              localized in messages/*.json (nav.switchLanguage). */}
           <Link
             href={pathname}
             locale={otherLocale}
-            aria-label={`Switch language to ${otherLocale.toUpperCase()}`}
-            className="text-[10px] tracking-widest uppercase opacity-70 hover:opacity-100 sm:text-xs"
+            aria-label={t("switchLanguage")}
+            // Visible text stays a tiny "EN"/"FA"; the box around it is a
+            // full 44×44px tap target (WCAG 2.5.5).
+            className="-mx-2 inline-flex min-h-11 min-w-11 items-center justify-center text-[10px] tracking-widest uppercase opacity-70 hover:opacity-100 sm:text-xs"
           >
             {otherLocale}
           </Link>

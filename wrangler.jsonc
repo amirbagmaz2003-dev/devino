@@ -17,6 +17,14 @@
       "service": "devino",
     },
   ],
+  // Non-secret runtime config (brief 02). SITE_URL moves to the real domain
+  // once it's connected; ALLOW_INDEXING stays "false" until then so the
+  // workers.dev preview is never indexed. TELEGRAM_BOT_TOKEN is a secret:
+  // `wrangler secret put TELEGRAM_BOT_TOKEN`.
+  "vars": {
+    "SITE_URL": "https://devino.amirbagmaz2003.workers.dev",
+    "ALLOW_INDEXING": "false",
+  },
   "d1_databases": [
     {
       "binding": "DB",

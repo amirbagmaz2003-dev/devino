@@ -10,6 +10,8 @@ export type AdminFieldName = "slug" | "price" | "stockCount" | "file";
 export type AdminFormState = {
   error?: string;
   fieldErrors?: Partial<Record<AdminFieldName, string>>;
+  /** Confirmation shown inside the form, for actions that stay on the page. */
+  success?: string;
 } | null;
 
 export const MESSAGES = {
