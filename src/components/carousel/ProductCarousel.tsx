@@ -53,11 +53,11 @@ export default function ProductCarousel({
   nextLabel,
 }: ProductCarouselProps) {
   const tCarousel = useTranslations("carousel");
-  // See CollectionPosterCarousel for why Embla gets the page direction.
-  const direction = localeDirection[useLocale() as Locale];
+  // See CollectionPosterCarousel: always-LTR track, locale-direction content.
+  const contentDir = localeDirection[useLocale() as Locale];
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
-    direction,
+    direction: "ltr",
   });
   const containerRef = useRef<HTMLDivElement>(null);
   const clickGuard = useDragClickGuard();
@@ -92,7 +92,7 @@ export default function ProductCarousel({
       aria-label={carouselLabel}
       className="relative mx-auto max-w-xs focus:outline-none sm:max-w-sm md:max-w-md lg:max-w-lg"
     >
-      <div ref={emblaRef} dir={direction} className="overflow-hidden">
+      <div ref={emblaRef} dir="ltr" className="overflow-hidden">
         <div
           className="flex"
           onPointerDown={clickGuard.onPointerDown}
@@ -110,17 +110,19 @@ export default function ProductCarousel({
               })}
               className="min-w-0 flex-[0_0_100%]"
             >
-              <ProductCard
-                priority={index === 0}
-                name={product.name}
-                slug={product.slug}
-                price={product.price}
-                currencyUnit={currencyUnit}
-                locale={locale}
-                mainImage={product.mainImage}
-                inStock={product.inStock}
-                outOfStockLabel={outOfStockLabel}
-              />
+              <div dir={contentDir}>
+                <ProductCard
+                  priority={index === 0}
+                  name={product.name}
+                  slug={product.slug}
+                  price={product.price}
+                  currencyUnit={currencyUnit}
+                  locale={locale}
+                  mainImage={product.mainImage}
+                  inStock={product.inStock}
+                  outOfStockLabel={outOfStockLabel}
+                />
+              </div>
             </div>
           ))}
         </div>

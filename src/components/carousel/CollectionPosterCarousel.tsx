@@ -40,18 +40,18 @@ export default function CollectionPosterCarousel({
   nextLabel,
 }: CollectionPosterCarouselProps) {
   const tCarousel = useTranslations("carousel");
-  // Embla must be told the page direction explicitly: on /fa the track
-  // inherits <html dir="rtl">, so flexbox lays the slides out
-  // right-to-left, and Embla's slide-position/loop math only matches that
-  // layout with `direction: "rtl"` (otherwise every slide after the first
-  // lands off-screen). The viewport carries the same `dir`, as Embla's
-  // docs require. Switching locale without a reload changes this option,
-  // which makes useEmblaCarousel re-initialise with the new direction.
-  // The arrows stay physically fixed (left=prev, right=next) regardless.
-  const direction = localeDirection[useLocale() as Locale];
+  // Carousel movement is identical in both languages: the track is always
+  // LTR (Embla `direction: "ltr"` + `dir="ltr"` on its viewport), so the
+  // next slide always enters from the right and left/right arrows, keys
+  // and drags behave the same on /fa and /en. The track must be pinned
+  // explicitly — inheriting <html dir="rtl"> would lay the slides out
+  // right-to-left and push them off-screen under LTR positioning. Only
+  // each slide's content follows the locale direction, so Persian text
+  // still renders and aligns RTL.
+  const contentDir = localeDirection[useLocale() as Locale];
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
-    direction,
+    direction: "ltr",
   });
   const containerRef = useRef<HTMLDivElement>(null);
   const clickGuard = useDragClickGuard();
@@ -91,7 +91,7 @@ export default function CollectionPosterCarousel({
       className="relative overflow-hidden focus:outline-none"
       style={{ height: "calc(100dvh - var(--header-h))" }}
     >
-      <div ref={emblaRef} dir={direction} className="h-full overflow-hidden">
+      <div ref={emblaRef} dir="ltr" className="h-full overflow-hidden">
         <div className="flex h-full">
           {collections.map((collection, index) => {
             const isNeighbor = Math.abs(index - selectedIndex) <= 1;
@@ -111,6 +111,7 @@ export default function CollectionPosterCarousel({
                   onClick={clickGuard.onClickCapture}
                   onPointerDown={clickGuard.onPointerDown}
                   onPointerMove={clickGuard.onPointerMove}
+                  dir={contentDir}
                   className="group absolute inset-0 block"
                 >
                   {collection.coverImage && (
