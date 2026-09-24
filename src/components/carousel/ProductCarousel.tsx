@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useReducer, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { localeDirection, type Locale } from "@/i18n/routing";
 import useEmblaCarousel from "embla-carousel-react";
 import ProductCard from "@/components/ProductCard";
 import CarouselArrows from "./CarouselArrows";
@@ -52,8 +53,11 @@ export default function ProductCarousel({
   nextLabel,
 }: ProductCarouselProps) {
   const tCarousel = useTranslations("carousel");
+  // See CollectionPosterCarousel for why Embla gets the page direction.
+  const direction = localeDirection[useLocale() as Locale];
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
+    direction,
   });
   const containerRef = useRef<HTMLDivElement>(null);
   const clickGuard = useDragClickGuard();
@@ -88,7 +92,7 @@ export default function ProductCarousel({
       aria-label={carouselLabel}
       className="relative mx-auto max-w-xs focus:outline-none sm:max-w-sm md:max-w-md lg:max-w-lg"
     >
-      <div ref={emblaRef} className="overflow-hidden">
+      <div ref={emblaRef} dir={direction} className="overflow-hidden">
         <div
           className="flex"
           onPointerDown={clickGuard.onPointerDown}

@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useReducer, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { localeDirection, type Locale } from "@/i18n/routing";
 import useEmblaCarousel from "embla-carousel-react";
 import { Link } from "@/i18n/navigation";
 import MediaBox, { type MediaBoxProps } from "@/components/MediaBox";
@@ -39,8 +40,18 @@ export default function CollectionPosterCarousel({
   nextLabel,
 }: CollectionPosterCarouselProps) {
   const tCarousel = useTranslations("carousel");
+  // Embla must be told the page direction explicitly: on /fa the track
+  // inherits <html dir="rtl">, so flexbox lays the slides out
+  // right-to-left, and Embla's slide-position/loop math only matches that
+  // layout with `direction: "rtl"` (otherwise every slide after the first
+  // lands off-screen). The viewport carries the same `dir`, as Embla's
+  // docs require. Switching locale without a reload changes this option,
+  // which makes useEmblaCarousel re-initialise with the new direction.
+  // The arrows stay physically fixed (left=prev, right=next) regardless.
+  const direction = localeDirection[useLocale() as Locale];
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
+    direction,
   });
   const containerRef = useRef<HTMLDivElement>(null);
   const clickGuard = useDragClickGuard();
@@ -80,7 +91,7 @@ export default function CollectionPosterCarousel({
       className="relative overflow-hidden focus:outline-none"
       style={{ height: "calc(100dvh - var(--header-h))" }}
     >
-      <div ref={emblaRef} className="h-full overflow-hidden">
+      <div ref={emblaRef} dir={direction} className="h-full overflow-hidden">
         <div className="flex h-full">
           {collections.map((collection, index) => {
             const isNeighbor = Math.abs(index - selectedIndex) <= 1;
