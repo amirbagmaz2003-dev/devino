@@ -1,29 +1,48 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { getProductBySlug, getSiteSettings } from "@/db/queries";
+import { excerpt, pageMetadata } from "@/lib/seo";
 import { formatPrice } from "@/lib/formatPrice";
 import ProductGallery from "@/components/ProductGallery";
 import ContactChannels from "@/components/ContactChannels";
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({
+  params,
+}: PageProps<"/[locale]/products/[slug]">): Promise<Metadata> {
+  const { locale, slug } = await params;
+  const product = await getProductBySlug(slug, locale);
+  if (!product) return {};
+  const t = await getTranslations({ locale, namespace: "meta" });
+  const cover = product.images.find((image) => image.type === "image") ?? null;
+  return pageMetadata({
+    locale,
+    path: `/products/${product.slug}`,
+    title: product.name,
+    description:
+      excerpt(product.description) ??
+      (product.collection
+        ? `${product.name} — ${product.collection.name}`
+        : t("collectionsDescription")),
+    imageUrl: cover?.asset.url,
+    imageAlt: cover?.alt || product.name,
+  });
+}
+
 export default async function ProductDetailPage({
   params,
 }: PageProps<"/[locale]/products/[slug]">) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations("productDetail");
-  const [product, siteSettings] = await Promise.all([
+  const [product, siteSettings, t] = await Promise.all([
     getProductBySlug(slug, locale),
     getSiteSettings(),
+    getTranslations("productDetail"),
   ]);
-
-  if (!product) {
-    return (
-      <div className="mx-auto max-w-6xl px-6 pt-[calc(var(--header-h)+2rem)] pb-24 text-center">
-        <p className="text-matte-black/70">{t("notFound")}</p>
-      </div>
-    );
-  }
+  if (!product) notFound();
 
   return (
     <div className="mx-auto max-w-6xl px-6 pt-[calc(var(--header-h)+2rem)] pb-24">
@@ -43,6 +62,13 @@ export default async function ProductDetailPage({
               {product.description}
             </p>
           )}
+
+          <Link
+            href={{ pathname: "/contact", query: { product: product.slug } }}
+            className="bg-matte-black text-pearl-white hover:bg-matte-black/85 focus-visible:outline-olive-accent mt-8 inline-flex min-h-12 items-center justify-center px-8 text-sm tracking-wide transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            {t("bookFitting")}
+          </Link>
 
           <ContactChannels
             heading={t("orderHeading")}

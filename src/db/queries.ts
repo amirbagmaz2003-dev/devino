@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { MediaBoxProps } from "@/components/MediaBox";
 import { getDb } from "./client";
 import { resolveMedia } from "./media";
@@ -46,6 +47,7 @@ export interface CollectionDetail {
   name: string;
   slug: string;
   description: string | null;
+  coverImage: MediaBoxProps | null;
   products: ProductSummary[];
 }
 
@@ -174,26 +176,17 @@ const PRODUCT_SUMMARY_SELECT = /* sql */ `
   LEFT JOIN media m ON m.id = first_media.media_id
 `;
 
-export async function getCollectionBySlug(
+/** Per-request memoized: generateMetadata and the page share one lookup. */
+export const getCollectionBySlug = cache(async (
   slug: string,
   locale: string,
-): Promise<CollectionDetail | null> {
+): Promise<CollectionDetail | null> => {
   try {
     const db = await getDb();
     const collection = await db
-      .prepare(
-        `SELECT id, slug, name_fa, name_en, description_fa, description_en
-         FROM collections WHERE slug = ?`,
-      )
+      .prepare(`${COLLECTION_SELECT} WHERE c.slug = ?`)
       .bind(slug)
-      .first<{
-        id: string;
-        slug: string;
-        name_fa: string;
-        name_en: string;
-        description_fa: string | null;
-        description_en: string | null;
-      }>();
+      .first<CollectionRow>();
     if (!collection) return null;
 
     const { results: productRows } = await db
@@ -212,13 +205,14 @@ export async function getCollectionBySlug(
       description:
         pickLocale(collection.description_fa ?? "", collection.description_en ?? "", locale) ||
         null,
+      coverImage: toCollectionSummary(collection, locale).coverImage,
       products: productRows.map((row) => toProductSummary(row, locale)),
     };
   } catch (error) {
     console.error("[getCollectionBySlug] D1 query failed:", error);
     return null;
   }
-}
+});
 
 interface ProductDetailRow {
   id: string;
@@ -244,10 +238,11 @@ interface ProductMediaRow {
   alt_en: string;
 }
 
-export async function getProductBySlug(
+/** Per-request memoized: generateMetadata and the page share one lookup. */
+export const getProductBySlug = cache(async (
   slug: string,
   locale: string,
-): Promise<ProductDetail | null> {
+): Promise<ProductDetail | null> => {
   try {
     const db = await getDb();
     const product = await db
@@ -306,7 +301,7 @@ export async function getProductBySlug(
     console.error("[getProductBySlug] D1 query failed:", error);
     return null;
   }
-}
+});
 
 interface SiteSettingsRow {
   brand_name: string;
@@ -317,7 +312,12 @@ interface SiteSettingsRow {
   instagram_url: string | null;
 }
 
-export async function getSiteSettings(): Promise<SiteSettingsData | null> {
+/**
+ * Per-request memoized (React cache): the layout's metadata, the header
+ * tagline, the footer and the page itself can all ask for it and D1 is
+ * queried once.
+ */
+export const getSiteSettings = cache(async (): Promise<SiteSettingsData | null> => {
   try {
     const db = await getDb();
     const row = await db
@@ -337,5 +337,26 @@ export async function getSiteSettings(): Promise<SiteSettingsData | null> {
   } catch (error) {
     console.error("[getSiteSettings] D1 query failed:", error);
     return null;
+  }
+});
+
+/** Slugs for sitemap.xml (collections and products, all public). */
+export async function getSitemapSlugs(): Promise<{
+  collections: string[];
+  products: string[];
+}> {
+  try {
+    const db = await getDb();
+    const [collections, products] = await Promise.all([
+      db.prepare("SELECT slug FROM collections ORDER BY sort_order, created_at").all<{ slug: string }>(),
+      db.prepare("SELECT slug FROM products ORDER BY sort_order, created_at").all<{ slug: string }>(),
+    ]);
+    return {
+      collections: collections.results.map((row) => row.slug),
+      products: products.results.map((row) => row.slug),
+    };
+  } catch (error) {
+    console.error("[getSitemapSlugs] D1 query failed:", error);
+    return { collections: [], products: [] };
   }
 }

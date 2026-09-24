@@ -1,47 +1,84 @@
-import { useTranslations } from "next-intl";
-import NewsletterForm from "./NewsletterForm";
+import { getTranslations } from "next-intl/server";
+import { getSiteSettings } from "@/db/queries";
 import Logo from "./Logo";
 
-// Placeholder social links — replaced with real profiles when available.
-const SOCIAL_LINKS = [
-  { label: "Instagram", href: "#" },
-  { label: "Telegram", href: "#" },
-  { label: "Pinterest", href: "#" },
-];
+interface SocialLink {
+  label: string;
+  href: string;
+}
+
+function ExternalLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="hover:text-olive-accent decoration-matte-black/20 inline-flex min-h-11 items-center underline underline-offset-4 transition-colors"
+    >
+      {children}
+    </a>
+  );
+}
 
 /**
  * Always on the light end of the palette (CLAUDE.md — "لوگو": "در فوتر ...
  * فقط نسخه‌ی مشکی لوگو استفاده شود"), so Logo is pinned to the black
- * variant — no scroll-driven crossfade needed here.
+ * variant — no scroll-driven crossfade needed here. Social links come
+ * from site_settings (editable in /admin); any link that isn't set is
+ * simply not rendered.
  */
-export default function Footer() {
-  const t = useTranslations("footer");
+export default async function Footer() {
+  const [t, settings] = await Promise.all([
+    getTranslations("footer"),
+    getSiteSettings(),
+  ]);
   const year = new Date().getFullYear();
+
+  const links: SocialLink[] = [
+    settings?.telegramUrl
+      ? { label: t("social.telegram"), href: settings.telegramUrl }
+      : null,
+    settings?.instagramUrl
+      ? { label: t("social.instagram"), href: settings.instagramUrl }
+      : null,
+  ].filter((link): link is SocialLink => link !== null);
 
   return (
     <footer className="bg-pearl-white text-matte-black">
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-12 sm:grid-cols-2">
         <div>
-          <h2 className="font-heading text-lg">{t("newsletter.heading")}</h2>
-          <p className="text-matte-black/70 mt-2 text-sm">
-            {t("newsletter.description")}
+          <h2 className="font-heading text-lg">{t("stayClose.heading")}</h2>
+          <p className="text-matte-black/70 mt-2 max-w-sm text-sm">
+            {t("stayClose.text")}
           </p>
-          <div className="mt-4 max-w-sm">
-            <NewsletterForm />
+          {links.length > 0 && (
+            <ul className="mt-2 flex flex-wrap gap-x-6 text-sm">
+              {links.map((link) => (
+                <li key={link.href}>
+                  <ExternalLink href={link.href}>{link.label}</ExternalLink>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        {links.length > 0 && (
+          <div className="sm:text-end">
+            <h2 className="font-heading text-lg">{t("social.heading")}</h2>
+            <ul className="mt-1 flex flex-col text-sm sm:items-end">
+              {links.map((link) => (
+                <li key={link.href}>
+                  <ExternalLink href={link.href}>{link.label}</ExternalLink>
+                </li>
+              ))}
+            </ul>
           </div>
-        </div>
-        <div className="sm:text-end">
-          <h2 className="font-heading text-lg">{t("social.heading")}</h2>
-          <ul className="mt-2 flex flex-col gap-1 text-sm sm:items-end">
-            {SOCIAL_LINKS.map((link) => (
-              <li key={link.label}>
-                <a href={link.href} className="hover:text-olive-accent">
-                  {link.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
+        )}
       </div>
       <div className="border-matte-black/10 text-matte-black/50 flex items-center justify-center gap-2 border-t px-6 py-4 text-center text-xs">
         <Logo variant="black" className="h-4" />

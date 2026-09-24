@@ -3,10 +3,11 @@
     "home": "Home",
     "collections": "Collections",
     "about": "About",
-    "contact": "Contact"
+    "contact": "Contact",
+    "switchLanguage": "Switch language to Persian"
   },
   "home": {
-    "title": "DEVINO",
+    "title": "deVino",
     "tagline": "A Presence of Her Own.",
     "heroAlt": "Woman in a black one-shoulder evening gown, dramatic black-and-white lighting.",
     "teaser": {
@@ -21,7 +22,6 @@
     "viewCollection": "View Collection"
   },
   "collectionDetail": {
-    "notFound": "This collection could not be found.",
     "empty": "No products have been added to this collection yet — check back soon."
   },
   "carousel": {
@@ -30,7 +30,6 @@
     "slideStatus": "Slide {current} of {total}"
   },
   "productDetail": {
-    "notFound": "This product could not be found.",
     "currencyUnit": "Toman",
     "inStock": "In stock",
     "outOfStock": "Out of stock",
@@ -38,26 +37,64 @@
     "orderDescription": "This site is a showcase, not an online store — reach out through one of the channels below to inquire about this piece.",
     "phoneLabel": "Call",
     "telegramLabel": "Telegram",
-    "instagramLabel": "Instagram"
+    "instagramLabel": "Instagram",
+    "bookFitting": "Book a fitting"
   },
   "about": {
     "title": "About deVino",
     "body": "Placeholder — the brand story will be written here."
   },
   "contact": {
-    "title": "Contact & Reservations",
-    "body": "Placeholder — a contact and reservation form will be built here."
+    "title": "Book a Private Fitting",
+    "intro": "To see and try on our pieces in person, book a private fitting. Once we receive your request, we'll call you to confirm the details.",
+    "fields": {
+      "name": "Full name",
+      "phone": "Mobile number",
+      "product": "Piece you'd like to try (optional)",
+      "productNone": "Not sure yet",
+      "productUngrouped": "Other pieces",
+      "date": "Preferred date",
+      "datePlaceholder": "Choose a date",
+      "note": "Notes (optional)"
+    },
+    "submit": "Send request",
+    "success": "Your request has been received. We'll be in touch shortly to confirm.",
+    "errors": {
+      "name": "Please enter your name.",
+      "phone": "Please enter a valid mobile number.",
+      "date": "Please choose today or a later date.",
+      "generic": "Something went wrong. Please try again."
+    },
+    "calendar": {
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "close": "Close"
+    },
+    "channelsHeading": "Get in touch"
   },
   "footer": {
-    "newsletter": {
-      "heading": "Newsletter",
-      "description": "Placeholder — be the first to know about new collections.",
-      "emailPlaceholder": "Your email address",
-      "submit": "Subscribe"
+    "stayClose": {
+      "heading": "Stay Close",
+      "text": "Follow new collections and behind-the-scenes moments on Telegram and Instagram."
     },
     "social": {
-      "heading": "Follow"
+      "heading": "Follow",
+      "telegram": "Telegram",
+      "instagram": "Instagram"
     },
     "rights": "All rights reserved."
+  },
+  "meta": {
+    "homeDescription": "deVino — evening wear for women, minimal and dramatic. A Presence of Her Own.",
+    "collectionsTitle": "Collections",
+    "collectionsDescription": "Explore the deVino evening-wear collections up close.",
+    "aboutTitle": "About deVino",
+    "aboutDescription": "The story of deVino, a women's evening-wear house.",
+    "notFoundTitle": "Page not found"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "The page you're looking for doesn't exist or has moved.",
+    "back": "Back to the collections"
   }
 }

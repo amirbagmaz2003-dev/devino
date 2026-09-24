@@ -1,22 +1,53 @@
 import type { Metadata } from "next";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing, localeDirection, type Locale } from "@/i18n/routing";
 import { headingFont, bodyFont, headingFontFa, bodyFontFa } from "@/lib/fonts";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import ScrollToTop from "@/components/ScrollToTop";
+import { getSiteSettings } from "@/db/queries";
+import { getSiteUrl } from "@/lib/site";
+import { BRAND_NAME, pageMetadata } from "@/lib/seo";
 import "../../globals.css";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
-export const metadata: Metadata = {
-  title: "DEVINO",
-  description: "A Presence of Her Own.",
-};
+// Every page reads live D1 data (site settings in the footer and header
+// tagline at minimum), so nothing here is prerendered at build time — an
+// admin edit shows up on the next request.
+export const dynamic = "force-dynamic";
+
+/**
+ * Site-wide defaults: metadataBase from SITE_URL (so every relative URL in
+ * page metadata — canonical, hreflang, OG images — becomes absolute), the
+ * "%s | deVino" title template, and the home page's own title/description.
+ * Pages override title/description/alternates/OG with their own.
+ */
+export async function generateMetadata({
+  params,
+}: LayoutProps<"/[locale]">): Promise<Metadata> {
+  const { locale } = await params;
+  const [t, settings, siteUrl] = await Promise.all([
+    getTranslations({ locale, namespace: "meta" }),
+    getSiteSettings(),
+    getSiteUrl(),
+  ]);
+  const brand = settings?.brandName?.trim() || BRAND_NAME;
+  const home = pageMetadata({
+    locale,
+    path: "/",
+    description: t("homeDescription"),
+  });
+  return {
+    ...home,
+    metadataBase: new URL(siteUrl),
+    title: { default: brand, template: `%s | ${brand}` },
+    applicationName: brand,
+  };
+}
 
 export default async function LocaleLayout({
   children,
@@ -41,7 +72,6 @@ export default async function LocaleLayout({
     >
       <body className="flex min-h-full flex-col antialiased">
         <NextIntlClientProvider>
-          <ScrollToTop />
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />

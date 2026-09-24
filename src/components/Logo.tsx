@@ -20,7 +20,7 @@ export default function Logo({ className = "", variant = "auto" }: LogoProps) {
       <span className={`relative inline-block aspect-[962/324] ${className}`}>
         <Image
           src={variant === "black" ? blackLogo : whiteLogo}
-          alt="DEVINO"
+          alt="deVino"
           fill
           className="object-contain"
           priority
@@ -33,7 +33,7 @@ export default function Logo({ className = "", variant = "auto" }: LogoProps) {
     <span className={`relative inline-block aspect-[962/324] ${className}`}>
       <Image
         src={whiteLogo}
-        alt="DEVINO"
+        alt="deVino"
         fill
         className="logo-crossfade logo-crossfade--white object-contain"
         priority
