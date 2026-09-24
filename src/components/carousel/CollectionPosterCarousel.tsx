@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useReducer, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { localeDirection, type Locale } from "@/i18n/routing";
 import useEmblaCarousel from "embla-carousel-react";
 import { Link } from "@/i18n/navigation";
 import MediaBox, { type MediaBoxProps } from "@/components/MediaBox";
@@ -39,6 +40,13 @@ export default function CollectionPosterCarousel({
   nextLabel,
 }: CollectionPosterCarouselProps) {
   const tCarousel = useTranslations("carousel");
+  // Embla runs in its default LTR mode (no `direction: "rtl"`, so paging
+  // stays left=prev/right=next in both languages). The track must then be
+  // laid out LTR too — if it inherited <html dir="rtl"> on /fa, flexbox
+  // would stack the slides right-to-left while Embla translates them as
+  // LTR, pushing every slide off-screen after the first page (blank
+  // posters). Each slide restores the page's own direction for its text.
+  const slideDir = localeDirection[useLocale() as Locale];
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
   });
@@ -80,7 +88,7 @@ export default function CollectionPosterCarousel({
       className="relative overflow-hidden focus:outline-none"
       style={{ height: "calc(100dvh - var(--header-h))" }}
     >
-      <div ref={emblaRef} className="h-full overflow-hidden">
+      <div ref={emblaRef} dir="ltr" className="h-full overflow-hidden">
         <div className="flex h-full">
           {collections.map((collection, index) => {
             const isNeighbor = Math.abs(index - selectedIndex) <= 1;
@@ -93,6 +101,7 @@ export default function CollectionPosterCarousel({
                   current: index + 1,
                   total: collections.length,
                 })}
+                dir={slideDir}
                 className="relative h-full min-w-0 flex-[0_0_100%]"
               >
                 <Link
