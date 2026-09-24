@@ -40,15 +40,18 @@ export default function CollectionPosterCarousel({
   nextLabel,
 }: CollectionPosterCarouselProps) {
   const tCarousel = useTranslations("carousel");
-  // Embla runs in its default LTR mode (no `direction: "rtl"`, so paging
-  // stays left=prev/right=next in both languages). The track must then be
-  // laid out LTR too — if it inherited <html dir="rtl"> on /fa, flexbox
-  // would stack the slides right-to-left while Embla translates them as
-  // LTR, pushing every slide off-screen after the first page (blank
-  // posters). Each slide restores the page's own direction for its text.
-  const slideDir = localeDirection[useLocale() as Locale];
+  // Embla must be told the page direction explicitly: on /fa the track
+  // inherits <html dir="rtl">, so flexbox lays the slides out
+  // right-to-left, and Embla's slide-position/loop math only matches that
+  // layout with `direction: "rtl"` (otherwise every slide after the first
+  // lands off-screen). The viewport carries the same `dir`, as Embla's
+  // docs require. Switching locale without a reload changes this option,
+  // which makes useEmblaCarousel re-initialise with the new direction.
+  // The arrows stay physically fixed (left=prev, right=next) regardless.
+  const direction = localeDirection[useLocale() as Locale];
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
+    direction,
   });
   const containerRef = useRef<HTMLDivElement>(null);
   const clickGuard = useDragClickGuard();
@@ -88,7 +91,7 @@ export default function CollectionPosterCarousel({
       className="relative overflow-hidden focus:outline-none"
       style={{ height: "calc(100dvh - var(--header-h))" }}
     >
-      <div ref={emblaRef} dir="ltr" className="h-full overflow-hidden">
+      <div ref={emblaRef} dir={direction} className="h-full overflow-hidden">
         <div className="flex h-full">
           {collections.map((collection, index) => {
             const isNeighbor = Math.abs(index - selectedIndex) <= 1;
@@ -101,7 +104,6 @@ export default function CollectionPosterCarousel({
                   current: index + 1,
                   total: collections.length,
                 })}
-                dir={slideDir}
                 className="relative h-full min-w-0 flex-[0_0_100%]"
               >
                 <Link

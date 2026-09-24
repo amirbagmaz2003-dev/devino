@@ -53,11 +53,11 @@ export default function ProductCarousel({
   nextLabel,
 }: ProductCarouselProps) {
   const tCarousel = useTranslations("carousel");
-  // See CollectionPosterCarousel for why the track is pinned to LTR and
-  // each slide restores the page's direction.
-  const slideDir = localeDirection[useLocale() as Locale];
+  // See CollectionPosterCarousel for why Embla gets the page direction.
+  const direction = localeDirection[useLocale() as Locale];
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
+    direction,
   });
   const containerRef = useRef<HTMLDivElement>(null);
   const clickGuard = useDragClickGuard();
@@ -92,7 +92,7 @@ export default function ProductCarousel({
       aria-label={carouselLabel}
       className="relative mx-auto max-w-xs focus:outline-none sm:max-w-sm md:max-w-md lg:max-w-lg"
     >
-      <div ref={emblaRef} dir="ltr" className="overflow-hidden">
+      <div ref={emblaRef} dir={direction} className="overflow-hidden">
         <div
           className="flex"
           onPointerDown={clickGuard.onPointerDown}
@@ -108,7 +108,6 @@ export default function ProductCarousel({
                 current: index + 1,
                 total: products.length,
               })}
-              dir={slideDir}
               className="min-w-0 flex-[0_0_100%]"
             >
               <ProductCard
