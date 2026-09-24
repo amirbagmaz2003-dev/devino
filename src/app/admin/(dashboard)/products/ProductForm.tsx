@@ -1,8 +1,17 @@
 import FocalPointPicker from "@/components/admin/FocalPointPicker";
+import AdminForm, {
+  FieldError,
+  SubmitButton,
+} from "@/components/admin/AdminForm";
+import IntegerInput from "@/components/admin/IntegerInput";
 import type { ProductAdminRow, CollectionAdminRow } from "@/db/admin";
+import type { AdminFormState } from "@/lib/adminForm";
 
 interface ProductFormProps {
-  action: (formData: FormData) => void;
+  action: (
+    state: AdminFormState,
+    formData: FormData,
+  ) => Promise<AdminFormState>;
   product?: ProductAdminRow | null;
   collections: CollectionAdminRow[];
   /** Only the "new product" form uploads its first image inline — the
@@ -17,10 +26,12 @@ export default function ProductForm({
   showInitialImagePicker = false,
 }: ProductFormProps) {
   return (
-    <form action={action} className="max-w-xl space-y-5">
+    <AdminForm action={action} className="max-w-xl space-y-5">
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className="block text-sm font-medium text-zinc-700">نام (فارسی)</label>
+          <label className="block text-sm font-medium text-zinc-700">
+            نام (فارسی)
+          </label>
           <input
             name="nameFa"
             defaultValue={product?.name_fa}
@@ -29,7 +40,9 @@ export default function ProductForm({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-zinc-700">نام (انگلیسی)</label>
+          <label className="block text-sm font-medium text-zinc-700">
+            نام (انگلیسی)
+          </label>
           <input
             name="nameEn"
             defaultValue={product?.name_en}
@@ -47,10 +60,13 @@ export default function ProductForm({
           placeholder="اگر خالی بماند، خودکار از نام انگلیسی ساخته می‌شود"
           className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
         />
+        <FieldError name="slug" />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-zinc-700">کالکشن</label>
+        <label className="block text-sm font-medium text-zinc-700">
+          کالکشن
+        </label>
         <select
           name="collectionId"
           defaultValue={product?.collection_id ?? ""}
@@ -67,7 +83,9 @@ export default function ProductForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className="block text-sm font-medium text-zinc-700">توضیح (فارسی)</label>
+          <label className="block text-sm font-medium text-zinc-700">
+            توضیح (فارسی)
+          </label>
           <textarea
             name="descriptionFa"
             defaultValue={product?.description_fa ?? ""}
@@ -76,7 +94,9 @@ export default function ProductForm({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-zinc-700">توضیح (انگلیسی)</label>
+          <label className="block text-sm font-medium text-zinc-700">
+            توضیح (انگلیسی)
+          </label>
           <textarea
             name="descriptionEn"
             defaultValue={product?.description_en ?? ""}
@@ -88,25 +108,33 @@ export default function ProductForm({
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
-          <label className="block text-sm font-medium text-zinc-700">قیمت (تومان)</label>
-          <input
-            type="number"
+          <label
+            htmlFor="price"
+            className="block text-sm font-medium text-zinc-700"
+          >
+            قیمت (تومان)
+          </label>
+          <IntegerInput
+            id="price"
             name="price"
-            defaultValue={product?.price ?? 0}
+            defaultValue={product?.price ?? null}
             required
-            min={0}
-            className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
           />
+          <FieldError name="price" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-zinc-700">موجودی دقیق (اختیاری)</label>
-          <input
-            type="number"
+          <label
+            htmlFor="stockCount"
+            className="block text-sm font-medium text-zinc-700"
+          >
+            موجودی دقیق (اختیاری)
+          </label>
+          <IntegerInput
+            id="stockCount"
             name="stockCount"
-            defaultValue={product?.stock_count ?? ""}
-            min={0}
-            className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+            defaultValue={product?.stock_count}
           />
+          <FieldError name="stockCount" />
         </div>
         <div className="flex items-end pb-2">
           <label className="flex items-center gap-2 text-sm text-zinc-700">
@@ -122,7 +150,9 @@ export default function ProductForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-zinc-700">ترتیب نمایش</label>
+        <label className="block text-sm font-medium text-zinc-700">
+          ترتیب نمایش
+        </label>
         <input
           type="number"
           name="sortOrder"
@@ -140,7 +170,9 @@ export default function ProductForm({
           />
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-zinc-700">متن جایگزین (فارسی)</label>
+              <label className="block text-sm font-medium text-zinc-700">
+                متن جایگزین (فارسی)
+              </label>
               <input
                 name="imageAltFa"
                 className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
@@ -159,12 +191,7 @@ export default function ProductForm({
         </div>
       )}
 
-      <button
-        type="submit"
-        className="rounded-md bg-zinc-900 px-5 py-2 text-sm font-medium text-white hover:bg-zinc-800"
-      >
-        ذخیره
-      </button>
-    </form>
+      <SubmitButton>ذخیره</SubmitButton>
+    </AdminForm>
   );
 }

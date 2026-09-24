@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { listCollectionsAdmin } from "@/db/admin";
+import AdminForm, { SubmitButton } from "@/components/admin/AdminForm";
+import { MESSAGES } from "@/lib/adminForm";
 import { deleteCollectionAction } from "./actions";
 
 export default async function AdminCollectionsPage() {
@@ -22,7 +24,10 @@ export default async function AdminCollectionsPage() {
       ) : (
         <ul className="mt-6 divide-y divide-zinc-200 rounded-lg border border-zinc-200 bg-white">
           {collections.map((collection) => (
-            <li key={collection.id} className="flex items-center justify-between px-4 py-3">
+            <li
+              key={collection.id}
+              className="flex items-center justify-between px-4 py-3"
+            >
               <div>
                 <p className="font-medium">{collection.name_fa}</p>
                 <p className="text-xs text-zinc-500">
@@ -36,11 +41,20 @@ export default async function AdminCollectionsPage() {
                 >
                   ویرایش
                 </Link>
-                <form action={deleteCollectionAction.bind(null, collection.id)}>
-                  <button type="submit" className="text-red-600 hover:text-red-800">
+                <AdminForm
+                  action={deleteCollectionAction.bind(null, collection.id)}
+                  confirmMessage={MESSAGES.confirmDeleteCollection}
+                  blockedMessage={
+                    collection.product_count > 0
+                      ? MESSAGES.collectionHasProducts
+                      : undefined
+                  }
+                  className="flex max-w-xs flex-col items-end gap-1"
+                >
+                  <SubmitButton className="text-red-600 hover:text-red-800">
                     حذف
-                  </button>
-                </form>
+                  </SubmitButton>
+                </AdminForm>
               </div>
             </li>
           ))}

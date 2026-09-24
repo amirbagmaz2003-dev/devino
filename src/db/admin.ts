@@ -41,27 +41,37 @@ export async function uploadMedia(params: {
   await kv.put(kvKey, await params.file.arrayBuffer());
 
   const db = await getDb();
-  await db
-    .prepare(
-      `INSERT INTO media (id, type, r2_key, content_type, focal_x, focal_y, alt_fa, alt_en)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    )
-    .bind(
-      id,
-      params.type,
-      kvKey,
-      params.file.type || "application/octet-stream",
-      params.focalX ?? 0.5,
-      params.focalY ?? 0.5,
-      params.altFa,
-      params.altEn,
-    )
-    .run();
+  try {
+    await db
+      .prepare(
+        `INSERT INTO media (id, type, r2_key, content_type, focal_x, focal_y, alt_fa, alt_en)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      )
+      .bind(
+        id,
+        params.type,
+        kvKey,
+        params.file.type || "application/octet-stream",
+        params.focalX ?? 0.5,
+        params.focalY ?? 0.5,
+        params.altFa,
+        params.altEn,
+      )
+      .run();
+  } catch (error) {
+    // Never leave a KV value behind that no media row points to.
+    await kv.delete(kvKey);
+    throw error;
+  }
 
   return id;
 }
 
-export async function updateMediaFocalPoint(id: string, focalX: number, focalY: number) {
+export async function updateMediaFocalPoint(
+  id: string,
+  focalX: number,
+  focalY: number,
+) {
   const db = await getDb();
   await db
     .prepare("UPDATE media SET focal_x = ?, focal_y = ? WHERE id = ?")
@@ -82,6 +92,52 @@ export async function deleteMedia(id: string) {
   await db.prepare("DELETE FROM media WHERE id = ?").bind(id).run();
 }
 
+/** Whether any product gallery or collection cover still points at this media. */
+export async function isMediaReferenced(id: string): Promise<boolean> {
+  const db = await getDb();
+  const row = await db
+    .prepare(
+      `SELECT EXISTS (SELECT 1 FROM product_media WHERE media_id = ?1)
+           OR EXISTS (SELECT 1 FROM collections WHERE cover_media_id = ?1) AS used`,
+    )
+    .bind(id)
+    .first<{ used: number }>();
+  return row?.used === 1;
+}
+
+/** Deletes the media (KV value + row) unless something still references it. */
+export async function deleteMediaIfUnreferenced(id: string) {
+  if (!(await isMediaReferenced(id))) {
+    await deleteMedia(id);
+  }
+}
+
+// ---------- Validation helpers ----------
+
+/** Whether another row of `table` (other than `excludeId`) already uses `slug`. */
+export async function isSlugTaken(
+  table: "collections" | "products",
+  slug: string,
+  excludeId: string | null = null,
+): Promise<boolean> {
+  const db = await getDb();
+  const row = await db
+    .prepare(
+      `SELECT 1 AS taken FROM ${table} WHERE slug = ? AND id IS NOT ? LIMIT 1`,
+    )
+    .bind(slug, excludeId)
+    .first<{ taken: number }>();
+  return row !== null;
+}
+
+/** D1 surfaces SQLite constraint violations as plain Errors with this text. */
+export function isUniqueSlugViolation(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    /UNIQUE constraint failed: \w+\.slug/.test(error.message)
+  );
+}
+
 // ---------- Collections ----------
 
 export interface CollectionAdminRow {
@@ -95,18 +151,37 @@ export interface CollectionAdminRow {
   sort_order: number;
 }
 
-export async function listCollectionsAdmin(): Promise<CollectionAdminRow[]> {
+export interface CollectionListAdminRow extends CollectionAdminRow {
+  product_count: number;
+}
+
+export async function listCollectionsAdmin(): Promise<
+  CollectionListAdminRow[]
+> {
   const db = await getDb();
   const { results } = await db
     .prepare(
-      `SELECT id, slug, name_fa, name_en, description_fa, description_en, cover_media_id, sort_order
-       FROM collections ORDER BY sort_order ASC, created_at ASC`,
+      `SELECT c.id, c.slug, c.name_fa, c.name_en, c.description_fa, c.description_en,
+              c.cover_media_id, c.sort_order,
+              (SELECT COUNT(*) FROM products p WHERE p.collection_id = c.id) AS product_count
+       FROM collections c ORDER BY c.sort_order ASC, c.created_at ASC`,
     )
-    .all<CollectionAdminRow>();
+    .all<CollectionListAdminRow>();
   return results;
 }
 
-export async function getCollectionAdmin(id: string): Promise<CollectionAdminRow | null> {
+export async function countProductsInCollection(id: string): Promise<number> {
+  const db = await getDb();
+  const row = await db
+    .prepare("SELECT COUNT(*) AS n FROM products WHERE collection_id = ?")
+    .bind(id)
+    .first<{ n: number }>();
+  return row?.n ?? 0;
+}
+
+export async function getCollectionAdmin(
+  id: string,
+): Promise<CollectionAdminRow | null> {
   const db = await getDb();
   const row = await db
     .prepare(
@@ -128,7 +203,9 @@ export interface CollectionInput {
   sortOrder: number;
 }
 
-export async function createCollection(input: CollectionInput): Promise<string> {
+export async function createCollection(
+  input: CollectionInput,
+): Promise<string> {
   const id = crypto.randomUUID();
   const db = await getDb();
   await db
@@ -150,31 +227,60 @@ export async function createCollection(input: CollectionInput): Promise<string> 
   return id;
 }
 
-export async function updateCollection(id: string, input: CollectionInput) {
+/**
+ * Updates the collection row and, when given, the (unchanged) cover's
+ * focal point in one atomic batch.
+ */
+export async function updateCollection(
+  id: string,
+  input: CollectionInput,
+  coverFocal?: { mediaId: string; x: number; y: number },
+) {
   const db = await getDb();
-  await db
-    .prepare(
-      `UPDATE collections
+  const statements = [
+    db
+      .prepare(
+        `UPDATE collections
        SET slug = ?, name_fa = ?, name_en = ?, description_fa = ?, description_en = ?,
            cover_media_id = ?, sort_order = ?
        WHERE id = ?`,
-    )
-    .bind(
-      input.slug,
-      input.nameFa,
-      input.nameEn,
-      input.descriptionFa || null,
-      input.descriptionEn || null,
-      input.coverMediaId,
-      input.sortOrder,
-      id,
-    )
-    .run();
+      )
+      .bind(
+        input.slug,
+        input.nameFa,
+        input.nameEn,
+        input.descriptionFa || null,
+        input.descriptionEn || null,
+        input.coverMediaId,
+        input.sortOrder,
+        id,
+      ),
+  ];
+  if (coverFocal) {
+    statements.push(
+      db
+        .prepare("UPDATE media SET focal_x = ?, focal_y = ? WHERE id = ?")
+        .bind(coverFocal.x, coverFocal.y, coverFocal.mediaId),
+    );
+  }
+  await db.batch(statements);
 }
 
-export async function deleteCollection(id: string) {
+/**
+ * Refuses (returns false) while any product still belongs to the
+ * collection — the guard runs inside the DELETE itself, so a product
+ * assigned concurrently can't slip through. Returns true when deleted.
+ */
+export async function deleteCollection(id: string): Promise<boolean> {
   const db = await getDb();
-  await db.prepare("DELETE FROM collections WHERE id = ?").bind(id).run();
+  const result = await db
+    .prepare(
+      `DELETE FROM collections
+       WHERE id = ?1 AND NOT EXISTS (SELECT 1 FROM products WHERE collection_id = ?1)`,
+    )
+    .bind(id)
+    .run();
+  return result.meta.changes > 0;
 }
 
 // ---------- Products ----------
@@ -193,19 +299,26 @@ export interface ProductAdminRow {
   sort_order: number;
 }
 
-export async function listProductsAdmin(): Promise<ProductAdminRow[]> {
+export interface ProductListAdminRow extends ProductAdminRow {
+  image_count: number;
+}
+
+export async function listProductsAdmin(): Promise<ProductListAdminRow[]> {
   const db = await getDb();
   const { results } = await db
     .prepare(
-      `SELECT id, slug, name_fa, name_en, description_fa, description_en, price, in_stock,
-              stock_count, collection_id, sort_order
-       FROM products ORDER BY sort_order ASC, created_at ASC`,
+      `SELECT p.id, p.slug, p.name_fa, p.name_en, p.description_fa, p.description_en, p.price,
+              p.in_stock, p.stock_count, p.collection_id, p.sort_order,
+              (SELECT COUNT(*) FROM product_media pm WHERE pm.product_id = p.id) AS image_count
+       FROM products p ORDER BY p.sort_order ASC, p.created_at ASC`,
     )
-    .all<ProductAdminRow>();
+    .all<ProductListAdminRow>();
   return results;
 }
 
-export async function getProductAdmin(id: string): Promise<ProductAdminRow | null> {
+export async function getProductAdmin(
+  id: string,
+): Promise<ProductAdminRow | null> {
   const db = await getDb();
   const row = await db
     .prepare(
@@ -222,7 +335,9 @@ export interface ProductMediaAdminRow extends MediaAdminRow {
   sort_order: number;
 }
 
-export async function getProductMedia(productId: string): Promise<ProductMediaAdminRow[]> {
+export async function getProductMedia(
+  productId: string,
+): Promise<ProductMediaAdminRow[]> {
   const db = await getDb();
   const { results } = await db
     .prepare(
@@ -251,10 +366,14 @@ export interface ProductInput {
   sortOrder: number;
 }
 
-export async function createProduct(input: ProductInput): Promise<string> {
+/** Inserts the product and (optionally) links its first image, atomically. */
+export async function createProduct(
+  input: ProductInput,
+  initialMediaId: string | null = null,
+): Promise<string> {
   const id = crypto.randomUUID();
   const db = await getDb();
-  await db
+  const insert = db
     .prepare(
       `INSERT INTO products
         (id, slug, name_fa, name_en, description_fa, description_en, price, in_stock,
@@ -273,8 +392,19 @@ export async function createProduct(input: ProductInput): Promise<string> {
       input.stockCount,
       input.collectionId,
       input.sortOrder,
-    )
-    .run();
+    );
+  await db.batch(
+    initialMediaId
+      ? [
+          insert,
+          db
+            .prepare(
+              "INSERT INTO product_media (product_id, media_id, sort_order) VALUES (?, ?, 0)",
+            )
+            .bind(id, initialMediaId),
+        ]
+      : [insert],
+  );
   return id;
 }
 
@@ -303,12 +433,31 @@ export async function updateProduct(id: string, input: ProductInput) {
     .run();
 }
 
+/**
+ * Deletes the product and its gallery links in one batch, then the media
+ * files themselves (KV value + row) unless another product or a
+ * collection cover still uses them.
+ */
 export async function deleteProduct(id: string) {
   const db = await getDb();
-  await db.prepare("DELETE FROM products WHERE id = ?").bind(id).run();
+  const { results } = await db
+    .prepare("SELECT media_id FROM product_media WHERE product_id = ?")
+    .bind(id)
+    .all<{ media_id: string }>();
+  await db.batch([
+    db.prepare("DELETE FROM product_media WHERE product_id = ?").bind(id),
+    db.prepare("DELETE FROM products WHERE id = ?").bind(id),
+  ]);
+  for (const { media_id } of results) {
+    await deleteMediaIfUnreferenced(media_id);
+  }
 }
 
-export async function addProductMedia(productId: string, mediaId: string, sortOrder: number) {
+export async function addProductMedia(
+  productId: string,
+  mediaId: string,
+  sortOrder: number,
+) {
   const db = await getDb();
   await db
     .prepare(
@@ -376,4 +525,56 @@ export async function updateSiteSettings(input: SiteSettingsAdminRow) {
       input.instagram_url,
     )
     .run();
+}
+
+// ---------- Login rate limiting ----------
+
+export const LOGIN_MAX_FAILURES = 5;
+export const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+export const LOGIN_LOCKOUT_MS = 15 * 60 * 1000;
+
+/**
+ * True while `ip` is locked out: its most recent failure is less than
+ * LOGIN_LOCKOUT_MS old and, counting back LOGIN_WINDOW_MS from that
+ * failure, there were at least LOGIN_MAX_FAILURES. Attempts made while
+ * locked are rejected without being recorded, so the lock lasts exactly
+ * 15 minutes from the failure that triggered it.
+ */
+export async function isLoginLocked(
+  ip: string,
+  now = Date.now(),
+): Promise<boolean> {
+  const db = await getDb();
+  const { results } = await db
+    .prepare(
+      `SELECT attempted_at FROM login_attempts
+       WHERE ip = ? AND attempted_at > ?
+       ORDER BY attempted_at DESC`,
+    )
+    .bind(ip, now - LOGIN_LOCKOUT_MS - LOGIN_WINDOW_MS)
+    .all<{ attempted_at: number }>();
+  const latest = results[0]?.attempted_at;
+  if (latest === undefined || now - latest >= LOGIN_LOCKOUT_MS) return false;
+  const inWindow = results.filter(
+    (r) => r.attempted_at > latest - LOGIN_WINDOW_MS,
+  );
+  return inWindow.length >= LOGIN_MAX_FAILURES;
+}
+
+export async function recordLoginFailure(ip: string, now = Date.now()) {
+  const db = await getDb();
+  await db.batch([
+    db
+      .prepare("INSERT INTO login_attempts (ip, attempted_at) VALUES (?, ?)")
+      .bind(ip, now),
+    // Opportunistic pruning keeps the table tiny without a cron job.
+    db
+      .prepare("DELETE FROM login_attempts WHERE attempted_at < ?")
+      .bind(now - 24 * 60 * 60 * 1000),
+  ]);
+}
+
+export async function clearLoginFailures(ip: string) {
+  const db = await getDb();
+  await db.prepare("DELETE FROM login_attempts WHERE ip = ?").bind(ip).run();
 }

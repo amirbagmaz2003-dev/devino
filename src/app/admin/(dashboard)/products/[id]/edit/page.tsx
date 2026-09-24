@@ -1,8 +1,13 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { getProductAdmin, getProductMedia, listCollectionsAdmin } from "@/db/admin";
+import {
+  getProductAdmin,
+  getProductMedia,
+  listCollectionsAdmin,
+} from "@/db/admin";
 import { mediaUrl } from "@/db/media";
 import FocalPointPicker from "@/components/admin/FocalPointPicker";
+import AdminForm, { SubmitButton } from "@/components/admin/AdminForm";
 import ProductForm from "../../ProductForm";
 import {
   updateProductAction,
@@ -10,7 +15,11 @@ import {
   removeProductImageAction,
 } from "../../actions";
 
-export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EditProductPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const [product, images, collections] = await Promise.all([
     getProductAdmin(id),
@@ -46,17 +55,23 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
                     className="object-cover"
                   />
                 </div>
-                <form action={removeProductImageAction.bind(null, id, image.id)}>
-                  <button type="submit" className="w-full text-xs text-red-600 hover:text-red-800">
+                <AdminForm
+                  action={removeProductImageAction.bind(null, id, image.id)}
+                >
+                  <SubmitButton className="w-full text-xs text-red-600 hover:text-red-800">
                     حذف
-                  </button>
-                </form>
+                  </SubmitButton>
+                </AdminForm>
               </li>
             ))}
           </ul>
         )}
 
-        <form action={addProductImageAction.bind(null, id)} className="mt-6 space-y-3">
+        <AdminForm
+          action={addProductImageAction.bind(null, id)}
+          resetOnSuccess
+          className="mt-6 space-y-3"
+        >
           <FocalPointPicker
             namePrefix="imageFocal"
             fileInputName="imageFile"
@@ -74,13 +89,10 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
               className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
             />
           </div>
-          <button
-            type="submit"
-            className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium hover:bg-zinc-50"
-          >
+          <SubmitButton className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium hover:bg-zinc-50">
             افزودن عکس
-          </button>
-        </form>
+          </SubmitButton>
+        </AdminForm>
       </div>
     </div>
   );

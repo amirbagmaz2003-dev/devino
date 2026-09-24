@@ -1,6 +1,16 @@
 import Link from "next/link";
 import { listProductsAdmin } from "@/db/admin";
+import AdminForm, { SubmitButton } from "@/components/admin/AdminForm";
+import { MESSAGES } from "@/lib/adminForm";
 import { deleteProductAction } from "./actions";
+
+function Badge({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs text-amber-800">
+      {children}
+    </span>
+  );
+}
 
 export default async function AdminProductsPage() {
   const products = await listProductsAdmin();
@@ -22,12 +32,20 @@ export default async function AdminProductsPage() {
       ) : (
         <ul className="mt-6 divide-y divide-zinc-200 rounded-lg border border-zinc-200 bg-white">
           {products.map((product) => (
-            <li key={product.id} className="flex items-center justify-between px-4 py-3">
+            <li
+              key={product.id}
+              className="flex items-center justify-between px-4 py-3"
+            >
               <div>
-                <p className="font-medium">{product.name_fa}</p>
+                <p className="flex flex-wrap items-center gap-2 font-medium">
+                  {product.name_fa}
+                  {product.image_count === 0 && <Badge>بدون عکس</Badge>}
+                  {!product.collection_id && <Badge>بدون کالکشن</Badge>}
+                </p>
                 <p className="text-xs text-zinc-500">
-                  {product.name_en} · /{product.slug} · {product.price.toLocaleString("fa-IR")}{" "}
-                  تومان {product.in_stock === 0 && "· ناموجود"}
+                  {product.name_en} · /{product.slug} ·{" "}
+                  {product.price.toLocaleString("fa-IR")} تومان{" "}
+                  {product.in_stock === 0 && "· ناموجود"}
                 </p>
               </div>
               <div className="flex items-center gap-4 text-sm">
@@ -37,11 +55,14 @@ export default async function AdminProductsPage() {
                 >
                   ویرایش
                 </Link>
-                <form action={deleteProductAction.bind(null, product.id)}>
-                  <button type="submit" className="text-red-600 hover:text-red-800">
+                <AdminForm
+                  action={deleteProductAction.bind(null, product.id)}
+                  confirmMessage={MESSAGES.confirmDeleteProduct}
+                >
+                  <SubmitButton className="text-red-600 hover:text-red-800">
                     حذف
-                  </button>
-                </form>
+                  </SubmitButton>
+                </AdminForm>
               </div>
             </li>
           ))}
