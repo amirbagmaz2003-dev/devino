@@ -67,8 +67,7 @@ Phases 0 through 4 are complete. The site is live on Cloudflare Workers: https:/
 
 Real data (not just placeholders) has been entered through the admin panel: several products (named after grape/wine varieties — the brand's official naming pattern for products) and three collections (برداشت اول / First Harvest, غروب شراب / Evening Pour, وینتیج / Vintage).
 
-**Open bug (priority — fix before any new phase):**
-In the Persian version (`/fa`), **both carousels** are broken: only the first slide renders; all other slides are completely empty (not just the image — name, price and description are missing too). The English version works correctly. The data, KV files and `MediaBox` have been verified as fine; the problem is slide positioning under RTL. Likely root cause: both carousels use `useEmblaCarousel({ loop: true })` with no `direction` option, while Embla requires `direction: 'rtl'` on `dir="rtl"` pages. The original report ("poster goes blank after switching language") is most likely the same bug. Test with at least 3 slides, since fewer slides may not reproduce it. Separately, one product (`petit-verdot`) was saved with no image at all (a data issue, not a code issue).
+**Fixed — RTL carousel bug:** in the Persian version (`/fa`) both carousels used to show only the first slide (the rest were empty, and the poster went blank after switching language). Fixed by making the carousel track always LTR in both locales (Embla `direction: "ltr"` + `dir="ltr"` on the Embla viewport), while each slide's content follows the locale direction (`dir` from `localeDirection` on the slide's inner wrapper). Separately, one product (`petit-verdot`) was saved with no image at all (a data issue, not a code issue).
 
 ## Important Notes on Working with Claude Code (must be followed)
 - Prompts must be precise and limited to the relevant files; always state explicitly "don't touch the rest of the project, don't re-review from scratch" to keep token usage low

@@ -1,18 +1,32 @@
 import FocalPointPicker from "@/components/admin/FocalPointPicker";
+import AdminForm, {
+  FieldError,
+  SubmitButton,
+} from "@/components/admin/AdminForm";
 import type { CollectionAdminRow } from "@/db/admin";
+import type { AdminFormState } from "@/lib/adminForm";
 
 interface CollectionFormProps {
-  action: (formData: FormData) => void;
+  action: (
+    state: AdminFormState,
+    formData: FormData,
+  ) => Promise<AdminFormState>;
   collection?: CollectionAdminRow | null;
   coverImageUrl?: string | null;
 }
 
-export default function CollectionForm({ action, collection, coverImageUrl }: CollectionFormProps) {
+export default function CollectionForm({
+  action,
+  collection,
+  coverImageUrl,
+}: CollectionFormProps) {
   return (
-    <form action={action} className="max-w-xl space-y-5">
+    <AdminForm action={action} className="max-w-xl space-y-5">
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className="block text-sm font-medium text-zinc-700">نام (فارسی)</label>
+          <label className="block text-sm font-medium text-zinc-700">
+            نام (فارسی)
+          </label>
           <input
             name="nameFa"
             defaultValue={collection?.name_fa}
@@ -21,7 +35,9 @@ export default function CollectionForm({ action, collection, coverImageUrl }: Co
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-zinc-700">نام (انگلیسی)</label>
+          <label className="block text-sm font-medium text-zinc-700">
+            نام (انگلیسی)
+          </label>
           <input
             name="nameEn"
             defaultValue={collection?.name_en}
@@ -39,11 +55,14 @@ export default function CollectionForm({ action, collection, coverImageUrl }: Co
           placeholder="اگر خالی بماند، خودکار از نام انگلیسی ساخته می‌شود"
           className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
         />
+        <FieldError name="slug" />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className="block text-sm font-medium text-zinc-700">توضیح (فارسی)</label>
+          <label className="block text-sm font-medium text-zinc-700">
+            توضیح (فارسی)
+          </label>
           <textarea
             name="descriptionFa"
             defaultValue={collection?.description_fa ?? ""}
@@ -52,7 +71,9 @@ export default function CollectionForm({ action, collection, coverImageUrl }: Co
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-zinc-700">توضیح (انگلیسی)</label>
+          <label className="block text-sm font-medium text-zinc-700">
+            توضیح (انگلیسی)
+          </label>
           <textarea
             name="descriptionEn"
             defaultValue={collection?.description_en ?? ""}
@@ -71,7 +92,9 @@ export default function CollectionForm({ action, collection, coverImageUrl }: Co
       />
 
       <div>
-        <label className="block text-sm font-medium text-zinc-700">ترتیب نمایش</label>
+        <label className="block text-sm font-medium text-zinc-700">
+          ترتیب نمایش
+        </label>
         <input
           type="number"
           name="sortOrder"
@@ -80,12 +103,7 @@ export default function CollectionForm({ action, collection, coverImageUrl }: Co
         />
       </div>
 
-      <button
-        type="submit"
-        className="rounded-md bg-zinc-900 px-5 py-2 text-sm font-medium text-white hover:bg-zinc-800"
-      >
-        ذخیره
-      </button>
-    </form>
+      <SubmitButton>ذخیره</SubmitButton>
+    </AdminForm>
   );
 }

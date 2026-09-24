@@ -2,16 +2,23 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { requireAdmin } from "@/lib/adminAuth";
+import { MESSAGES, type AdminFormState } from "@/lib/adminForm";
 import {
   createCollection,
   updateCollection,
   deleteCollection,
   getCollectionAdmin,
-  updateMediaFocalPoint,
+  countProductsInCollection,
+  deleteMedia,
+  deleteMediaIfUnreferenced,
+  isSlugTaken,
+  isUniqueSlugViolation,
   uploadMedia,
   slugify,
   type CollectionInput,
 } from "@/db/admin";
+import { readUploadedFile } from "../upload";
 
 function readCollectionForm(formData: FormData): CollectionInput {
   const nameFa = String(formData.get("nameFa") ?? "").trim();
@@ -28,62 +35,132 @@ function readCollectionForm(formData: FormData): CollectionInput {
   };
 }
 
-function revalidatePublicPages(slug: string) {
+function revalidatePublicPages() {
   revalidatePath("/[locale]/collections", "page");
   revalidatePath("/[locale]/collections/[slug]", "page");
-  void slug;
 }
 
-export async function createCollectionAction(formData: FormData) {
-  const input = readCollectionForm(formData);
-  const file = formData.get("coverFile") as File | null;
+function readFocal(formData: FormData) {
+  return {
+    x: Number(formData.get("coverFocalX") ?? 0.5),
+    y: Number(formData.get("coverFocalY") ?? 0.5),
+  };
+}
 
-  if (file && file.size > 0) {
-    input.coverMediaId = await uploadMedia({
-      type: "image",
-      file,
-      focalX: Number(formData.get("coverFocalX") ?? 0.5),
-      focalY: Number(formData.get("coverFocalY") ?? 0.5),
-      altFa: input.nameFa,
-      altEn: input.nameEn,
-    });
+/**
+ * Shared create/update flow. Order matters for orphan-free media: validate
+ * everything first, upload the new cover only after that, and delete the
+ * just-uploaded cover again if the DB write still fails. The old cover is
+ * deleted only once the row points at the new one.
+ */
+async function saveCollection(
+  id: string | null,
+  formData: FormData,
+): Promise<AdminFormState> {
+  const input = readCollectionForm(formData);
+  if (!input.nameFa || !input.nameEn || !input.slug) {
+    return { error: MESSAGES.saveFailed };
   }
 
-  await createCollection(input);
-  revalidatePublicPages(input.slug);
-  redirect("/admin/collections");
-}
+  const upload = readUploadedFile(formData, "coverFile");
+  if (upload.error) return { fieldErrors: { file: upload.error } };
 
-export async function updateCollectionAction(id: string, formData: FormData) {
-  const input = readCollectionForm(formData);
-  const existing = await getCollectionAdmin(id);
-  input.coverMediaId = existing?.cover_media_id ?? null;
+  try {
+    const existing = id ? await getCollectionAdmin(id) : null;
+    if (id && !existing) return { error: MESSAGES.saveFailed };
 
-  const file = formData.get("coverFile") as File | null;
-  if (file && file.size > 0) {
-    input.coverMediaId = await uploadMedia({
-      type: "image",
-      file,
-      focalX: Number(formData.get("coverFocalX") ?? 0.5),
-      focalY: Number(formData.get("coverFocalY") ?? 0.5),
-      altFa: input.nameFa,
-      altEn: input.nameEn,
-    });
-  } else if (existing?.cover_media_id) {
-    await updateMediaFocalPoint(
-      existing.cover_media_id,
-      Number(formData.get("coverFocalX") ?? 0.5),
-      Number(formData.get("coverFocalY") ?? 0.5),
-    );
+    if (await isSlugTaken("collections", input.slug, id)) {
+      return { fieldErrors: { slug: MESSAGES.duplicateSlug } };
+    }
+
+    const focal = readFocal(formData);
+    const oldCoverId = existing?.cover_media_id ?? null;
+    let newCoverId: string | null = null;
+    if (upload.file) {
+      newCoverId = await uploadMedia({
+        type: "image",
+        file: upload.file,
+        focalX: focal.x,
+        focalY: focal.y,
+        altFa: input.nameFa,
+        altEn: input.nameEn,
+      });
+    }
+    input.coverMediaId = newCoverId ?? oldCoverId;
+
+    try {
+      if (id) {
+        await updateCollection(
+          id,
+          input,
+          !newCoverId && oldCoverId
+            ? { mediaId: oldCoverId, ...focal }
+            : undefined,
+        );
+      } else {
+        await createCollection(input);
+      }
+    } catch (error) {
+      if (newCoverId) await deleteMedia(newCoverId);
+      if (isUniqueSlugViolation(error)) {
+        return { fieldErrors: { slug: MESSAGES.duplicateSlug } };
+      }
+      throw error;
+    }
+
+    if (newCoverId && oldCoverId) {
+      await deleteMediaIfUnreferenced(oldCoverId);
+    }
+  } catch (error) {
+    console.error("[admin] saving collection failed", error);
+    return { error: MESSAGES.saveFailed };
   }
 
-  await updateCollection(id, input);
-  revalidatePublicPages(input.slug);
-  redirect("/admin/collections");
-}
-
-export async function deleteCollectionAction(id: string) {
-  await deleteCollection(id);
+  revalidatePublicPages();
   revalidatePath("/admin/collections");
-  revalidatePublicPages("");
+  redirect("/admin/collections");
+}
+
+export async function createCollectionAction(
+  _prev: AdminFormState,
+  formData: FormData,
+): Promise<AdminFormState> {
+  await requireAdmin();
+  return saveCollection(null, formData);
+}
+
+export async function updateCollectionAction(
+  id: string,
+  _prev: AdminFormState,
+  formData: FormData,
+): Promise<AdminFormState> {
+  await requireAdmin();
+  return saveCollection(id, formData);
+}
+
+export async function deleteCollectionAction(
+  id: string,
+  _prev: AdminFormState,
+  _formData: FormData,
+): Promise<AdminFormState> {
+  await requireAdmin();
+  void _formData;
+  try {
+    const existing = await getCollectionAdmin(id);
+    if (!existing) return null;
+    if (!(await deleteCollection(id))) {
+      return (await countProductsInCollection(id)) > 0
+        ? { error: MESSAGES.collectionHasProducts }
+        : { error: MESSAGES.saveFailed };
+    }
+    if (existing.cover_media_id) {
+      await deleteMediaIfUnreferenced(existing.cover_media_id);
+    }
+  } catch (error) {
+    console.error("[admin] deleting collection failed", error);
+    return { error: MESSAGES.saveFailed };
+  }
+  revalidatePath("/admin/collections");
+  revalidatePublicPages();
+  return null;
 }
