@@ -7,9 +7,10 @@ const STROKE_PX = 1.25;
 const VIEWBOX_WIDTH = 1000;
 
 /**
- * The olive "shoulder" line in the home statement section: one thin
- * path that rises gently, rounds over and falls away, like the line of a
- * one-shoulder gown. It is drawn progressively and scroll-linked — the
+ * The olive "shoulder" line in the home statement section: one thin,
+ * asymmetric path — a shoulder seen from the front. From the neck side
+ * it slopes gently down, rounds over the shoulder point, then falls more
+ * steeply toward the arm and ends softly. It is drawn progressively and scroll-linked — the
  * dash offset follows the section's position in the viewport (same idea
  * as the header's scroll-linked color change), not a timed animation.
  * `pathLength="1"` makes the dash offset simply "the undrawn fraction".
@@ -76,14 +77,14 @@ export default function ShoulderLine({ className = "" }: { className?: string })
       aria-hidden="true"
       focusable="false"
       data-testid="shoulder-line"
-      viewBox={`0 0 ${VIEWBOX_WIDTH} 160`}
-      preserveAspectRatio="none"
-      // Mirrored under RTL so it draws from the reading side.
-      className={`block h-16 w-full sm:h-20 rtl:-scale-x-100 ${className}`}
+      viewBox={`0 0 ${VIEWBOX_WIDTH} 360`}
+      // Mirrored under RTL so it starts (neck side) on the reading side.
+      className={`block h-auto w-full overflow-visible rtl:-scale-x-100 ${className}`}
     >
       <path
         ref={pathRef}
-        d="M 0 150 C 170 146, 300 118, 420 72 C 505 40, 575 22, 640 34 C 720 50, 790 105, 1000 152"
+        // neck -> gentle slope -> rounded shoulder point -> steeper fall down the arm, soft end
+        d="M 30 8 C 48 58, 110 88, 214 100 C 390 120, 556 142, 680 166 C 790 188, 864 222, 878 280 C 886 314, 884 338, 876 356"
         fill="none"
         stroke="#556B2F"
         strokeWidth={strokeWidth}

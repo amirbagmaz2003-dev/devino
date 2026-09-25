@@ -8,6 +8,20 @@ const TAGLINE = {
   en: "A Presence of Her Own.",
 } as const;
 
+const STATEMENT = {
+  fa: [
+    "برای زنی که هرگز برای دیده‌شدن نمی‌کوشد،",
+    "و درست به همین دلیل از یاد نمی‌رود.",
+  ],
+  en: [
+    "For the woman who never tries to be seen,",
+    "and for that very reason is never forgotten.",
+  ],
+} as const;
+
+/** fa headings must be Markazi Text (CLAUDE.md), en headings Cormorant Garamond. */
+const HEADING_FONT = { fa: "Markazi Text", en: "Cormorant Garamond" } as const;
+
 /** Undrawn fraction of the shoulder line (pathLength = 1): 1 = hidden, 0 = fully drawn. */
 function dashOffset(page: Page) {
   return page
@@ -32,6 +46,7 @@ for (const locale of ["fa", "en"] as const) {
   for (const viewport of [
     { name: "desktop", width: 1280, height: 800 },
     { name: "mobile", width: 390, height: 844 },
+    { name: "narrow", width: 320, height: 640 },
   ]) {
     test(`${locale} ${viewport.name}: tagline once in the teaser; statement secondary; shoulder line scroll-linked`, async ({
       browser,
@@ -63,11 +78,62 @@ for (const locale of ["fa", "en"] as const) {
       expect(h2!.y).toBeLessThan(tagline!.y);
       expect(tagline!.y).toBeLessThan(button!.y);
 
-      // Statement: black, pearl-white, smaller and lighter than the tagline.
+      // Statement: pearl-white background, matte-black text, smaller and
+      // lighter than the tagline.
       const statement = page.getByTestId("home-statement");
-      await expect(statement).toHaveCSS("background-color", "rgb(0, 0, 0)");
+      await expect(statement).toHaveCSS(
+        "background-color",
+        "rgb(248, 246, 240)",
+      );
       const statementText = statement.locator("p");
-      await expect(statementText).toHaveCSS("color", "rgb(248, 246, 240)");
+      await expect(statementText).toHaveCSS("color", "rgb(0, 0, 0)");
+
+      // Two halves, broken right after the comma, at every width.
+      const halves = statement.locator("[data-statement-line]");
+      await expect(halves).toHaveText([...STATEMENT[locale]]);
+      const [first, second] = await Promise.all([
+        halves.nth(0).boundingBox(),
+        halves.nth(1).boundingBox(),
+      ]);
+      expect(second!.y).toBeGreaterThanOrEqual(first!.y + first!.height - 1);
+      await expect(halves.first()).toHaveCSS("text-wrap-style", "balance");
+      if (viewport.width >= 390) {
+        // Where they fit, each half is exactly one line.
+        const lineHeight = Number.parseFloat(
+          await statementText.evaluate((el) => getComputedStyle(el).lineHeight),
+        );
+        expect(first!.height).toBeLessThan(lineHeight * 1.5);
+        expect(second!.height).toBeLessThan(lineHeight * 1.5);
+      }
+
+      // Equal breathing room above the sentence and below the line.
+      const gaps = await statement.evaluate((section) => {
+        const s = section.getBoundingClientRect();
+        const text = section.querySelector("p")!.getBoundingClientRect();
+        const svg = section.querySelector("svg")!.getBoundingClientRect();
+        return { above: text.top - s.top, below: s.bottom - svg.bottom };
+      });
+      expect(Math.abs(gaps.above - gaps.below)).toBeLessThanOrEqual(2);
+
+      // Heading font: the tagline, the statement and the teaser heading.
+      for (const el of [
+        teaser.getByTestId("home-tagline"),
+        statementText,
+        teaser.locator("h2"),
+      ]) {
+        expect(
+          await el.evaluate((node) => getComputedStyle(node).fontFamily),
+        ).toMatch(new RegExp(`^"${HEADING_FONT[locale]}"`));
+      }
+      expect(
+        await page.evaluate(async (family) => {
+          await document.fonts.ready;
+          return [...document.fonts].some(
+            (f) =>
+              f.family.replace(/"/g, "") === family && f.status === "loaded",
+          );
+        }, HEADING_FONT[locale]),
+      ).toBe(true);
       const size = async (l: typeof statementText) =>
         Number.parseFloat(
           await l.evaluate((el) => getComputedStyle(el).fontSize),

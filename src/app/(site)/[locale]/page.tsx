@@ -65,14 +65,21 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
       <section
         data-testid="home-statement"
-        className="bg-matte-black text-pearl-white px-6 py-32 sm:py-44"
+        className="bg-pearl-white text-matte-black px-6 py-24 sm:py-32"
       >
         {/* Secondary to the tagline: lighter weight (300 where the font has
-            it; Markazi Text's lightest is 400) and a clearly smaller size. */}
-        <p className="font-heading mx-auto max-w-2xl text-center text-xl leading-relaxed font-light sm:text-2xl md:text-3xl md:leading-relaxed">
-          {t("statement")}
+            it; Markazi Text's lightest is 400) and a clearly smaller size.
+            Always two lines, broken right after the comma; `text-wrap:
+            balance` inside each half keeps narrow screens free of orphans. */}
+        <p className="font-heading mx-auto max-w-3xl text-center text-xl leading-relaxed font-light sm:text-2xl md:text-3xl md:leading-relaxed">
+          <span data-statement-line className="block text-balance">
+            {t("statementLine1")}
+          </span>{" "}
+          <span data-statement-line className="block text-balance">
+            {t("statementLine2")}
+          </span>
         </p>
-        <ShoulderLine className="mx-auto mt-10 max-w-md" />
+        <ShoulderLine className="mx-auto mt-10 max-w-[18rem] sm:mt-12 sm:max-w-sm" />
       </section>
 
       <section className="px-6 pt-24 pb-16 text-center">

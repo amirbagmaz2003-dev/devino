@@ -533,14 +533,11 @@ for (const locale of ["fa", "en"] as const) {
     // 1. tagline: the teaser's main line (brief 04), between heading and button.
     const teaser = page.locator("section").nth(1);
     await expect(teaser.getByTestId("home-tagline")).toHaveText(c.tagline);
-    // 2. statement: black section, pearl-white text.
+    // 2. statement: pearl-white section, matte-black text (brief 04 follow-up).
     const statement = page.locator("section").nth(2);
     await expect(statement).toHaveText(c.statement);
-    await expect(statement).toHaveCSS("background-color", "rgb(0, 0, 0)");
-    await expect(statement.locator("p")).toHaveCSS(
-      "color",
-      "rgb(248, 246, 240)",
-    );
+    await expect(statement).toHaveCSS("background-color", "rgb(248, 246, 240)");
+    await expect(statement.locator("p")).toHaveCSS("color", "rgb(0, 0, 0)");
     // 3. closing line with the olive rule, just above the footer.
     const closing = page.locator("section").nth(3);
     await expect(closing.locator("p")).toHaveText(c.closing);
