@@ -70,7 +70,8 @@ export default async function ContactPage({
     <div className="mx-auto max-w-2xl px-6 pt-[calc(var(--header-h)+3rem)] pb-24">
       <h1 className="font-heading text-4xl sm:text-5xl">{t("title")}</h1>
       <span aria-hidden className="bg-olive-accent mt-6 block h-px w-10" />
-      <p className="text-matte-black/70 mt-6 leading-relaxed">{t("intro")}</p>
+      <p className="font-heading text-matte-black/70 mt-6 text-lg italic">{t("lead")}</p>
+      <p className="text-matte-black/70 mt-4 leading-relaxed">{t("intro")}</p>
 
       <div className="mt-12">
         <BookingForm

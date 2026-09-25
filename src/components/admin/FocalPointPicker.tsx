@@ -2,7 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import { MAX_UPLOAD_BYTES, MESSAGES } from "@/lib/adminForm";
+import { resizeForUpload } from "@/lib/imageResize";
+import {
+  MAX_VIDEO_BYTES,
+  VARIANT_WIDTHS,
+  VIDEO_TYPES,
+  variantField,
+} from "@/lib/mediaVariants";
 import { FieldError, useAdminForm } from "./AdminForm";
+
+const VIDEO_TOO_LARGE = "حجم ویدیو باید کمتر از ۲۰ مگابایت باشد.";
 
 interface FocalPointPickerProps {
   /** Hidden inputs are submitted as `${namePrefix}X` / `${namePrefix}Y`. */
@@ -13,53 +22,11 @@ interface FocalPointPickerProps {
   defaultFocalY?: number;
   existingImageUrl?: string | null;
   required?: boolean;
-}
-
-/** Longest edge after resizing; phone photos (5–10 MB) come out ~1 MB. */
-const MAX_EDGE_PX = 2400;
-const JPEG_QUALITY = 0.85;
-
-/**
- * Downscales to MAX_EDGE_PX and re-encodes as JPEG. `imageOrientation:
- * "from-image"` applies the EXIF rotation while decoding, so the pixels
- * come out upright and the (EXIF-less) JPEG displays the same way. Falls
- * back to the original file for formats the browser can't decode.
- */
-async function resizeImage(file: File): Promise<File> {
-  let bitmap: ImageBitmap;
-  try {
-    bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
-  } catch {
-    return file;
-  }
-  const scale = Math.min(
-    1,
-    MAX_EDGE_PX / Math.max(bitmap.width, bitmap.height),
-  );
-  const width = Math.round(bitmap.width * scale);
-  const height = Math.round(bitmap.height * scale);
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) {
-    bitmap.close();
-    return file;
-  }
-  // JPEG has no alpha: flatten transparent PNGs onto white, not black.
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, width, height);
-  ctx.drawImage(bitmap, 0, 0, width, height);
-  bitmap.close();
-  const blob = await new Promise<Blob | null>((resolve) =>
-    canvas.toBlob(resolve, "image/jpeg", JPEG_QUALITY),
-  );
-  if (!blob) return file;
-  const baseName = file.name.replace(/\.[^.]+$/, "") || "image";
-  return new File([blob], `${baseName}.jpg`, {
-    type: "image/jpeg",
-    lastModified: Date.now(),
-  });
+  /** Also accept video/mp4 and video/webm (the home hero). Videos are
+   * never resized and have no focal point. */
+  acceptVideo?: boolean;
+  /** What `existingImageUrl` points at, so a current video previews as one. */
+  existingType?: "image" | "video";
 }
 
 /**
@@ -68,8 +35,10 @@ async function resizeImage(file: File): Promise<File> {
  * hidden fields, submitted alongside the file in the same form. A newly
  * chosen file is size-checked, resized in the browser, swapped into the
  * file input, and previewed from the resized version — so the focal point
- * is picked on exactly the image that gets uploaded. Nothing selected in
- * edit mode -> shows the already-uploaded image instead.
+ * is picked on exactly the image that gets uploaded. The 800/1600px
+ * variants (brief 03, §8) are generated at the same time and submitted in
+ * hidden file inputs next to it. Nothing selected in edit mode -> shows
+ * the already-uploaded image instead.
  */
 export default function FocalPointPicker({
   namePrefix,
@@ -79,8 +48,12 @@ export default function FocalPointPicker({
   defaultFocalY = 0.5,
   existingImageUrl = null,
   required = false,
+  acceptVideo = false,
+  existingType = "image",
 }: FocalPointPickerProps) {
   const [preview, setPreview] = useState<string | null>(existingImageUrl);
+  const [previewType, setPreviewType] = useState<"image" | "video">(existingType);
+  const variantRefs = useRef<Partial<Record<number, HTMLInputElement | null>>>({});
   const [focal, setFocal] = useState({ x: defaultFocalX, y: defaultFocalY });
   const [error, setError] = useState<string | null>(null);
   const boxRef = useRef<HTMLDivElement>(null);
@@ -88,10 +61,22 @@ export default function FocalPointPicker({
   const objectUrl = useRef<string | null>(null);
   const { setBusy } = useAdminForm();
 
-  function showPreview(url: string | null) {
+  function showPreview(url: string | null, type: "image" | "video" = existingType) {
     if (objectUrl.current) URL.revokeObjectURL(objectUrl.current);
     objectUrl.current = url && url !== existingImageUrl ? url : null;
     setPreview(url);
+    setPreviewType(type);
+  }
+
+  function setVariantFiles(files: Partial<Record<number, File>>) {
+    for (const width of VARIANT_WIDTHS) {
+      const input = variantRefs.current[width];
+      if (!input) continue;
+      const transfer = new DataTransfer();
+      const file = files[width];
+      if (file) transfer.items.add(file);
+      input.files = transfer.files;
+    }
   }
 
   // Back to the initial state when the surrounding form is reset (e.g.
@@ -100,6 +85,7 @@ export default function FocalPointPicker({
     const form = fileRef.current?.form;
     function handleReset() {
       showPreview(existingImageUrl);
+      setVariantFiles({});
       setFocal({ x: defaultFocalX, y: defaultFocalY });
       setError(null);
     }
@@ -115,10 +101,23 @@ export default function FocalPointPicker({
     const input = event.currentTarget;
     const file = input.files?.[0];
     setError(null);
+    setVariantFiles({});
     if (!file) {
       showPreview(existingImageUrl);
       return;
     }
+
+    if (acceptVideo && (VIDEO_TYPES as readonly string[]).includes(file.type)) {
+      if (file.size > MAX_VIDEO_BYTES) {
+        input.value = "";
+        showPreview(existingImageUrl);
+        setError(VIDEO_TOO_LARGE);
+        return;
+      }
+      showPreview(URL.createObjectURL(file), "video");
+      return;
+    }
+
     if (file.size > MAX_UPLOAD_BYTES) {
       input.value = "";
       showPreview(existingImageUrl);
@@ -128,13 +127,14 @@ export default function FocalPointPicker({
 
     setBusy(true);
     try {
-      const resized = await resizeImage(file);
-      if (resized !== file) {
+      const resized = await resizeForUpload(file, file.name);
+      if (resized) {
         const transfer = new DataTransfer();
-        transfer.items.add(resized);
+        transfer.items.add(resized.original);
         input.files = transfer.files;
+        setVariantFiles(resized.variants);
       }
-      showPreview(URL.createObjectURL(resized));
+      showPreview(URL.createObjectURL(resized?.original ?? file), "image");
     } finally {
       setBusy(false);
     }
@@ -161,7 +161,7 @@ export default function FocalPointPicker({
         ref={fileRef}
         type="file"
         name={fileInputName}
-        accept="image/*"
+        accept={acceptVideo ? "image/*,video/mp4,video/webm" : "image/*"}
         required={required && !existingImageUrl}
         onChange={handleFileChange}
         className="mt-1 block w-full text-sm"
@@ -172,7 +172,31 @@ export default function FocalPointPicker({
         </p>
       )}
       <FieldError name="file" />
-      {preview && (
+      {VARIANT_WIDTHS.map((width) => (
+        <input
+          key={width}
+          ref={(el) => {
+            variantRefs.current[width] = el;
+          }}
+          type="file"
+          name={variantField(fileInputName, width)}
+          hidden
+          tabIndex={-1}
+          aria-hidden
+        />
+      ))}
+      {preview && previewType === "video" && (
+        <video
+          src={preview}
+          muted
+          loop
+          playsInline
+          autoPlay
+          aria-label={label}
+          className="mt-2 aspect-video w-64 rounded border border-zinc-300 bg-zinc-200 object-cover"
+        />
+      )}
+      {preview && previewType === "image" && (
         <>
           <div
             ref={boxRef}
@@ -195,8 +219,12 @@ export default function FocalPointPicker({
           </p>
         </>
       )}
-      <input type="hidden" name={`${namePrefix}X`} value={focal.x} />
-      <input type="hidden" name={`${namePrefix}Y`} value={focal.y} />
+      {previewType === "image" && (
+        <>
+          <input type="hidden" name={`${namePrefix}X`} value={focal.x} />
+          <input type="hidden" name={`${namePrefix}Y`} value={focal.y} />
+        </>
+      )}
     </div>
   );
 }

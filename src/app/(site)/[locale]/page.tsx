@@ -2,20 +2,22 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import MediaBox from "@/components/MediaBox";
 import HeroScrollController from "@/components/HeroScrollController";
-import { getSiteSettings } from "@/db/queries";
+import { getHeroMedia, getSiteSettings } from "@/db/queries";
 
-// Placeholder campaign photo (CLAUDE.md — "محتوای موقت"), provided directly
-// by the project owner as a real file — replaced with actual campaign
-// photography via the admin panel in a later phase; nothing else needs to change.
+// Built-in hero, used until one is set in /admin/settings (site_settings.
+// hero_media_id) — the owner's placeholder campaign photo (CLAUDE.md —
+// "محتوای موقت"). An admin hero may be an image or a video; MediaBox
+// handles both, so nothing here changes when it switches.
 const HERO_IMAGE_URL = "/photos/hero-editorial-bw.jpg";
 const HERO_FOCAL_POINT = { x: 0.42, y: 0.18 };
 
 export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [t, settings] = await Promise.all([
+  const [t, settings, hero] = await Promise.all([
     getTranslations("home"),
     getSiteSettings(),
+    getHeroMedia(locale),
   ]);
   // Admin-editable tagline (site_settings) wins; the translation is the fallback.
   const tagline =
@@ -27,13 +29,17 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       <HeroScrollController />
 
       <section className="relative h-dvh w-full overflow-hidden">
-        <MediaBox
-          type="image"
-          asset={{ url: HERO_IMAGE_URL }}
-          focalPoint={HERO_FOCAL_POINT}
-          alt={t("heroAlt")}
-          priority
-        />
+        {hero ? (
+          <MediaBox {...hero} priority sizes="100vw" />
+        ) : (
+          <MediaBox
+            type="image"
+            asset={{ url: HERO_IMAGE_URL }}
+            focalPoint={HERO_FOCAL_POINT}
+            alt={t("heroAlt")}
+            priority
+          />
+        )}
         <div className="text-pearl-white relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
           <h1 className="font-heading text-5xl md:text-6xl">{t("title")}</h1>
           <p className="font-heading mt-4 text-xl italic">{tagline}</p>
@@ -49,6 +55,20 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         >
           {t("teaser.cta")}
         </Link>
+        <p className="font-heading text-matte-black/60 mt-10 text-lg italic">{t("tagline")}</p>
+      </section>
+
+      <section className="bg-matte-black text-pearl-white px-6 py-32 sm:py-44">
+        <p className="font-heading mx-auto max-w-3xl text-center text-3xl leading-snug sm:text-4xl md:text-5xl md:leading-snug">
+          {t("statement")}
+        </p>
+      </section>
+
+      <section className="px-6 pt-24 pb-16 text-center">
+        <span aria-hidden className="bg-olive-accent mx-auto block h-px w-10" />
+        <p className="font-heading text-matte-black/70 mt-6 text-base italic sm:text-lg">
+          {t("closing")}
+        </p>
       </section>
     </>
   );

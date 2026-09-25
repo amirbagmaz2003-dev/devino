@@ -52,7 +52,33 @@ export default function MediaBox({
   zoom = true,
 }: MediaBoxProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [isInView, setIsInView] = useState(true);
+
+  // Videos start from here rather than via the autoplay attribute, so
+  // `prefers-reduced-motion: reduce` can keep them paused on the first
+  // frame. (Images need nothing: the Ken Burns keyframes in globals.css
+  // only apply under `prefers-reduced-motion: no-preference`.)
+  useEffect(() => {
+    if (type !== "video") return;
+    const video = videoRef.current;
+    if (!video) return;
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const apply = () => {
+      video.muted = true; // required for autoplay; React doesn't SSR `muted`
+      if (query.matches) {
+        video.pause();
+        video.currentTime = 0;
+      } else {
+        void video.play().catch(() => {
+          // Autoplay refused (e.g. low-power mode): stays on the first frame.
+        });
+      }
+    };
+    apply();
+    query.addEventListener("change", apply);
+    return () => query.removeEventListener("change", apply);
+  }, [type, asset.url]);
 
   useEffect(() => {
     if (type !== "image" || !zoom) return;
@@ -77,11 +103,14 @@ export default function MediaBox({
     >
       {type === "video" ? (
         <video
+          ref={videoRef}
           src={asset.url}
-          autoPlay
           muted
           loop
           playsInline
+          // Priority (hero) video loads eagerly; others only fetch metadata
+          // until they play.
+          preload={priority ? undefined : "metadata"}
           aria-label={alt}
           className="h-full w-full object-cover"
           style={{ objectPosition }}

@@ -108,6 +108,7 @@ export async function createProductAction(
       ? await uploadMedia({
           type: "image",
           file: upload.file,
+          variants: upload.variants,
           ...readImageMeta(formData, input.nameFa, input.nameEn),
         })
       : null;
@@ -184,7 +185,8 @@ export async function addProductImageAction(
   await requireAdmin();
   const upload = readUploadedFile(formData, "imageFile");
   if (upload.error) return { fieldErrors: { file: upload.error } };
-  if (!upload.file) return null;
+  // Used to return silently here, which looked like the button did nothing.
+  if (!upload.file) return { fieldErrors: { file: "لطفاً یک عکس انتخاب کنید." } };
 
   try {
     if (!(await getProductAdmin(productId)))
@@ -193,6 +195,7 @@ export async function addProductImageAction(
     const mediaId = await uploadMedia({
       type: "image",
       file: upload.file,
+      variants: upload.variants,
       ...readImageMeta(formData),
     });
     try {

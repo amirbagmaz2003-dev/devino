@@ -1,4 +1,5 @@
 import { getDb, getMediaKv } from "./client";
+import { VARIANT_WIDTHS, variantKey, type VariantWidth } from "@/lib/mediaVariants";
 
 /** Slugify a name for the auto-suggested slug field in the admin forms. */
 export function slugify(input: string) {
@@ -32,6 +33,8 @@ export async function uploadMedia(params: {
   focalY?: number;
   altFa: string;
   altEn: string;
+  /** 800/1600px JPEG copies, stored as "<key>:<width>" (images only). */
+  variants?: Partial<Record<VariantWidth, File>>;
 }): Promise<string> {
   const id = crypto.randomUUID();
   const kvKey = `media:${id}`;
@@ -39,6 +42,12 @@ export async function uploadMedia(params: {
   // Raw bytes, not base64 — KV accepts an ArrayBuffer directly, and
   // base64 would just inflate size ~33% for no benefit here.
   await kv.put(kvKey, await params.file.arrayBuffer());
+  try {
+    await putMediaVariants(kvKey, params.variants ?? {});
+  } catch (error) {
+    await deleteKvValues(kvKey);
+    throw error;
+  }
 
   const db = await getDb();
   try {
@@ -60,7 +69,7 @@ export async function uploadMedia(params: {
       .run();
   } catch (error) {
     // Never leave a KV value behind that no media row points to.
-    await kv.delete(kvKey);
+    await deleteKvValues(kvKey);
     throw error;
   }
 
@@ -79,6 +88,27 @@ export async function updateMediaFocalPoint(
     .run();
 }
 
+/** Stores variants of the media whose original lives at KV `originalKey`. */
+export async function putMediaVariants(
+  originalKey: string,
+  variants: Partial<Record<VariantWidth, File>>,
+) {
+  const kv = await getMediaKv();
+  for (const width of VARIANT_WIDTHS) {
+    const file = variants[width];
+    if (file) await kv.put(variantKey(originalKey, width), await file.arrayBuffer());
+  }
+}
+
+/** The original KV value and every variant of it. */
+async function deleteKvValues(originalKey: string) {
+  const kv = await getMediaKv();
+  await Promise.all([
+    kv.delete(originalKey),
+    ...VARIANT_WIDTHS.map((width) => kv.delete(variantKey(originalKey, width))),
+  ]);
+}
+
 export async function deleteMedia(id: string) {
   const db = await getDb();
   const row = await db
@@ -86,8 +116,7 @@ export async function deleteMedia(id: string) {
     .bind(id)
     .first<{ r2_key: string }>();
   if (row) {
-    const kv = await getMediaKv();
-    await kv.delete(row.r2_key);
+    await deleteKvValues(row.r2_key);
   }
   await db.prepare("DELETE FROM media WHERE id = ?").bind(id).run();
 }
@@ -98,7 +127,8 @@ export async function isMediaReferenced(id: string): Promise<boolean> {
   const row = await db
     .prepare(
       `SELECT EXISTS (SELECT 1 FROM product_media WHERE media_id = ?1)
-           OR EXISTS (SELECT 1 FROM collections WHERE cover_media_id = ?1) AS used`,
+           OR EXISTS (SELECT 1 FROM collections WHERE cover_media_id = ?1)
+           OR EXISTS (SELECT 1 FROM site_settings WHERE hero_media_id = ?1) AS used`,
     )
     .bind(id)
     .first<{ used: number }>();
@@ -577,4 +607,54 @@ export async function recordLoginFailure(ip: string, now = Date.now()) {
 export async function clearLoginFailures(ip: string) {
   const db = await getDb();
   await db.prepare("DELETE FROM login_attempts WHERE ip = ?").bind(ip).run();
+}
+
+// ---------- Home hero (brief 03) ----------
+
+export async function getHeroMediaAdmin(): Promise<MediaAdminRow | null> {
+  const db = await getDb();
+  const row = await db
+    .prepare(
+      `SELECT m.id, m.type, m.r2_key, m.content_type, m.focal_x, m.focal_y, m.alt_fa, m.alt_en
+       FROM site_settings s JOIN media m ON m.id = s.hero_media_id
+       WHERE s.id = 1`,
+    )
+    .first<MediaAdminRow>();
+  return row ?? null;
+}
+
+export async function setHeroMediaId(id: string | null) {
+  const db = await getDb();
+  await db.prepare("UPDATE site_settings SET hero_media_id = ? WHERE id = 1").bind(id).run();
+}
+
+// ---------- Variant backfill (brief 03, §8) ----------
+
+/** Image media that are missing at least one 800/1600 variant in KV. */
+export async function listImagesMissingVariants(): Promise<{ id: string }[]> {
+  const db = await getDb();
+  const { results } = await db
+    .prepare("SELECT id, r2_key FROM media WHERE type = 'image' ORDER BY created_at")
+    .all<{ id: string; r2_key: string }>();
+  // One paginated key listing (names only, no values) instead of a lookup per image.
+  const kv = await getMediaKv();
+  const keys = new Set<string>();
+  let cursor: string | undefined;
+  do {
+    const page = await kv.list({ cursor });
+    for (const key of page.keys) keys.add(key.name);
+    cursor = page.list_complete ? undefined : page.cursor;
+  } while (cursor);
+  return results
+    .filter((row) => VARIANT_WIDTHS.some((width) => !keys.has(variantKey(row.r2_key, width))))
+    .map((row) => ({ id: row.id }));
+}
+
+export async function getImageMediaKey(id: string): Promise<string | null> {
+  const db = await getDb();
+  const row = await db
+    .prepare("SELECT r2_key FROM media WHERE id = ? AND type = 'image'")
+    .bind(id)
+    .first<{ r2_key: string }>();
+  return row?.r2_key ?? null;
 }
