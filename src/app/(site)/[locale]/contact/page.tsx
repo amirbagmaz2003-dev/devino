@@ -1,12 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { listBookableProducts } from "@/db/bookings";
+import { Link } from "@/i18n/navigation";
 import { getSiteSettings } from "@/db/queries";
-import { todayInTehran } from "@/lib/jalali";
 import { pageMetadata } from "@/lib/seo";
-import BookingForm, {
-  type BookingProductGroup,
-} from "@/components/booking/BookingForm";
 import ContactChannels from "@/components/ContactChannels";
 
 export async function generateMetadata({
@@ -14,57 +10,18 @@ export async function generateMetadata({
 }: PageProps<"/[locale]/contact">): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "contact" });
-  return pageMetadata({
-    locale,
-    path: "/contact",
-    title: t("title"),
-    description: t("intro"),
-  });
+  return pageMetadata({ locale, path: "/contact", title: t("title"), description: t("intro") });
 }
 
-async function loadProductGroups(
-  locale: string,
-): Promise<BookingProductGroup[]> {
-  try {
-    const products = await listBookableProducts(locale);
-    const groups = new Map<string | null, BookingProductGroup>();
-    for (const product of products) {
-      const key = product.collectionId;
-      if (!groups.has(key))
-        groups.set(key, { label: product.collectionName, products: [] });
-      groups
-        .get(key)!
-        .products.push({ slug: product.slug, name: product.name });
-    }
-    return [...groups.values()];
-  } catch (error) {
-    // The form still works without the optional dress list.
-    console.error("[contact] loading products failed", error);
-    return [];
-  }
-}
-
-/** Private fitting booking (brief 02, §1) — replaces the old placeholder contact page. */
-export default async function ContactPage({
-  params,
-  searchParams,
-}: PageProps<"/[locale]/contact">) {
+/** Contact channels only (brief 04) — orders go through /order from each piece's page. */
+export default async function ContactPage({ params }: PageProps<"/[locale]/contact">) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { product } = await searchParams;
-  const [t, tProduct, groups, settings] = await Promise.all([
+  const [t, tProduct, settings] = await Promise.all([
     getTranslations("contact"),
     getTranslations("productDetail"),
-    loadProductGroups(locale),
     getSiteSettings(),
   ]);
-
-  const requested = typeof product === "string" ? product : "";
-  const initialProduct = groups.some((group) =>
-    group.products.some((p) => p.slug === requested),
-  )
-    ? requested
-    : "";
 
   return (
     <div className="mx-auto max-w-2xl px-6 pt-[calc(var(--header-h)+3rem)] pb-24">
@@ -73,17 +30,8 @@ export default async function ContactPage({
       <p className="font-heading text-matte-black/70 mt-6 text-lg italic">{t("lead")}</p>
       <p className="text-matte-black/70 mt-4 leading-relaxed">{t("intro")}</p>
 
-      <div className="mt-12">
-        <BookingForm
-          locale={locale === "en" ? "en" : "fa"}
-          productGroups={groups}
-          initialProduct={initialProduct}
-          today={todayInTehran()}
-        />
-      </div>
-
       <ContactChannels
-        heading={t("channelsHeading")}
+        prominent
         phone={settings?.contactPhone}
         telegramUrl={settings?.telegramUrl}
         instagramUrl={settings?.instagramUrl}
@@ -91,6 +39,12 @@ export default async function ContactPage({
         telegramLabel={tProduct("telegramLabel")}
         instagramLabel={tProduct("instagramLabel")}
       />
+
+      <p className="text-matte-black/70 mt-12 text-sm">
+        <Link href="/collections" className="hover:text-olive-accent underline underline-offset-4">
+          {t("orderHint")}
+        </Link>
+      </p>
     </div>
   );
 }

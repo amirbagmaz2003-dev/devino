@@ -10,3 +10,9 @@ export function normalizeIranianMobile(raw: string): string | null {
   const match = /^(?:\+98|0098|98|0)?(9\d{9})$/.exec(compact);
   return match ? `0${match[1]}` : null;
 }
+
+/** Iranian postal code: Persian/Arabic digits, spaces and dashes allowed; 10 ASCII digits out, else null. */
+export function normalizePostalCode(raw: string): string | null {
+  const compact = toAsciiDigits(raw).replace(/[\s\-‌]/g, "");
+  return /^\d{10}$/.test(compact) ? compact : null;
+}

@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import MediaBox from "@/components/MediaBox";
 import HeroScrollController from "@/components/HeroScrollController";
+import ShoulderLine from "@/components/ShoulderLine";
 import { getHeroMedia, getSiteSettings } from "@/db/queries";
 
 // Built-in hero, used until one is set in /admin/settings (site_settings.
@@ -42,26 +43,43 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         )}
         <div className="text-pearl-white relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
           <h1 className="font-heading text-5xl md:text-6xl">{t("title")}</h1>
-          <p className="font-heading mt-4 text-xl italic">{tagline}</p>
         </div>
       </section>
 
       <section className="mx-auto flex min-h-[60dvh] max-w-3xl flex-col items-center justify-center px-6 py-24 text-center">
         <h2 className="text-3xl">{t("teaser.heading")}</h2>
-        <p className="text-matte-black/70 mt-4">{t("teaser.body")}</p>
+        {/* The tagline: the first sentence a visitor reads after the brand name. */}
+        <p
+          data-testid="home-tagline"
+          className="font-heading mt-6 text-4xl leading-tight sm:text-5xl md:text-6xl"
+        >
+          {tagline}
+        </p>
         <Link
           href="/collections"
           className="border-matte-black hover:bg-matte-black hover:text-pearl-white mt-8 border px-6 py-3 text-sm tracking-wide uppercase transition-colors"
         >
           {t("teaser.cta")}
         </Link>
-        <p className="font-heading text-matte-black/60 mt-10 text-lg italic">{t("tagline")}</p>
       </section>
 
-      <section className="bg-matte-black text-pearl-white px-6 py-32 sm:py-44">
-        <p className="font-heading mx-auto max-w-3xl text-center text-3xl leading-snug sm:text-4xl md:text-5xl md:leading-snug">
-          {t("statement")}
+      <section
+        data-testid="home-statement"
+        className="bg-pearl-white text-matte-black px-6 py-24 sm:py-32"
+      >
+        {/* Secondary to the tagline: lighter weight (300 where the font has
+            it; Markazi Text's lightest is 400) and a clearly smaller size.
+            Always two lines, broken right after the comma; `text-wrap:
+            balance` inside each half keeps narrow screens free of orphans. */}
+        <p className="font-heading mx-auto max-w-3xl text-center text-xl leading-relaxed font-light sm:text-2xl md:text-3xl md:leading-relaxed">
+          <span data-statement-line className="block text-balance">
+            {t("statementLine1")}
+          </span>{" "}
+          <span data-statement-line className="block text-balance">
+            {t("statementLine2")}
+          </span>
         </p>
+        <ShoulderLine className="mx-auto mt-10 max-w-[18rem] sm:mt-12 sm:max-w-sm" />
       </section>
 
       <section className="px-6 pt-24 pb-16 text-center">

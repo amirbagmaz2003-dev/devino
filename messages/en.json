@@ -12,11 +12,11 @@
     "heroAlt": "Woman in a black one-shoulder evening gown, dramatic black-and-white lighting.",
     "teaser": {
       "heading": "The Collections",
-      "body": "Placeholder — the full collections grid arrives in a later phase.",
       "cta": "View Collections"
     },
-    "statement": "For the woman who never tries to be seen, and for that very reason is never forgotten.",
-    "closing": "Perfection lives in the details."
+    "closing": "Perfection lives in the details.",
+    "statementLine1": "For the woman who never tries to be seen,",
+    "statementLine2": "and for that very reason is never forgotten."
   },
   "collections": {
     "title": "Collections",
@@ -41,7 +41,7 @@
     "phoneLabel": "Call",
     "telegramLabel": "Telegram",
     "instagramLabel": "Instagram",
-    "bookFitting": "Book a fitting"
+    "placeOrder": "Place an order"
   },
   "about": {
     "title": "About deVino",
@@ -60,33 +60,10 @@
     "closing": "Beauty is born of the relationship between a woman and her dress, never from one overpowering the other."
   },
   "contact": {
-    "title": "Book a Private Fitting",
-    "intro": "To see and try on our pieces in person, book a private fitting. Once we receive your request, we'll call you to confirm the details.",
-    "fields": {
-      "name": "Full name",
-      "phone": "Mobile number",
-      "product": "Piece you'd like to try (optional)",
-      "productNone": "Not sure yet",
-      "productUngrouped": "Other pieces",
-      "date": "Preferred date",
-      "datePlaceholder": "Choose a date",
-      "note": "Notes (optional)"
-    },
-    "submit": "Send request",
-    "success": "Your request has been received. We'll be in touch shortly to confirm.",
-    "errors": {
-      "name": "Please enter your name.",
-      "phone": "Please enter a valid mobile number.",
-      "date": "Please choose today or a later date.",
-      "generic": "Something went wrong. Please try again."
-    },
-    "calendar": {
-      "previousMonth": "Previous month",
-      "nextMonth": "Next month",
-      "close": "Close"
-    },
-    "channelsHeading": "Get in touch",
-    "lead": "Not a dress to be looked at, but one that begins a conversation."
+    "title": "Contact",
+    "lead": "Not a dress to be looked at, but one that begins a conversation.",
+    "intro": "For questions about our pieces, sizing or an existing order, reach us through any of the channels below.",
+    "orderHint": "To place an order, use the \"Place an order\" button on any piece's page."
   },
   "footer": {
     "stayClose": {
@@ -112,5 +89,39 @@
     "title": "Page not found",
     "body": "The page you're looking for doesn't exist or has moved.",
     "back": "Back to the collections"
+  },
+  "order": {
+    "title": "Place an Order",
+    "intro": "Fill in the form below. We'll call you to confirm the size, shipping cost and delivery time. Payment is arranged during that call.",
+    "fields": {
+      "name": "Full name",
+      "phone": "Mobile number",
+      "product": "Piece",
+      "productPlaceholder": "Choose a piece",
+      "productUngrouped": "Other pieces",
+      "size": "Size",
+      "sizePlaceholder": "Choose a size",
+      "sizeHint": "Between two sizes? Mention it in the notes.",
+      "province": "Province",
+      "provincePlaceholder": "Choose a province",
+      "city": "City",
+      "address": "Full address",
+      "postalCode": "Postal code",
+      "note": "Notes (optional)"
+    },
+    "submit": "Send order",
+    "success": "Your order has been received. We'll call you shortly to confirm the details.",
+    "errors": {
+      "name": "Please enter your name.",
+      "phone": "Please enter a valid mobile number.",
+      "product": "Please choose a piece.",
+      "size": "Please choose a size.",
+      "province": "Please choose a province.",
+      "city": "Please enter your city.",
+      "address": "Please enter your full address.",
+      "postalCode": "The postal code must be 10 digits.",
+      "generic": "Something went wrong. Please try again."
+    },
+    "shippingNote": "We currently ship within Iran only."
   }
 }

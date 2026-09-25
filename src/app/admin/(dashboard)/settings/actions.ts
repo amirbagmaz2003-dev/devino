@@ -22,7 +22,7 @@ import {
 } from "@/db/admin";
 import { VARIANT_WIDTHS, type VariantWidth } from "@/lib/mediaVariants";
 import { readUploadedFile } from "../upload";
-import { getTelegramChatId, setTelegramChatId } from "@/db/bookings";
+import { getTelegramChatId, setTelegramChatId } from "@/db/orders";
 import { findLatestPrivateChatId, isTelegramBotConfigured, sendTelegramMessage } from "@/lib/telegram";
 
 export async function updateSiteSettingsAction(

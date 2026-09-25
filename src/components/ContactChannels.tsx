@@ -4,7 +4,7 @@ interface ContactChannel {
 }
 
 interface ContactChannelsProps {
-  heading: string;
+  heading?: string;
   description?: string;
   phone?: string | null;
   telegramUrl?: string | null;
@@ -12,6 +12,8 @@ interface ContactChannelsProps {
   phoneLabel: string;
   telegramLabel: string;
   instagramLabel: string;
+  /** Contact page: larger, stacked links as the page's main content. */
+  prominent?: boolean;
 }
 
 /**
@@ -30,6 +32,7 @@ export default function ContactChannels({
   phoneLabel,
   telegramLabel,
   instagramLabel,
+  prominent = false,
 }: ContactChannelsProps) {
   const channels: ContactChannel[] = [
     phone ? { label: phoneLabel, href: `tel:${phone}` } : null,
@@ -39,9 +42,31 @@ export default function ContactChannels({
 
   if (channels.length === 0) return null;
 
+  if (prominent) {
+    return (
+      <ul className="mt-10 space-y-2">
+        {channels.map((channel) => {
+          const isExternal = !channel.href.startsWith("tel:");
+          return (
+            <li key={channel.label}>
+              <a
+                href={channel.href}
+                target={isExternal ? "_blank" : undefined}
+                rel={isExternal ? "noopener noreferrer" : undefined}
+                className="font-heading hover:text-olive-accent decoration-matte-black/25 inline-flex min-h-12 items-center text-2xl underline underline-offset-8 transition-colors sm:text-3xl"
+              >
+                {channel.label}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    );
+  }
+
   return (
     <div className="border-matte-black/15 mt-10 border-t pt-6">
-      <h2 className="font-heading text-base">{heading}</h2>
+      {heading && <h2 className="font-heading text-base">{heading}</h2>}
       {description && (
         <p className="text-matte-black/60 mt-1 text-sm">{description}</p>
       )}

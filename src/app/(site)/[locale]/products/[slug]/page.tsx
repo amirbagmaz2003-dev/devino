@@ -64,10 +64,10 @@ export default async function ProductDetailPage({
           )}
 
           <Link
-            href={{ pathname: "/contact", query: { product: product.slug } }}
+            href={{ pathname: "/order", query: { product: product.slug } }}
             className="bg-matte-black text-pearl-white hover:bg-matte-black/85 focus-visible:outline-olive-accent mt-8 inline-flex min-h-12 items-center justify-center px-8 text-sm tracking-wide transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
           >
-            {t("bookFitting")}
+            {t("placeOrder")}
           </Link>
 
           <ContactChannels

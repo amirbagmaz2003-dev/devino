@@ -18,7 +18,7 @@ declare global {
     // about them either way.
     ADMIN_PASSWORD: string;
     SESSION_SECRET: string;
-    // Optional secret: Telegram bot for new-booking notifications. When
+    // Optional secret: Telegram bot for new-order notifications. When
     // unset, notifications are skipped (with a warning), never an error.
     TELEGRAM_BOT_TOKEN?: string;
     // Plain vars (wrangler.jsonc "vars"): public origin for absolute URLs
