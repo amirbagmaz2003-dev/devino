@@ -113,7 +113,7 @@ async function makeJpeg(page: Page, width: number, height: number): Promise<Buff
   return Buffer.from(base64, "base64");
 }
 
-async function chooseImage(page: Page, name: string, buffer: Buffer, fileInput = "input[type=file]") {
+async function chooseImage(page: Page, name: string, buffer: Buffer, fileInput = "input[type=file]:not([hidden])") {
   await page.setInputFiles(fileInput, { name, mimeType: "image/jpeg", buffer });
   // The picker resizes asynchronously; its preview appears once done.
   await expect(page.locator('[aria-label="برای تعیین نقطه‌ی کانونی روی عکس کلیک کنید"]')).toBeVisible();
@@ -323,7 +323,7 @@ test("duplicate slug shows the message under the field and keeps typed values", 
   await expect(page).toHaveURL(/\/admin\/collections\/new$/);
   await expect(page.locator("input[name=nameEn]")).toHaveValue("Duplicate");
   await expect(page.locator("textarea[name=descriptionEn]")).toHaveValue("kept text");
-  expect(await page.locator("input[type=file]").evaluate((i: HTMLInputElement) => i.files?.length)).toBe(1);
+  expect(await page.locator("input[type=file]:not([hidden])").evaluate((i: HTMLInputElement) => i.files?.length)).toBe(1);
   // Validation ran before the upload: no file was stored at all.
   expect(sql<{ n: number }>("SELECT COUNT(*) AS n FROM media")[0].n).toBe(mediaBefore);
   expect(orphanCount()).toBe(orphansBefore);
@@ -466,13 +466,13 @@ test("large images are resized in the browser; >15 MB is refused", async ({ brow
   await page.goto("/admin/products/new");
 
   // Over the cap: refused before resizing, input cleared.
-  await page.setInputFiles("input[type=file]", {
+  await page.setInputFiles("input[type=file]:not([hidden])", {
     name: "huge.jpg",
     mimeType: "image/jpeg",
     buffer: Buffer.alloc(15 * 1024 * 1024 + 1, 1),
   });
   await expect(page.getByText("حجم فایل بیش از حد مجاز است (حداکثر ۱۵ مگابایت).")).toBeVisible();
-  expect(await page.locator("input[type=file]").evaluate((i: HTMLInputElement) => i.files?.length)).toBe(0);
+  expect(await page.locator("input[type=file]:not([hidden])").evaluate((i: HTMLInputElement) => i.files?.length)).toBe(0);
 
   // 4000×3000 -> long edge 2400, JPEG, and the focal point is set on it.
   const slug = `resize-${RUN}`;
@@ -483,7 +483,7 @@ test("large images are resized in the browser; >15 MB is refused", async ({ brow
   await page.fill("input[name=price]", "1000");
   await chooseImage(page, "large.png", original);
   const chosen = await page
-    .locator("input[type=file]")
+    .locator("input[type=file]:not([hidden])")
     .evaluate(async (i: HTMLInputElement) => {
       const f = i.files![0];
       const bmp = await createImageBitmap(f);
@@ -549,7 +549,7 @@ test("replacing a cover and deleting a product remove the old media (row + KV)",
   await page.click("main button[type=submit]");
   await page.waitForURL(/\/admin\/products\/.+\/edit$/);
   await chooseImage(page, "g2.jpg", await makeJpeg(page, 600, 800));
-  await page.getByRole("button", { name: "افزودن عکس" }).click();
+  await page.getByRole("button", { name: "افزودن این عکس به گالری" }).click();
   await expect(page.locator("ul img")).toHaveCount(2);
 
   const media = sql<{ id: string; r2_key: string }>(

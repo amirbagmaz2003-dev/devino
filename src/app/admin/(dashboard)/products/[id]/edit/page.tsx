@@ -41,6 +41,10 @@ export default async function EditProductPage({
 
       <div className="mt-10 max-w-xl border-t border-zinc-200 pt-6">
         <h2 className="text-lg font-semibold">گالری عکس‌ها</h2>
+        <p className="mt-1 text-sm text-zinc-600">
+          عکس جدید را اینجا انتخاب کنید و دکمه‌ی پایین همین بخش را بزنید؛ دکمه‌ی «ذخیره»ی بالای
+          صفحه فقط مشخصات محصول را ذخیره می‌کند.
+        </p>
 
         {images.length > 0 && (
           <ul className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
@@ -90,7 +94,7 @@ export default async function EditProductPage({
             />
           </div>
           <SubmitButton className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium hover:bg-zinc-50">
-            افزودن عکس
+            افزودن این عکس به گالری
           </SubmitButton>
         </AdminForm>
       </div>

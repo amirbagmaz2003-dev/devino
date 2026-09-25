@@ -360,3 +360,21 @@ export async function getSitemapSlugs(): Promise<{
     return { collections: [], products: [] };
   }
 }
+
+/** The admin-chosen home hero (image or video), or null for the built-in photo. */
+export async function getHeroMedia(locale: string): Promise<MediaBoxProps | null> {
+  try {
+    const db = await getDb();
+    const row = await db
+      .prepare(
+        `SELECT m.id, m.type, m.focal_x, m.focal_y, m.alt_fa, m.alt_en
+         FROM site_settings s JOIN media m ON m.id = s.hero_media_id
+         WHERE s.id = 1`,
+      )
+      .first<ProductMediaRow>();
+    return row ? resolveMedia(row, locale) : null;
+  } catch (error) {
+    console.error("[getHeroMedia] D1 query failed:", error);
+    return null;
+  }
+}

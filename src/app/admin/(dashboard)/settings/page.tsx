@@ -1,18 +1,25 @@
-import { getSiteSettingsAdmin } from "@/db/admin";
+import Image from "next/image";
+import { getHeroMediaAdmin, getSiteSettingsAdmin } from "@/db/admin";
+import { mediaUrl } from "@/db/media";
+import FocalPointPicker from "@/components/admin/FocalPointPicker";
+import BackfillVariants from "./BackfillVariants";
 import { getTelegramChatId } from "@/db/bookings";
 import { isTelegramBotConfigured } from "@/lib/telegram";
 import AdminForm, { SubmitButton } from "@/components/admin/AdminForm";
 import {
   connectTelegramAction,
+  resetHeroAction,
+  saveHeroAction,
   sendTelegramTestAction,
   updateSiteSettingsAction,
 } from "./actions";
 
 export default async function AdminSettingsPage() {
-  const [settings, chatId, botConfigured] = await Promise.all([
+  const [settings, chatId, botConfigured, hero] = await Promise.all([
     getSiteSettingsAdmin(),
     getTelegramChatId(),
     isTelegramBotConfigured(),
+    getHeroMediaAdmin(),
   ]);
   const connected = Boolean(chatId && botConfigured);
 
@@ -105,6 +112,54 @@ export default async function AdminSettingsPage() {
 
         <SubmitButton>ذخیره</SubmitButton>
       </AdminForm>
+
+      <section
+        aria-labelledby="hero-heading"
+        className="mt-10 max-w-xl rounded-lg border border-zinc-200 bg-white p-5"
+      >
+        <h2 id="hero-heading" className="text-base font-semibold">
+          تصویر یا ویدیوی صفحه‌ی اصلی
+        </h2>
+        {!hero && (
+          <div className="mt-3 flex items-center gap-3 text-sm text-zinc-600">
+            <div className="relative h-20 w-16 overflow-hidden rounded border border-zinc-300">
+              <Image
+                src="/photos/hero-editorial-bw.jpg"
+                alt=""
+                fill
+                unoptimized
+                className="object-cover"
+              />
+            </div>
+            <span data-testid="hero-status">تصویر پیش‌فرض</span>
+          </div>
+        )}
+        <AdminForm action={saveHeroAction} resetOnSuccess className="mt-4 space-y-4">
+          <FocalPointPicker
+            // Remount when the hero changes so the preview shows the new one.
+            key={hero?.id ?? "default"}
+            namePrefix="heroFocal"
+            fileInputName="heroFile"
+            label="انتخاب فایل"
+            acceptVideo
+            existingImageUrl={hero ? mediaUrl(hero.id) : null}
+            existingType={hero?.type ?? "image"}
+            defaultFocalX={hero?.focal_x ?? 0.5}
+            defaultFocalY={hero?.focal_y ?? 0.5}
+          />
+          <SubmitButton>ذخیره</SubmitButton>
+        </AdminForm>
+        {hero && (
+          <AdminForm action={resetHeroAction} className="mt-3">
+            <SubmitButton className="rounded-md border border-zinc-300 bg-white px-5 py-2 text-sm font-medium hover:bg-zinc-50">
+              بازگشت به تصویر پیش‌فرض
+            </SubmitButton>
+          </AdminForm>
+        )}
+        <div className="mt-6 border-t border-zinc-200 pt-5">
+          <BackfillVariants />
+        </div>
+      </section>
 
       <section
         aria-labelledby="telegram-heading"

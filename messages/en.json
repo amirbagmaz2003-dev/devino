@@ -14,7 +14,9 @@
       "heading": "The Collections",
       "body": "Placeholder — the full collections grid arrives in a later phase.",
       "cta": "View Collections"
-    }
+    },
+    "statement": "For the woman who never tries to be seen, and for that very reason is never forgotten.",
+    "closing": "Perfection lives in the details."
   },
   "collections": {
     "title": "Collections",
@@ -22,7 +24,8 @@
     "viewCollection": "View Collection"
   },
   "collectionDetail": {
-    "empty": "No products have been added to this collection yet — check back soon."
+    "empty": "No products have been added to this collection yet — check back soon.",
+    "presenceLine": "A dress doesn't create a presence. It completes one."
   },
   "carousel": {
     "previous": "Previous",
@@ -42,7 +45,19 @@
   },
   "about": {
     "title": "About deVino",
-    "body": "Placeholder — the brand story will be written here."
+    "why": {
+      "heading": "Why deVino",
+      "body": "The world is not short of clothes. Our question was never what else could be made, but why anything new should exist at all. Our answer was a woman whose presence never needs to raise its voice."
+    },
+    "shoulder": {
+      "heading": "We Begin at the Shoulder",
+      "body": "Before designing, we watched the body, looking for the place where a person's presence appears first. We found it at the shoulder, the line we associate with endurance and standing tall. Every deVino piece begins there, and any detail that doesn't follow that line is left out."
+    },
+    "name": {
+      "heading": "The Name: From a Cup",
+      "body": "The name deVino grew from a familiar word that Persian defines as a cup: a vessel that means little on its own and becomes complete only when it passes to another hand. A cup belongs to gatherings, to evenings made whole by the presence of others. deVino is not the name of an object. It names the moment something passes between a woman and what she wears."
+    },
+    "closing": "Beauty is born of the relationship between a woman and her dress, never from one overpowering the other."
   },
   "contact": {
     "title": "Book a Private Fitting",
@@ -70,7 +85,8 @@
       "nextMonth": "Next month",
       "close": "Close"
     },
-    "channelsHeading": "Get in touch"
+    "channelsHeading": "Get in touch",
+    "lead": "Not a dress to be looked at, but one that begins a conversation."
   },
   "footer": {
     "stayClose": {
@@ -85,11 +101,11 @@
     "rights": "All rights reserved."
   },
   "meta": {
-    "homeDescription": "deVino — evening wear for women, minimal and dramatic. A Presence of Her Own.",
+    "homeDescription": "A Presence of Her Own.",
     "collectionsTitle": "Collections",
     "collectionsDescription": "Explore the deVino evening-wear collections up close.",
     "aboutTitle": "About deVino",
-    "aboutDescription": "The story of deVino, a women's evening-wear house.",
+    "aboutDescription": "The world is not short of clothes.",
     "notFoundTitle": "Page not found"
   },
   "notFound": {

@@ -44,6 +44,9 @@ export default async function CollectionDetailPage({
         {collection.description && (
           <p className="text-matte-black/70 mt-4">{collection.description}</p>
         )}
+        <p className="font-heading text-matte-black/60 mt-6 text-base italic">
+          {t("presenceLine")}
+        </p>
       </div>
 
       {collection.products.length === 0 ? (

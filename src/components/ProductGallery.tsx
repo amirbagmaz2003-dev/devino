@@ -26,7 +26,9 @@ export default function ProductGallery({ images }: ProductGalleryProps) {
           {...active}
           zoom={false}
           priority
-          sizes="(min-width: 1024px) 50vw, 100vw"
+          // One column of the product page's max-w-6xl (1152px) two-column
+          // grid (px-6 padding, gap-16) on desktop; full width minus padding below.
+          sizes="(min-width: 1152px) 520px, (min-width: 1024px) calc(50vw - 56px), calc(100vw - 48px)"
         />
       </div>
       {images.length > 1 && (

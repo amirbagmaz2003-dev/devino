@@ -80,6 +80,7 @@ async function saveCollection(
       newCoverId = await uploadMedia({
         type: "image",
         file: upload.file,
+        variants: upload.variants,
         focalX: focal.x,
         focalY: focal.y,
         altFa: input.nameFa,
