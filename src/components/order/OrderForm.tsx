@@ -6,7 +6,7 @@ import { submitOrderAction } from "@/app/(site)/[locale]/order/actions";
 import type { OrderFieldError, OrderFormState } from "@/app/(site)/[locale]/order/orderForm";
 import MediaBox, { type MediaBoxProps } from "@/components/MediaBox";
 import { formatPrice } from "@/lib/formatPrice";
-import { ORDER_SIZES, PROVINCES } from "@/lib/provinces";
+import { CONTACT_METHODS, ORDER_SIZES, type ContactMethod } from "@/lib/orderOptions";
 import { FIELD_CLASS } from "./fieldStyles";
 
 export interface OrderProduct {
@@ -37,10 +37,7 @@ const FIELD_ORDER: OrderFieldError[] = [
   "phone",
   "product",
   "size",
-  "province",
-  "city",
-  "address",
-  "postalCode",
+  "telegramUsername",
 ];
 
 /**
@@ -64,6 +61,7 @@ export default function OrderForm({
   });
   const [, startTransition] = useTransition();
   const [productSlug, setProductSlug] = useState(initialProduct);
+  const [contactMethod, setContactMethod] = useState<ContactMethod>("phone");
   const formRef = useRef<HTMLFormElement>(null);
   const successRef = useRef<HTMLParagraphElement>(null);
 
@@ -117,7 +115,7 @@ export default function OrderForm({
           role="status"
           className="border-olive-accent font-heading mt-12 border-s-2 py-6 ps-6 text-xl leading-relaxed focus:outline-none sm:text-2xl"
         >
-          {t("success")}
+          {t("success", { method: t(`successMethods.${state.method}`) })}
         </p>
       ) : (
         <form ref={formRef} onSubmit={handleSubmit} noValidate className="mt-12 space-y-6">
@@ -207,66 +205,45 @@ export default function OrderForm({
             </p>
           </Field>
 
-          <div className="grid gap-6 sm:grid-cols-2">
-            <Field id="order-province" label={t("fields.province")} error={error("province")}>
-              <select
-                id="order-province"
-                name="province"
-                defaultValue=""
-                aria-invalid={invalid("province")}
-                aria-describedby={describe("province")}
-                className={FIELD_CLASS}
-              >
-                <option value="">{t("fields.provincePlaceholder")}</option>
-                {PROVINCES.map((province) => (
-                  <option key={province.fa} value={province.fa}>
-                    {locale === "fa" ? province.fa : province.en}
-                  </option>
-                ))}
-              </select>
-            </Field>
+          <fieldset>
+            <legend className="mb-3 block text-sm">{t("fields.contactMethod")}</legend>
+            <div className="flex flex-wrap gap-x-6 gap-y-2">
+              {CONTACT_METHODS.map((method) => (
+                <label key={method} className="inline-flex min-h-11 cursor-pointer items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    name="contactMethod"
+                    value={method}
+                    checked={contactMethod === method}
+                    onChange={() => setContactMethod(method)}
+                    className="accent-matte-black h-4 w-4"
+                  />
+                  {t(`contactMethods.${method}`)}
+                </label>
+              ))}
+            </div>
+          </fieldset>
 
-            <Field id="order-city" label={t("fields.city")} error={error("city")}>
+          {/* Only for Telegram — not rendered (so not submitted) otherwise. */}
+          {contactMethod === "telegram" && (
+            <Field id="order-telegramUsername" label={t("fields.telegramUsername")} error={error("telegramUsername")}>
               <input
-                id="order-city"
-                name="city"
+                id="order-telegramUsername"
+                name="telegramUsername"
                 type="text"
-                autoComplete="address-level2"
-                maxLength={80}
-                aria-invalid={invalid("city")}
-                aria-describedby={describe("city")}
-                className={FIELD_CLASS}
+                autoComplete="off"
+                autoCapitalize="none"
+                spellCheck={false}
+                dir="ltr"
+                placeholder="@username"
+                maxLength={33}
+                required
+                aria-invalid={invalid("telegramUsername")}
+                aria-describedby={describe("telegramUsername")}
+                className={`${FIELD_CLASS} ${locale === "fa" ? "text-end" : ""}`}
               />
             </Field>
-          </div>
-
-          <Field id="order-address" label={t("fields.address")} error={error("address")}>
-            <textarea
-              id="order-address"
-              name="address"
-              rows={3}
-              autoComplete="street-address"
-              maxLength={500}
-              aria-invalid={invalid("address")}
-              aria-describedby={describe("address")}
-              className={`${FIELD_CLASS} resize-y`}
-            />
-          </Field>
-
-          <Field id="order-postalCode" label={t("fields.postalCode")} error={error("postalCode")}>
-            <input
-              id="order-postalCode"
-              name="postalCode"
-              type="text"
-              inputMode="numeric"
-              autoComplete="postal-code"
-              dir="ltr"
-              maxLength={20}
-              aria-invalid={invalid("postalCode")}
-              aria-describedby={describe("postalCode")}
-              className={`${FIELD_CLASS} ${locale === "fa" ? "text-end" : ""}`}
-            />
-          </Field>
+          )}
 
           <Field id="order-note" label={t("fields.note")}>
             <textarea id="order-note" name="note" rows={4} maxLength={1000} className={`${FIELD_CLASS} resize-y`} />

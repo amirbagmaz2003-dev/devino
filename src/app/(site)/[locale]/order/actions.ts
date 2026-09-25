@@ -1,16 +1,20 @@
 "use server";
 
 import { createOrder, getProductForOrder, getTelegramChatId, isOrderRateLimited } from "@/db/orders";
-import { normalizeIranianMobile, normalizePostalCode } from "@/lib/phone";
-import { ORDER_SIZES, isProvince } from "@/lib/provinces";
+import { normalizeIranianMobile } from "@/lib/phone";
+import {
+  CONTACT_METHOD_LABELS_FA,
+  ORDER_SIZES,
+  isContactMethod,
+  normalizeTelegramUsername,
+  type ContactMethod,
+} from "@/lib/orderOptions";
 import { getClientIp } from "@/lib/requestIp";
 import { getSiteUrl } from "@/lib/site";
 import { runInBackground, sendTelegramMessage } from "@/lib/telegram";
 import type { OrderFieldError, OrderFormState } from "./orderForm";
 
 const MAX_NAME = 120;
-const MAX_CITY = 80;
-const MAX_ADDRESS = 500;
 const MAX_NOTE = 1000;
 
 function readLocale(value: FormDataEntryValue | null): "fa" | "en" {
@@ -28,10 +32,8 @@ async function notifyTelegram(order: {
   productName: string;
   size: number;
   price: number;
-  province: string;
-  city: string;
-  address: string;
-  postalCode: string;
+  contactMethod: ContactMethod;
+  telegramUsername: string | null;
   note: string | null;
 }) {
   try {
@@ -49,9 +51,8 @@ async function notifyTelegram(order: {
       `لباس: ${order.productName}`,
       `سایز: ${order.size}`,
       `قیمت: ${order.price.toLocaleString("fa-IR")} تومان`,
-      `استان/شهر: ${order.province} / ${order.city}`,
-      `نشانی: ${order.address}`,
-      `کد پستی: ${order.postalCode}`,
+      `راه تماس: ${CONTACT_METHOD_LABELS_FA[order.contactMethod]}`,
+      ...(order.telegramUsername ? [`آیدی تلگرام: @${order.telegramUsername}`] : []),
       `توضیحات: ${order.note ?? "—"}`,
       "",
       `${siteUrl}/admin/orders`,
@@ -74,19 +75,23 @@ export async function submitOrderAction(
 ): Promise<OrderFormState> {
   const locale = readLocale(formData.get("locale"));
 
+  const rawMethod = formData.get("contactMethod");
+  const contactMethod: ContactMethod | null = isContactMethod(rawMethod) ? rawMethod : null;
+
   // Honeypot: invisible to people, irresistible to bots. Pretend it worked.
   if (String(formData.get("website") ?? "").trim()) {
-    return { status: "success" };
+    return { status: "success", method: contactMethod ?? "phone" };
   }
 
   const name = text(formData, "name", MAX_NAME);
   const phone = normalizeIranianMobile(String(formData.get("phone") ?? ""));
   const productSlug = text(formData, "product", 200);
   const size = Number(formData.get("size"));
-  const province = text(formData, "province", 80);
-  const city = text(formData, "city", MAX_CITY);
-  const address = text(formData, "address", MAX_ADDRESS);
-  const postalCode = normalizePostalCode(String(formData.get("postalCode") ?? ""));
+  // Only meaningful with Telegram; ignored for any other method.
+  const telegramUsername =
+    contactMethod === "telegram"
+      ? normalizeTelegramUsername(String(formData.get("telegramUsername") ?? ""))
+      : null;
   const note = text(formData, "note", MAX_NOTE) || null;
 
   const fieldErrors: OrderFieldError[] = [];
@@ -102,10 +107,10 @@ export async function submitOrderAction(
   }
   if (!product) fieldErrors.push("product");
   if (!(ORDER_SIZES as readonly number[]).includes(size)) fieldErrors.push("size");
-  if (!isProvince(province)) fieldErrors.push("province");
-  if (!city) fieldErrors.push("city");
-  if (!address) fieldErrors.push("address");
-  if (!postalCode) fieldErrors.push("postalCode");
+  // The form always sends a method (a preselected radio group); a missing
+  // or unknown one means a tampered request, not a user mistake.
+  if (!contactMethod) return { status: "error", generic: true };
+  if (contactMethod === "telegram" && !telegramUsername) fieldErrors.push("telegramUsername");
   if (fieldErrors.length > 0 || !product) return { status: "error", fieldErrors };
 
   try {
@@ -122,10 +127,8 @@ export async function submitOrderAction(
         productNameSnapshot: product.nameFa,
         priceSnapshot: product.price,
         size,
-        province,
-        city,
-        address,
-        postalCode: postalCode!,
+        contactMethod,
+        telegramUsername,
         note,
         locale,
       },
@@ -138,10 +141,8 @@ export async function submitOrderAction(
         productName: product.nameFa,
         size,
         price: product.price,
-        province,
-        city,
-        address,
-        postalCode: postalCode!,
+        contactMethod,
+        telegramUsername,
         note,
       }),
     );
@@ -150,5 +151,5 @@ export async function submitOrderAction(
     return { status: "error", generic: true };
   }
 
-  return { status: "success" };
+  return { status: "success", method: contactMethod };
 }

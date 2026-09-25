@@ -3,7 +3,7 @@ import { ORDER_STATUSES, isOrderStatus, listOrdersAdmin, type OrderAdminRow } fr
 import { requireAdmin } from "@/lib/adminAuth";
 import { formatJalali, toPersianDigits } from "@/lib/jalali";
 import { updateOrderStatusAction } from "./actions";
-import CopyAddressButton from "./CopyAddressButton";
+import { CONTACT_METHOD_LABELS_FA } from "@/lib/orderOptions";
 import { ORDER_STATUS_LABELS } from "./labels";
 import StatusSelect from "./StatusSelect";
 
@@ -25,15 +25,9 @@ function formatSubmitted(createdAt: string) {
   return `${formatJalali(iso)}، ساعت ${toPersianDigits(`${get("hour")}:${get("minute")}`)}`;
 }
 
-/** The block «کپی نشانی» puts on the clipboard, laid out for a courier. */
-function courierText(order: OrderAdminRow) {
-  return [
-    order.name,
-    order.phone,
-    `${order.province}، ${order.city}`,
-    order.address,
-    `کد پستی: ${order.postal_code}`,
-  ].join("\n");
+/** wa.me wants the international number without "+" or the leading 0: 0912… -> 98912…. */
+function whatsappUrl(phone: string) {
+  return `https://wa.me/98${phone.replace(/^0/, "")}`;
 }
 
 function OrderCard({ order }: { order: OrderAdminRow }) {
@@ -64,20 +58,34 @@ function OrderCard({ order }: { order: OrderAdminRow }) {
           {" · "}
           <span className="text-zinc-900">{order.price_snapshot.toLocaleString("fa-IR")} تومان</span>
         </p>
-        <p className="text-zinc-600">
-          استان/شهر:{" "}
-          <span className="text-zinc-900">
-            {order.province} / {order.city}
+        <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-zinc-600">
+          <span>
+            راه تماس:{" "}
+            <span data-testid="contact-method" className="text-zinc-900">
+              {CONTACT_METHOD_LABELS_FA[order.contact_method]}
+            </span>
           </span>
-        </p>
-        <p className="text-zinc-600">
-          نشانی: <span className="whitespace-pre-line text-zinc-900">{order.address}</span>
-        </p>
-        <p className="text-zinc-600">
-          کد پستی:{" "}
-          <span dir="ltr" className="text-zinc-900">
-            {order.postal_code}
-          </span>
+          {order.contact_method === "whatsapp" && (
+            <a
+              href={whatsappUrl(order.phone)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-9 items-center rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-900 hover:bg-zinc-50"
+            >
+              باز کردن واتس‌اپ
+            </a>
+          )}
+          {order.contact_method === "telegram" && order.telegram_username && (
+            <a
+              href={`https://t.me/${order.telegram_username}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              dir="ltr"
+              className="text-zinc-900 underline underline-offset-4"
+            >
+              @{order.telegram_username}
+            </a>
+          )}
         </p>
         {order.note && <p className="whitespace-pre-line text-zinc-700">{order.note}</p>}
         <p className="text-xs text-zinc-500">ثبت: {formatSubmitted(order.created_at)}</p>
@@ -88,7 +96,6 @@ function OrderCard({ order }: { order: OrderAdminRow }) {
           status={order.status}
           label={`وضعیت سفارش ${order.name}`}
         />
-        <CopyAddressButton text={courierText(order)} />
       </div>
     </li>
   );

@@ -1,6 +1,7 @@
 import type { MediaBoxProps } from "@/components/MediaBox";
 import { getDb } from "./client";
 import { resolveMedia } from "./media";
+import type { ContactMethod } from "@/lib/orderOptions";
 import type { OrderStatus } from "./orderStatus";
 
 export { ORDER_STATUSES, isOrderStatus, type OrderStatus } from "./orderStatus";
@@ -15,10 +16,9 @@ export interface OrderInput {
   productNameSnapshot: string;
   priceSnapshot: number;
   size: number;
-  province: string;
-  city: string;
-  address: string;
-  postalCode: string;
+  contactMethod: ContactMethod;
+  /** Without "@"; only for contactMethod === "telegram". */
+  telegramUsername: string | null;
   note: string | null;
   locale: "fa" | "en";
 }
@@ -44,8 +44,8 @@ export async function createOrder(input: OrderInput, ip: string, now = Date.now(
     db
       .prepare(
         `INSERT INTO orders (id, name, phone, product_id, product_name_snapshot, price_snapshot,
-           size, province, city, address, postal_code, note, locale)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           size, contact_method, telegram_username, note, locale)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .bind(
         id,
@@ -55,10 +55,8 @@ export async function createOrder(input: OrderInput, ip: string, now = Date.now(
         input.productNameSnapshot,
         input.priceSnapshot,
         input.size,
-        input.province,
-        input.city,
-        input.address,
-        input.postalCode,
+        input.contactMethod,
+        input.telegramUsername,
         input.note,
         input.locale,
       ),
@@ -160,10 +158,8 @@ export interface OrderAdminRow {
   product_name_snapshot: string;
   price_snapshot: number;
   size: number;
-  province: string;
-  city: string;
-  address: string;
-  postal_code: string;
+  contact_method: ContactMethod;
+  telegram_username: string | null;
   note: string | null;
   locale: string;
   status: OrderStatus;
@@ -175,7 +171,7 @@ export async function listOrdersAdmin(status: OrderStatus | null): Promise<Order
   const { results } = await db
     .prepare(
       `SELECT o.id, o.name, o.phone, p.slug AS product_slug, o.product_name_snapshot,
-              o.price_snapshot, o.size, o.province, o.city, o.address, o.postal_code,
+              o.price_snapshot, o.size, o.contact_method, o.telegram_username,
               o.note, o.locale, o.status, o.created_at
        FROM orders o
        LEFT JOIN products p ON p.id = o.product_id
