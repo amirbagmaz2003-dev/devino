@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { isAdminAuthenticated } from "@/lib/adminAuth";
-import { countNewBookings } from "@/db/bookings";
+import { countNewOrders } from "@/db/orders";
 import { logoutAction } from "../actions";
 
 export default async function AdminDashboardLayout({
@@ -13,7 +13,7 @@ export default async function AdminDashboardLayout({
     redirect("/admin/login");
   }
 
-  const newBookings = await countNewBookings().catch(() => 0);
+  const newOrders = await countNewOrders().catch(() => 0);
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-5xl flex-col">
@@ -29,17 +29,17 @@ export default async function AdminDashboardLayout({
             محصولات
           </Link>
           <Link
-            href="/admin/bookings"
+            href="/admin/orders"
             className="inline-flex items-center gap-1.5 text-zinc-600 hover:text-zinc-900"
           >
-            درخواست‌های پرو
-            {newBookings > 0 && (
+            سفارش‌ها
+            {newOrders > 0 && (
               <span
-                data-testid="new-bookings-badge"
-                aria-label={`${newBookings} درخواست جدید`}
+                data-testid="new-orders-badge"
+                aria-label={`${newOrders} سفارش جدید`}
                 className="min-w-5 rounded-full bg-zinc-900 px-1.5 text-center text-xs leading-5 text-white"
               >
-                {newBookings.toLocaleString("fa-IR")}
+                {newOrders.toLocaleString("fa-IR")}
               </span>
             )}
           </Link>

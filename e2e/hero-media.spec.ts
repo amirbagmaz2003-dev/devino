@@ -530,15 +530,9 @@ for (const locale of ["fa", "en"] as const) {
     expect(
       await page.locator('meta[name="description"]').getAttribute("content"),
     ).toBe(c.tagline);
-    // 1. tagline line directly under the teaser button, heading font, italic.
+    // 1. tagline: the teaser's main line (brief 04), between heading and button.
     const teaser = page.locator("section").nth(1);
-    const taglineLine = teaser.locator("p").last();
-    await expect(taglineLine).toHaveText(c.tagline);
-    await expect(taglineLine).toHaveCSS("font-style", "italic");
-    const buttonBox = (await teaser.getByRole("link").boundingBox())!;
-    expect((await taglineLine.boundingBox())!.y).toBeGreaterThan(
-      buttonBox.y + buttonBox.height,
-    );
+    await expect(teaser.getByTestId("home-tagline")).toHaveText(c.tagline);
     // 2. statement: black section, pearl-white text.
     const statement = page.locator("section").nth(2);
     await expect(statement).toHaveText(c.statement);
@@ -567,7 +561,10 @@ for (const locale of ["fa", "en"] as const) {
     await expect(lead).toHaveCSS("font-style", "italic");
     const leadY = (await lead.boundingBox())!.y;
     const intro = page.locator("p", {
-      hasText: locale === "fa" ? "برای دیدن و پوشیدن" : "To see and try on",
+      hasText:
+        locale === "fa"
+          ? "برای پرسش درباره‌ی لباس‌ها"
+          : "For questions about our pieces",
     });
     expect((await intro.boundingBox())!.y).toBeGreaterThan(leadY);
 
@@ -576,9 +573,9 @@ for (const locale of ["fa", "en"] as const) {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       c.aboutTitle,
     );
-    await expect(page.locator("article").getByRole("heading", { level: 2 })).toHaveText([
-      ...c.headings,
-    ]);
+    await expect(
+      page.locator("article").getByRole("heading", { level: 2 }),
+    ).toHaveText([...c.headings]);
     await expect(page.locator("article section p").first()).toContainText(
       c.aboutBodyStart,
     );

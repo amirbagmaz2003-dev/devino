@@ -3,8 +3,8 @@
 import { useRef } from "react";
 import AdminForm, { useAdminForm } from "@/components/admin/AdminForm";
 import type { AdminFormState } from "@/lib/adminForm";
-import { BOOKING_STATUSES, type BookingStatus } from "@/db/bookingStatus";
-import { BOOKING_STATUS_LABELS } from "./labels";
+import { ORDER_STATUSES, type OrderStatus } from "@/db/orderStatus";
+import { ORDER_STATUS_LABELS } from "./labels";
 
 type Action = (
   state: AdminFormState,
@@ -18,7 +18,7 @@ export default function StatusSelect({
   label,
 }: {
   action: Action;
-  status: BookingStatus;
+  status: OrderStatus;
   label: string;
 }) {
   return (
@@ -28,7 +28,7 @@ export default function StatusSelect({
   );
 }
 
-function Select({ status, label }: { status: BookingStatus; label: string }) {
+function Select({ status, label }: { status: OrderStatus; label: string }) {
   const { pending } = useAdminForm();
   const ref = useRef<HTMLSelectElement>(null);
   return (
@@ -41,9 +41,9 @@ function Select({ status, label }: { status: BookingStatus; label: string }) {
       onChange={() => ref.current?.form?.requestSubmit()}
       className="min-h-10 rounded-md border border-zinc-300 bg-white px-3 text-sm disabled:opacity-60"
     >
-      {BOOKING_STATUSES.map((value) => (
+      {ORDER_STATUSES.map((value) => (
         <option key={value} value={value}>
-          {BOOKING_STATUS_LABELS[value]}
+          {ORDER_STATUS_LABELS[value]}
         </option>
       ))}
     </select>

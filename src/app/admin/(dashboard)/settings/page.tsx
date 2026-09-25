@@ -3,7 +3,7 @@ import { getHeroMediaAdmin, getSiteSettingsAdmin } from "@/db/admin";
 import { mediaUrl } from "@/db/media";
 import FocalPointPicker from "@/components/admin/FocalPointPicker";
 import BackfillVariants from "./BackfillVariants";
-import { getTelegramChatId } from "@/db/bookings";
+import { getTelegramChatId } from "@/db/orders";
 import { isTelegramBotConfigured } from "@/lib/telegram";
 import AdminForm, { SubmitButton } from "@/components/admin/AdminForm";
 import {
