@@ -89,21 +89,30 @@ interface OrderFields {
   name: string;
   phone: string;
   size?: string;
-  province?: string;
-  city: string;
-  address: string;
-  postalCode: string;
+  method?: "phone" | "whatsapp" | "telegram";
+  telegramUsername?: string;
   note?: string;
 }
 
-async function fillOrder(page: Page, f: OrderFields) {
+const METHOD_LABEL = {
+  fa: { phone: "تماس تلفنی", whatsapp: "واتس‌اپ", telegram: "تلگرام" },
+  en: { phone: "Phone call", whatsapp: "WhatsApp", telegram: "Telegram" },
+} as const;
+
+async function fillOrder(
+  page: Page,
+  f: OrderFields,
+  locale: "fa" | "en" = "fa",
+) {
   await page.fill("#order-name", f.name);
   await page.fill("#order-phone", f.phone);
-  await page.selectOption("#order-size", f.size ?? "40");
-  await page.selectOption("#order-province", f.province ?? "تهران");
-  await page.fill("#order-city", f.city);
-  await page.fill("#order-address", f.address);
-  await page.fill("#order-postalCode", f.postalCode);
+  await page.selectOption("#order-size", f.size ?? "38");
+  if (f.method)
+    await page
+      .getByRole("radio", { name: METHOD_LABEL[locale][f.method] })
+      .check();
+  if (f.telegramUsername !== undefined)
+    await page.fill("#order-telegramUsername", f.telegramUsername);
   if (f.note) await page.fill("#order-note", f.note);
 }
 
@@ -121,39 +130,51 @@ const merlot = () =>
 const TEXT = {
   fa: {
     submit: "ثبت سفارش",
-    success:
-      "سفارش شما ثبت شد. به‌زودی برای تأیید جزئیات با شما تماس می‌گیریم.",
+    intro:
+      "برای ثبت سفارش، فرم زیر را پر کنید. پس از ثبت، برای نهایی کردن سفارش از راهی که انتخاب می‌کنید با شما تماس می‌گیریم.",
+    methodLegend: "از چه راهی با شما هماهنگ کنیم؟",
+    telegramLabel: "آیدی تلگرام",
+    success: (m: string) =>
+      `سفارش شما ثبت شد. برای نهایی کردن آن، به‌زودی از طریق ${m} با شما در ارتباط خواهیم بود.`,
+    successMethod: {
+      phone: "تماس تلفنی",
+      whatsapp: "واتس‌اپ",
+      telegram: "تلگرام",
+    },
     errors: {
       name: "لطفاً نام را وارد کنید.",
       phone: "شماره‌ی موبایل معتبر نیست.",
       product: "لطفاً یک لباس انتخاب کنید.",
       size: "لطفاً سایز را انتخاب کنید.",
-      province: "لطفاً استان را انتخاب کنید.",
-      city: "لطفاً شهر را وارد کنید.",
-      address: "لطفاً نشانی کامل را وارد کنید.",
-      postalCode: "کد پستی باید ۱۰ رقم باشد.",
+      telegramUsername: "لطفاً آیدی تلگرام را درست وارد کنید.",
     },
   },
   en: {
     submit: "Send order",
-    success:
-      "Your order has been received. We'll call you shortly to confirm the details.",
+    intro:
+      "Fill in the form below to place your order. Once it's received, we'll contact you through the channel you choose to finalize it.",
+    methodLegend: "How should we reach you?",
+    telegramLabel: "Telegram username",
+    success: (m: string) =>
+      `Your order has been received. We'll be in touch shortly via ${m} to finalize it.`,
+    successMethod: {
+      phone: "a phone call",
+      whatsapp: "WhatsApp",
+      telegram: "Telegram",
+    },
     errors: {
       name: "Please enter your name.",
       phone: "Please enter a valid mobile number.",
       product: "Please choose a piece.",
       size: "Please choose a size.",
-      province: "Please choose a province.",
-      city: "Please enter your city.",
-      address: "Please enter your full address.",
-      postalCode: "The postal code must be 10 digits.",
+      telegramUsername: "Please enter a valid Telegram username.",
     },
   },
 } as const;
 
 // ---------- order page ----------
 
-test("fa: order from a product page — preselected, summary, DB price snapshot, Persian digits, Telegram", async ({
+test("fa: from the product page (old block gone) — default phone, DB price snapshot, Telegram message format", async ({
   browser,
 }) => {
   const before = sql<{ telegram_chat_id: string | null }>(
@@ -164,34 +185,60 @@ test("fa: order from a product page — preselected, summary, DB price snapshot,
   const { context, page } = await visitor(browser);
 
   await page.goto("/fa/products/merlot");
+  // The old order/contact block is gone; only the button remains.
+  await expect(page.getByText("برای ثبت سفارش", { exact: true })).toHaveCount(
+    0,
+  );
+  await expect(page.getByText(/این سایت صرفاً نمایشگر مجموعه است/)).toHaveCount(
+    0,
+  );
+  await expect(
+    page.locator(
+      "main a[href^='tel:'], main a[href*='t.me'], main a[href*='instagram.com']",
+    ),
+  ).toHaveCount(0);
   await page.getByRole("link", { name: "ثبت سفارش" }).click();
   await page.waitForURL(/\/fa\/order\?product=merlot$/);
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("ثبت سفارش");
-  await expect(page.locator("#order-product")).toHaveValue("merlot");
-  const summary = page.getByTestId("order-summary");
-  await expect(summary).toContainText("مرلو");
-  await expect(summary).toContainText("تومان");
-  await expect(summary.locator("img")).toHaveCount(1);
-  // Changing the piece updates the summary.
-  await page.selectOption("#order-product", "syrah");
-  await expect(summary).toContainText("سیرا");
-  await page.selectOption("#order-product", "merlot");
-  await expect(summary).toContainText("مرلو");
-  // No date field anymore.
-  await expect(page.locator('input[name="preferredDate"]')).toHaveCount(0);
+  await expect(page.getByText(TEXT.fa.intro, { exact: true })).toBeVisible();
+  await expect(page.getByTestId("order-summary")).toContainText("مرلو");
+  for (const gone of [
+    "#order-province",
+    "#order-city",
+    "#order-address",
+    "#order-postalCode",
+  ]) {
+    await expect(page.locator(gone)).toHaveCount(0);
+  }
+  // Field order: name, mobile, piece, size, contact method, (Telegram), notes.
+  const order_ = await page.locator("form label, form legend").allInnerTexts();
+  expect(
+    order_
+      .map((t) => t.trim())
+      .filter(Boolean)
+      .slice(1),
+  ).toEqual([
+    "نام و نام خانوادگی",
+    "شماره‌ی موبایل",
+    "لباس",
+    "سایز",
+    TEXT.fa.methodLegend,
+    "تماس تلفنی",
+    "واتس‌اپ",
+    "تلگرام",
+    "توضیحات (اختیاری)",
+  ]);
+  // Default method: phone; no Telegram field.
+  await expect(page.getByRole("radio", { name: "تماس تلفنی" })).toBeChecked();
+  await expect(page.locator("#order-telegramUsername")).toHaveCount(0);
 
   const name = `مریم ${RUN}`;
   await fillOrder(page, {
     name,
     phone: "۰۹۱۲ ۳۴۵ ۶۷۸۹",
-    size: "42",
-    province: "اصفهان",
-    city: "کاشان",
-    address: "خیابان امیرکبیر، کوچه‌ی ۱۲، پلاک ۴",
-    postalCode: "۸۷۱۵۹-۱۲۳۴۵",
-    note: "ترجیحاً عصر تماس بگیرید",
+    size: "40",
+    note: "ترجیحاً عصر",
   });
-  // Tampering: extra fields claiming a price/name never reach the order.
+  // Tampering with price/name fields never reaches the order.
   await page.evaluate(() => {
     const form = document.querySelector("form")!;
     for (const [n, v] of [
@@ -208,20 +255,19 @@ test("fa: order from a product page — preselected, summary, DB price snapshot,
   });
   telegram.calls = [];
   await page.getByRole("button", { name: TEXT.fa.submit }).click();
-  await expect(page.getByRole("status")).toHaveText(TEXT.fa.success);
-  await expect(page.locator("form")).toHaveCount(0);
+  await expect(page.getByRole("status")).toHaveText(
+    TEXT.fa.success("تماس تلفنی"),
+  );
 
   expect(order(name)[0]).toMatchObject({
     phone: "09123456789",
     product_id: product.id,
     product_name_snapshot: product.name_fa,
     price_snapshot: product.price,
-    size: 42,
-    province: "اصفهان",
-    city: "کاشان",
-    address: "خیابان امیرکبیر، کوچه‌ی ۱۲، پلاک ۴",
-    postal_code: "8715912345",
-    note: "ترجیحاً عصر تماس بگیرید",
+    size: 40,
+    contact_method: "phone",
+    telegram_username: null,
+    note: "ترجیحاً عصر",
     locale: "fa",
     status: "new",
   });
@@ -229,119 +275,175 @@ test("fa: order from a product page — preselected, summary, DB price snapshot,
   await expect
     .poll(() => telegram.calls.filter((c) => c.method === "sendMessage").length)
     .toBe(1);
-  const text = String(
+  const lines = String(
     telegram.calls.find((c) => c.method === "sendMessage")!.body.text,
-  );
-  const lines = text.split("\n");
+  ).split("\n");
   expect(lines[0]).toBe("سفارش جدید");
   for (const expected of [
     `نام: ${name}`,
     "موبایل: 09123456789",
     `لباس: ${product.name_fa}`,
-    "سایز: 42",
+    "سایز: 40",
     `قیمت: ${product.price.toLocaleString("fa-IR")} تومان`,
-    "استان/شهر: اصفهان / کاشان",
-    "نشانی: خیابان امیرکبیر، کوچه‌ی ۱۲، پلاک ۴",
-    "کد پستی: 8715912345",
-    "توضیحات: ترجیحاً عصر تماس بگیرید",
+    "راه تماس: تماس تلفنی",
+    "توضیحات: ترجیحاً عصر",
   ]) {
     expect(lines).toContain(expected);
   }
+  expect(
+    lines.some((l) => /^(آیدی تلگرام|استان\/شهر|نشانی|کد پستی):/.test(l)),
+  ).toBe(false);
   expect(lines.at(-1)).toMatch(/\/admin\/orders$/);
 
   sql(`UPDATE site_settings SET telegram_chat_id = ${q(before)} WHERE id = 1`);
   await context.close();
 });
 
-test("en: shipping note, English province names stored in Persian, success", async ({
-  browser,
-}) => {
-  const { context, page } = await visitor(browser);
-  await page.goto("/en/order?product=syrah");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Place an Order",
-  );
-  await expect(
-    page.getByText("We currently ship within Iran only."),
-  ).toBeVisible();
-  await expect(page.locator("#order-product")).toHaveValue("syrah");
-  await expect(page.locator("#order-size option").first()).toHaveText(
-    "Choose a size",
-  );
-  await expect(
-    page.getByText("Between two sizes? Mention it in the notes."),
-  ).toBeVisible();
-  await expect(
-    page.locator('#order-province option[value="اصفهان"]'),
-  ).toHaveText("Isfahan");
-  await expect(page.locator("#order-province option")).toHaveCount(32); // placeholder + 31
-
-  const name = `Sara ${RUN}`;
-  await fillOrder(page, {
-    name,
-    phone: "+98 912-345-6789",
-    size: "38",
-    province: "فارس",
-    city: "Shiraz",
-    address: "Zand Blvd, No. 7",
-    postalCode: "71 345 67890",
-  });
-  await page.getByRole("button", { name: TEXT.en.submit }).click();
-  await expect(page.getByRole("status")).toHaveText(TEXT.en.success);
-  expect(order(name)[0]).toMatchObject({
-    phone: "09123456789",
-    size: 38,
-    province: "فارس",
-    postal_code: "7134567890",
-    note: null,
-    locale: "en",
-  });
-  await context.close();
-});
-
 for (const locale of ["fa", "en"] as const) {
-  test(`${locale}: every validation error, without a product; typed values survive`, async ({
+  test(`${locale}: Telegram username only for Telegram, required, normalized; message names the method`, async ({
+    browser,
+  }) => {
+    const before = sql<{ telegram_chat_id: string | null }>(
+      "SELECT telegram_chat_id FROM site_settings WHERE id = 1",
+    )[0].telegram_chat_id;
+    sql("UPDATE site_settings SET telegram_chat_id = '424242' WHERE id = 1");
+    const { context, page } = await visitor(browser);
+    await page.goto(`/${locale}/order?product=syrah`);
+    await expect(
+      page.getByRole("radio", { name: METHOD_LABEL[locale].phone }),
+    ).toBeChecked();
+    await expect(page.locator("#order-telegramUsername")).toHaveCount(0);
+
+    // Telegram: the field appears with its label and placeholder, and is required.
+    await page
+      .getByRole("radio", { name: METHOD_LABEL[locale].telegram })
+      .check();
+    const username = page.locator("#order-telegramUsername");
+    await expect(username).toBeVisible();
+    await expect(page.getByLabel(TEXT[locale].telegramLabel)).toBeVisible();
+    await expect(username).toHaveAttribute("placeholder", "@username");
+    const name = `TG ${locale} ${RUN}`;
+    await fillOrder(
+      page,
+      { name, phone: "09121234567", size: "36", telegramUsername: "" },
+      locale,
+    );
+    await page.getByRole("button", { name: TEXT[locale].submit }).click();
+    await expect(
+      page.getByText(TEXT[locale].errors.telegramUsername, { exact: true }),
+    ).toBeVisible();
+    await expect(username).toBeFocused();
+    for (const invalid of ["abc", "bad name", "@x-y-z-w-v", "a".repeat(33)]) {
+      await username.fill(invalid);
+      await page.getByRole("button", { name: TEXT[locale].submit }).click();
+      await expect(
+        page.getByText(TEXT[locale].errors.telegramUsername, { exact: true }),
+      ).toBeVisible();
+    }
+    expect(order(name)).toHaveLength(0);
+
+    // Switching away hides it; switching back keeps working. "@" is stripped.
+    await page
+      .getByRole("radio", { name: METHOD_LABEL[locale].whatsapp })
+      .check();
+    await expect(username).toHaveCount(0);
+    await page
+      .getByRole("radio", { name: METHOD_LABEL[locale].telegram })
+      .check();
+    await page.fill("#order-telegramUsername", "@Devino_Client1");
+    telegram.calls = [];
+    await page.getByRole("button", { name: TEXT[locale].submit }).click();
+    await expect(page.getByRole("status")).toHaveText(
+      TEXT[locale].success(TEXT[locale].successMethod.telegram),
+    );
+    expect(order(name)[0]).toMatchObject({
+      size: 36,
+      contact_method: "telegram",
+      telegram_username: "Devino_Client1",
+      locale,
+    });
+    await expect
+      .poll(() => telegram.calls.some((c) => c.method === "sendMessage"))
+      .toBe(true);
+    const lines = String(
+      telegram.calls.find((c) => c.method === "sendMessage")!.body.text,
+    ).split("\n");
+    expect(lines).toContain("راه تماس: تلگرام");
+    expect(lines).toContain("آیدی تلگرام: @Devino_Client1");
+
+    // WhatsApp: the success message names it; a stray username is ignored.
+    const wa = await visitor(browser);
+    await wa.page.goto(`/${locale}/order?product=merlot`);
+    const waName = `WA ${locale} ${RUN}`;
+    await fillOrder(
+      wa.page,
+      { name: waName, phone: "09121234567", method: "whatsapp" },
+      locale,
+    );
+    await wa.page.evaluate(() => {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = "telegramUsername";
+      input.value = "someone_else";
+      document.querySelector("form")!.appendChild(input);
+    });
+    await wa.page.getByRole("button", { name: TEXT[locale].submit }).click();
+    await expect(wa.page.getByRole("status")).toHaveText(
+      TEXT[locale].success(TEXT[locale].successMethod.whatsapp),
+    );
+    expect(order(waName)[0]).toMatchObject({
+      contact_method: "whatsapp",
+      telegram_username: null,
+    });
+    await wa.context.close();
+
+    sql(
+      `UPDATE site_settings SET telegram_chat_id = ${q(before)} WHERE id = 1`,
+    );
+    await context.close();
+  });
+
+  test(`${locale}: validation errors; only sizes 36/38/40, also server-side`, async ({
     browser,
   }) => {
     const { context, page } = await visitor(browser);
     await page.goto(`/${locale}/order`);
-    await expect(page.getByTestId("order-summary")).toHaveCount(0);
-    await expect(page.locator("#order-product")).toHaveValue("");
+    await expect(page.locator("#order-size option")).toHaveText([
+      locale === "fa" ? "انتخاب سایز" : "Choose a size",
+      ...(locale === "fa" ? ["۳۶", "۳۸", "۴۰"] : ["36", "38", "40"]),
+    ]);
+    await expect(
+      page.getByText(
+        locale === "fa"
+          ? "اگر بین دو سایز مردد هستید، در توضیحات بنویسید."
+          : "Between two sizes? Mention it in the notes.",
+      ),
+    ).toBeVisible();
     const submit = page.getByRole("button", { name: TEXT[locale].submit });
-
     await submit.click();
-    for (const message of Object.values(TEXT[locale].errors)) {
-      await expect(page.getByText(message, { exact: true })).toBeVisible();
+    for (const field of ["name", "phone", "product", "size"] as const) {
+      await expect(
+        page.getByText(TEXT[locale].errors[field], { exact: true }),
+      ).toBeVisible();
     }
     await expect(page.locator("#order-name")).toBeFocused();
-    await expect(page.locator("#order-postalCode")).toHaveAttribute(
-      "aria-invalid",
-      "true",
-    );
-    await expect(page.locator("#order-postalCode")).toHaveAttribute(
-      "aria-describedby",
-      "order-postalCode-error",
-    );
 
-    // Everything valid except a 9-digit postal code.
+    // A tampered size (42) is refused by the server.
     await page.selectOption("#order-product", "merlot");
-    await fillOrder(page, {
-      name: `Invalid ${RUN}`,
-      phone: "09121112233",
-      city: "Tehran",
-      address: "Somewhere 1",
-      postalCode: "۱۲۳۴۵۶۷۸۹",
+    const name = `Size ${locale} ${RUN}`;
+    await fillOrder(page, { name, phone: "09121112233" }, locale);
+    await page.locator("#order-size").evaluate((select: HTMLSelectElement) => {
+      const option = document.createElement("option");
+      option.value = "42";
+      select.appendChild(option);
+      select.value = "42";
     });
     await submit.click();
     await expect(
-      page.getByText(TEXT[locale].errors.postalCode, { exact: true }),
+      page.getByText(TEXT[locale].errors.size, { exact: true }),
     ).toBeVisible();
-    await expect(
-      page.getByText(TEXT[locale].errors.name, { exact: true }),
-    ).toHaveCount(0);
-    await expect(page.locator("#order-postalCode")).toBeFocused();
-    await expect(page.locator("#order-city")).toHaveValue("Tehran");
-    expect(order(`Invalid ${RUN}`)).toHaveLength(0);
+    await expect(page.locator("#order-name")).toHaveValue(name);
+    expect(order(name)).toHaveLength(0);
     await context.close();
   });
 }
@@ -351,18 +453,12 @@ test("honeypot saves nothing; an IP is limited to 5 orders per hour", async ({
 }) => {
   const bot = await visitor(browser);
   await bot.page.goto("/fa/order?product=merlot");
-  await fillOrder(bot.page, {
-    name: `Bot ${RUN}`,
-    phone: "09120000000",
-    city: "x",
-    address: "x",
-    postalCode: "1234567890",
-  });
+  await fillOrder(bot.page, { name: `Bot ${RUN}`, phone: "09120000000" });
   await bot.page
     .locator("input[name=website]")
     .evaluate((el: HTMLInputElement) => (el.value = "spam"));
   await bot.page.getByRole("button", { name: TEXT.fa.submit }).click();
-  await expect(bot.page.getByRole("status")).toHaveText(TEXT.fa.success);
+  await expect(bot.page.getByRole("status")).toBeVisible();
   expect(order(`Bot ${RUN}`)).toHaveLength(0);
   await bot.context.close();
 
@@ -371,16 +467,9 @@ test("honeypot saves nothing; an IP is limited to 5 orders per hour", async ({
   for (let i = 1; i <= 6; i++) {
     const { context, page } = await visitor(browser, ip);
     await page.goto("/fa/order?product=merlot");
-    await fillOrder(page, {
-      name,
-      phone: "09125556677",
-      city: "x",
-      address: "x",
-      postalCode: "1234567890",
-    });
+    await fillOrder(page, { name, phone: "09125556677" });
     await page.getByRole("button", { name: TEXT.fa.submit }).click();
-    if (i <= 5)
-      await expect(page.getByRole("status")).toHaveText(TEXT.fa.success);
+    if (i <= 5) await expect(page.getByRole("status")).toBeVisible();
     else
       await expect(
         page.getByText("ارسال انجام نشد. لطفاً دوباره تلاش کنید."),
@@ -406,17 +495,33 @@ test("the order page is noindex and not in the sitemap", async ({
 
 // ---------- admin ----------
 
-test("admin: order with all fields, «کپی نشانی», status change, badge, filter; /admin/bookings redirects", async ({
+test("admin: size and contact method, WhatsApp and Telegram links, no address; status, badge, filter", async ({
   browser,
 }) => {
   const product = merlot();
-  const name = `Admin ${RUN}`;
-  sql(
-    `INSERT INTO orders (id, name, phone, product_id, product_name_snapshot, price_snapshot, size,
-       province, city, address, postal_code, note, locale)
-     VALUES ('ord-${RUN}', ${q(name)}, '09127778899', '${product.id}', ${q(product.name_fa)}, 26000000, 40,
-       'تهران', 'تهران', 'خیابان ولیعصر، پلاک ۱۰', '1234567890', 'یادداشت', 'fa')`,
-  );
+  const rows = [
+    { id: `ph-${RUN}`, name: `Admin phone ${RUN}`, method: "phone", tg: null },
+    {
+      id: `wa-${RUN}`,
+      name: `Admin whatsapp ${RUN}`,
+      method: "whatsapp",
+      tg: null,
+    },
+    {
+      id: `tg-${RUN}`,
+      name: `Admin telegram ${RUN}`,
+      method: "telegram",
+      tg: "devino_client",
+    },
+  ];
+  for (const r of rows) {
+    sql(
+      `INSERT INTO orders (id, name, phone, product_id, product_name_snapshot, price_snapshot, size,
+         contact_method, telegram_username, note, locale)
+       VALUES ('${r.id}', ${q(r.name)}, '09127778899', '${product.id}', ${q(product.name_fa)}, 26000000, 38,
+         '${r.method}', ${q(r.tg)}, 'یادداشت', 'fa')`,
+    );
+  }
   const newCount = sql<{ n: number }>(
     "SELECT COUNT(*) AS n FROM orders WHERE status='new'",
   )[0].n;
@@ -424,71 +529,60 @@ test("admin: order with all fields, «کپی نشانی», status change, badge,
   const { context, page } = await adminPage(browser);
   await page.goto("/admin/bookings");
   await expect(page).toHaveURL(/\/admin\/orders$/);
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("سفارش‌ها");
-  const nav = page.getByRole("link", { name: /سفارش‌ها/ });
-  await expect(nav).toHaveAttribute("href", "/admin/orders");
   await expect(page.getByTestId("new-orders-badge")).toHaveText(
     newCount.toLocaleString("fa-IR"),
   );
+  await expect(page.getByRole("button", { name: "کپی نشانی" })).toHaveCount(0);
+  await expect(page.locator("main")).not.toContainText(/استان|کد پستی|نشانی:/);
 
-  const card = page.locator("li", { hasText: name });
-  await expect(card.getByRole("link", { name: "09127778899" })).toHaveAttribute(
-    "href",
-    "tel:09127778899",
+  const card = (name: string) => page.locator("li", { hasText: name });
+  const phoneCard = card(rows[0].name);
+  await expect(
+    phoneCard.getByRole("link", { name: "09127778899" }),
+  ).toHaveAttribute("href", "tel:09127778899");
+  await expect(
+    phoneCard.getByRole("link", { name: product.name_fa }),
+  ).toHaveAttribute("href", "/fa/products/merlot");
+  await expect(phoneCard).toContainText("سایز: ۳۸");
+  await expect(phoneCard).toContainText("۲۶٬۰۰۰٬۰۰۰ تومان");
+  await expect(phoneCard.getByTestId("contact-method")).toHaveText(
+    "تماس تلفنی",
   );
   await expect(
-    card.getByRole("link", { name: product.name_fa }),
-  ).toHaveAttribute("href", "/fa/products/merlot");
-  await expect(card).toContainText("سایز: ۴۰");
-  await expect(card).toContainText("۲۶٬۰۰۰٬۰۰۰ تومان");
-  await expect(card).toContainText("تهران / تهران");
-  await expect(card).toContainText("خیابان ولیعصر، پلاک ۱۰");
-  await expect(card).toContainText("1234567890");
-  await expect(card).toContainText("یادداشت");
-  await expect(card).toContainText(
-    /ثبت: [۰-۹]+ (فروردین|اردیبهشت|خرداد|تیر|مرداد|شهریور|مهر|آبان|آذر|دی|بهمن|اسفند) [۰-۹]{4}/,
-  );
+    phoneCard.getByRole("link", { name: "باز کردن واتس‌اپ" }),
+  ).toHaveCount(0);
 
-  await card.getByRole("button", { name: "کپی نشانی" }).click();
-  await expect(card.getByRole("button", { name: "کپی شد" })).toBeVisible();
-  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
-    [
-      name,
-      "09127778899",
-      "تهران، تهران",
-      "خیابان ولیعصر، پلاک ۱۰",
-      "کد پستی: 1234567890",
-    ].join("\n"),
-  );
+  const waCard = card(rows[1].name);
+  await expect(waCard.getByTestId("contact-method")).toHaveText("واتس‌اپ");
+  await expect(
+    waCard.getByRole("link", { name: "باز کردن واتس‌اپ" }),
+  ).toHaveAttribute("href", "https://wa.me/989127778899");
 
-  const select = card.getByRole("combobox");
-  await expect(select.locator("option")).toHaveText([
-    "جدید",
-    "تماس گرفته شد",
-    "تأیید شد",
-    "ارسال شد",
-    "لغو شد",
-  ]);
-  await select.selectOption("confirmed");
+  const tgCard = card(rows[2].name);
+  await expect(tgCard.getByTestId("contact-method")).toHaveText("تلگرام");
+  await expect(
+    tgCard.getByRole("link", { name: "@devino_client" }),
+  ).toHaveAttribute("href", "https://t.me/devino_client");
+
+  const select = phoneCard.getByRole("combobox");
+  await select.selectOption("contacted");
   await expect
     .poll(
       () =>
         sql<{ status: string }>(
-          `SELECT status FROM orders WHERE id='ord-${RUN}'`,
+          `SELECT status FROM orders WHERE id='${rows[0].id}'`,
         )[0].status,
     )
-    .toBe("confirmed");
+    .toBe("contacted");
   await page.reload();
-  if (newCount - 1 > 0) {
-    await expect(page.getByTestId("new-orders-badge")).toHaveText(
-      (newCount - 1).toLocaleString("fa-IR"),
-    );
-  } else {
-    await expect(page.getByTestId("new-orders-badge")).toHaveCount(0);
-  }
-  await page.getByRole("link", { name: "تأیید شد" }).click();
-  await page.waitForURL(/status=confirmed/);
-  await expect(page.locator("li", { hasText: name })).toBeVisible();
+  const badge = page.getByTestId("new-orders-badge");
+  if (newCount - 1 > 0)
+    await expect(badge).toHaveText((newCount - 1).toLocaleString("fa-IR"));
+  else await expect(badge).toHaveCount(0);
+  await page.getByRole("link", { name: "تماس گرفته شد" }).click();
+  await page.waitForURL(/status=contacted/);
+  await expect(card(rows[0].name)).toBeVisible();
+  await expect(card(rows[1].name)).toHaveCount(0);
   await context.close();
 });
 

@@ -17,11 +17,7 @@ export async function generateMetadata({
 export default async function ContactPage({ params }: PageProps<"/[locale]/contact">) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [t, tProduct, settings] = await Promise.all([
-    getTranslations("contact"),
-    getTranslations("productDetail"),
-    getSiteSettings(),
-  ]);
+  const [t, settings] = await Promise.all([getTranslations("contact"), getSiteSettings()]);
 
   return (
     <div className="mx-auto max-w-2xl px-6 pt-[calc(var(--header-h)+3rem)] pb-24">
@@ -35,9 +31,9 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
         phone={settings?.contactPhone}
         telegramUrl={settings?.telegramUrl}
         instagramUrl={settings?.instagramUrl}
-        phoneLabel={tProduct("phoneLabel")}
-        telegramLabel={tProduct("telegramLabel")}
-        instagramLabel={tProduct("instagramLabel")}
+        phoneLabel={t("phoneLabel")}
+        telegramLabel={t("telegramLabel")}
+        instagramLabel={t("instagramLabel")}
       />
 
       <p className="text-matte-black/70 mt-12 text-sm">

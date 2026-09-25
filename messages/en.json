@@ -36,11 +36,6 @@
     "currencyUnit": "Toman",
     "inStock": "In stock",
     "outOfStock": "Out of stock",
-    "orderHeading": "To place an order",
-    "orderDescription": "This site is a showcase, not an online store — reach out through one of the channels below to inquire about this piece.",
-    "phoneLabel": "Call",
-    "telegramLabel": "Telegram",
-    "instagramLabel": "Instagram",
     "placeOrder": "Place an order"
   },
   "about": {
@@ -63,7 +58,10 @@
     "title": "Contact",
     "lead": "Not a dress to be looked at, but one that begins a conversation.",
     "intro": "For questions about our pieces, sizing or an existing order, reach us through any of the channels below.",
-    "orderHint": "To place an order, use the \"Place an order\" button on any piece's page."
+    "orderHint": "To place an order, use the \"Place an order\" button on any piece's page.",
+    "phoneLabel": "Call",
+    "telegramLabel": "Telegram",
+    "instagramLabel": "Instagram"
   },
   "footer": {
     "stayClose": {
@@ -92,7 +90,7 @@
   },
   "order": {
     "title": "Place an Order",
-    "intro": "Fill in the form below. We'll call you to confirm the size, shipping cost and delivery time. Payment is arranged during that call.",
+    "intro": "Fill in the form below to place your order. Once it's received, we'll contact you through the channel you choose to finalize it.",
     "fields": {
       "name": "Full name",
       "phone": "Mobile number",
@@ -102,26 +100,30 @@
       "size": "Size",
       "sizePlaceholder": "Choose a size",
       "sizeHint": "Between two sizes? Mention it in the notes.",
-      "province": "Province",
-      "provincePlaceholder": "Choose a province",
-      "city": "City",
-      "address": "Full address",
-      "postalCode": "Postal code",
-      "note": "Notes (optional)"
+      "note": "Notes (optional)",
+      "contactMethod": "How should we reach you?",
+      "telegramUsername": "Telegram username"
     },
     "submit": "Send order",
-    "success": "Your order has been received. We'll call you shortly to confirm the details.",
+    "success": "Your order has been received. We'll be in touch shortly via {method} to finalize it.",
     "errors": {
       "name": "Please enter your name.",
       "phone": "Please enter a valid mobile number.",
       "product": "Please choose a piece.",
       "size": "Please choose a size.",
-      "province": "Please choose a province.",
-      "city": "Please enter your city.",
-      "address": "Please enter your full address.",
-      "postalCode": "The postal code must be 10 digits.",
-      "generic": "Something went wrong. Please try again."
+      "generic": "Something went wrong. Please try again.",
+      "telegramUsername": "Please enter a valid Telegram username."
     },
-    "shippingNote": "We currently ship within Iran only."
+    "shippingNote": "We currently ship within Iran only.",
+    "contactMethods": {
+      "phone": "Phone call",
+      "whatsapp": "WhatsApp",
+      "telegram": "Telegram"
+    },
+    "successMethods": {
+      "phone": "a phone call",
+      "whatsapp": "WhatsApp",
+      "telegram": "Telegram"
+    }
   }
 }

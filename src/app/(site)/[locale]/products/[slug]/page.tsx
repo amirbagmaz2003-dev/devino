@@ -2,11 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { getProductBySlug, getSiteSettings } from "@/db/queries";
+import { getProductBySlug } from "@/db/queries";
 import { excerpt, pageMetadata } from "@/lib/seo";
 import { formatPrice } from "@/lib/formatPrice";
 import ProductGallery from "@/components/ProductGallery";
-import ContactChannels from "@/components/ContactChannels";
 
 export const dynamic = "force-dynamic";
 
@@ -37,9 +36,8 @@ export default async function ProductDetailPage({
 }: PageProps<"/[locale]/products/[slug]">) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
-  const [product, siteSettings, t] = await Promise.all([
+  const [product, t] = await Promise.all([
     getProductBySlug(slug, locale),
-    getSiteSettings(),
     getTranslations("productDetail"),
   ]);
   if (!product) notFound();
@@ -70,16 +68,6 @@ export default async function ProductDetailPage({
             {t("placeOrder")}
           </Link>
 
-          <ContactChannels
-            heading={t("orderHeading")}
-            description={t("orderDescription")}
-            phone={siteSettings?.contactPhone}
-            telegramUrl={siteSettings?.telegramUrl}
-            instagramUrl={siteSettings?.instagramUrl}
-            phoneLabel={t("phoneLabel")}
-            telegramLabel={t("telegramLabel")}
-            instagramLabel={t("instagramLabel")}
-          />
         </div>
       </div>
     </div>
