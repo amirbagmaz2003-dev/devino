@@ -7,10 +7,12 @@
  *   node scripts/generate-brand-images.mjs [http://localhost:8787]
  *
  * Output:
- *   src/app/icon.png (512×512), src/app/apple-icon.png (180×180),
- *   src/app/favicon.ico (32×32) — the logo's "D" as a monogram, black on
- *   pearl white, cropped from public/logos/devino-logo-black.png (not
- *   redrawn); public/og/og-fa.png and og-en.png (1200×630) — the full logo
+ *   src/app/icon.png (512×512), src/app/apple-icon.png (180×180) — the
+ *   logo's "D" as a monogram, black on pearl white, cropped from
+ *   public/logos/devino-logo-black.png (not redrawn);
+ *   src/app/favicon.ico (16×16 + 32×32) — a bolder, simplified serif "D"
+ *   drawn on the pixel grid, since the logo's hairlines wash out at tab
+ *   size; public/og/og-fa.png and og-en.png (1200×630) — the full logo
  *   with the tagline below it in the locale's heading font.
  */
 import { writeFileSync } from "node:fs";
@@ -71,6 +73,67 @@ async function monogram(size) {
   return c.toDataURL("image/png");
 }
 
+/**
+ * Browser side: the favicon "D", hand-fitted to the pixel grid for 16 and
+ * 32 px — a solid stem with slab serifs and a bowl that is thick on the
+ * right and thinner top/bottom, echoing the logo's contrast.
+ */
+function smallMonogram(size) {
+  const G = {
+    16: {
+      x0: 3,
+      x1: 6,
+      t: 2,
+      b: 14,
+      sx0: 2,
+      sx1: 8,
+      sh: 1,
+      ox: 14,
+      ix: 11,
+      bt: 2,
+    },
+    32: {
+      x0: 7,
+      x1: 11,
+      t: 5,
+      b: 27,
+      sx0: 5,
+      sx1: 16,
+      sh: 2,
+      ox: 27,
+      ix: 22,
+      bt: 3,
+    },
+  }[size];
+  const { x0, x1, t, b, sx0, sx1, sh, ox, ix, bt } = G;
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  const ctx = c.getContext("2d");
+  ctx.fillStyle = "#F8F6F0";
+  ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = "#000000";
+  // Stem and slab serifs.
+  ctx.fillRect(x0, t, x1 - x0, b - t);
+  ctx.fillRect(sx0, t, sx1 - sx0, sh);
+  ctx.fillRect(sx0, b - sh, sx1 - sx0, sh);
+  // Bowl: outer half-ellipse minus the inner one.
+  const mid = (t + b) / 2,
+    r = (b - t) / 2,
+    neck = x1 + 2;
+  ctx.beginPath();
+  ctx.moveTo(x1, t);
+  ctx.lineTo(neck, t);
+  ctx.ellipse(neck, mid, ox - neck, r, 0, -Math.PI / 2, Math.PI / 2);
+  ctx.lineTo(x1, b);
+  ctx.lineTo(x1, b - bt);
+  ctx.lineTo(neck, b - bt);
+  ctx.ellipse(neck, mid, ix - neck, r - bt, 0, Math.PI / 2, -Math.PI / 2, true);
+  ctx.lineTo(x1, t + bt);
+  ctx.closePath();
+  ctx.fill();
+  return c.toDataURL("image/png");
+}
+
 /** Browser side: 1200×630 share image — full logo, tagline below. */
 async function shareImage({ tagline, font, rtl }) {
   const { img } = await window.__logo;
@@ -95,21 +158,26 @@ async function shareImage({ tagline, font, rtl }) {
   return c.toDataURL("image/png");
 }
 
-/** Wraps a PNG in a single-image .ico container (PNG-in-ICO is valid since Vista). */
-function ico(pngBytes, size) {
-  const header = Buffer.alloc(22);
+/** Wraps PNGs in a .ico container (PNG-in-ICO is valid since Vista). */
+function ico(images) {
+  const header = Buffer.alloc(6 + 16 * images.length);
   header.writeUInt16LE(0, 0); // reserved
   header.writeUInt16LE(1, 2); // type: icon
-  header.writeUInt16LE(1, 4); // one image
-  header.writeUInt8(size, 6);
-  header.writeUInt8(size, 7);
-  header.writeUInt8(0, 8); // palette
-  header.writeUInt8(0, 9);
-  header.writeUInt16LE(1, 10); // planes
-  header.writeUInt16LE(32, 12); // bpp
-  header.writeUInt32LE(pngBytes.length, 14);
-  header.writeUInt32LE(22, 18); // offset
-  return Buffer.concat([header, pngBytes]);
+  header.writeUInt16LE(images.length, 4);
+  let offset = header.length;
+  images.forEach(({ bytes, size }, i) => {
+    const e = 6 + 16 * i;
+    header.writeUInt8(size, e);
+    header.writeUInt8(size, e + 1);
+    header.writeUInt8(0, e + 2); // palette
+    header.writeUInt8(0, e + 3);
+    header.writeUInt16LE(1, e + 4); // planes
+    header.writeUInt16LE(32, e + 6); // bpp
+    header.writeUInt32LE(bytes.length, e + 8);
+    header.writeUInt32LE(offset, e + 12);
+    offset += bytes.length;
+  });
+  return Buffer.concat([header, ...images.map((image) => image.bytes)]);
 }
 
 for (const locale of ["fa", "en"]) {
@@ -118,7 +186,13 @@ for (const locale of ["fa", "en"]) {
   if (locale === "fa") {
     writeFileSync("src/app/icon.png", await png(monogram, 512));
     writeFileSync("src/app/apple-icon.png", await png(monogram, 180));
-    writeFileSync("src/app/favicon.ico", ico(await png(monogram, 32), 32));
+    writeFileSync(
+      "src/app/favicon.ico",
+      ico([
+        { bytes: await png(smallMonogram, 16), size: 16 },
+        { bytes: await png(smallMonogram, 32), size: 32 },
+      ]),
+    );
   }
   writeFileSync(
     `public/og/og-${locale}.png`,
