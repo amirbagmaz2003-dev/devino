@@ -5,7 +5,7 @@ import { getSiteUrl } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
-const STATIC_PATHS = ["/", "/collections", "/about", "/contact"];
+const STATIC_PATHS = ["/", "/collections", "/about", "/contact", "/terms"];
 
 /** Every public page in both locales, each entry listing its hreflang alternates. */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

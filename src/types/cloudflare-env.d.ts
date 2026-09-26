@@ -26,6 +26,8 @@ declare global {
     // anything but "true" keeps robots.txt at Disallow: /.
     SITE_URL?: string;
     ALLOW_INDEXING?: string;
+    // Cloudflare Web Analytics token; empty/unset = no beacon.
+    CF_WEB_ANALYTICS_TOKEN?: string;
     // Test-only override of https://api.telegram.org (e.g. a local mock).
     TELEGRAM_API_BASE?: string;
   }

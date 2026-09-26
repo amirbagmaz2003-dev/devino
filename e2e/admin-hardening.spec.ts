@@ -288,7 +288,14 @@ test("double-clicking create makes exactly one collection and no orphaned media"
     }
   });
   await page.click("main button[type=submit]");
-  await page.waitForURL(/\/admin\/collections$/);
+  // Whichever of the two racing requests inserts second is refused as a
+  // duplicate slug — that may be the browser's own request (stays on the
+  // page with the slug message) or the replay (browser redirects).
+  await expect(
+    page
+      .getByText("این آدرس (اسلاگ) قبلاً برای یک مورد دیگر استفاده شده. لطفاً یک آدرس دیگر وارد کنید.")
+      .or(page.getByRole("heading", { name: "کالکشن‌ها", level: 1 })),
+  ).toBeVisible({ timeout: 30_000 });
   await Promise.all(actionRequests);
   expect(sql(`SELECT 1 FROM collections WHERE slug = '${slug2}'`)).toHaveLength(1);
   expect(orphanCount()).toBe(orphansBefore);

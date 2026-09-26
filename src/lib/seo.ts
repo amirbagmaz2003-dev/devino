@@ -43,9 +43,18 @@ export function pageMetadata({
   imageAlt,
 }: PageMetadataInput): Metadata {
   const url = `/${locale}${path === "/" ? "" : path}`;
-  const images = imageUrl
-    ? [{ url: imageUrl, alt: imageAlt || title || BRAND_NAME }]
-    : undefined;
+  // Pages without their own image (home, about, contact, terms…) share
+  // the default brand card: logo + tagline, per locale (brief 05).
+  const images = [
+    imageUrl
+      ? { url: imageUrl, alt: imageAlt || title || BRAND_NAME }
+      : {
+          url: `/og/og-${locale === "en" ? "en" : "fa"}.png`,
+          width: 1200,
+          height: 630,
+          alt: BRAND_NAME,
+        },
+  ];
   return {
     ...(title ? { title } : {}),
     description,
@@ -60,13 +69,13 @@ export function pageMetadata({
       url,
       title: title ?? BRAND_NAME,
       description,
-      ...(images ? { images } : {}),
+      images,
     },
     twitter: {
-      card: images ? "summary_large_image" : "summary",
+      card: "summary_large_image",
       title: title ?? BRAND_NAME,
       description,
-      ...(images ? { images: images.map((image) => image.url) } : {}),
+      images: images.map((image) => image.url),
     },
   };
 }

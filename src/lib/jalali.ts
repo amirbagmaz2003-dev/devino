@@ -149,21 +149,6 @@ export function weekday(iso: string): number {
   return new Date(Date.UTC(ymd.year, ymd.month - 1, ymd.day)).getUTCDay();
 }
 
-/**
- * Today's date in Tehran — fittings happen there, so "today or later" is
- * judged on Tehran's calendar for every visitor, on client and server alike.
- */
-export function todayInTehran(now = new Date()): string {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Tehran",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(now);
-  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
-  return `${get("year")}-${get("month")}-${get("day")}`;
-}
-
 // ---------- Display ----------
 
 export const JALALI_MONTHS = [
@@ -213,8 +198,4 @@ export function formatGregorian(iso: string): string {
   const ymd = parseIsoDate(iso);
   if (!ymd) return iso;
   return `${ymd.day} ${GREGORIAN_MONTHS[ymd.month - 1]} ${ymd.year}`;
-}
-
-export function formatBookingDate(iso: string, locale: string): string {
-  return locale === "fa" ? formatJalali(iso) : formatGregorian(iso);
 }

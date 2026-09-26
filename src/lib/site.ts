@@ -22,3 +22,8 @@ export async function getSiteUrl(): Promise<string> {
 export async function isIndexingAllowed(): Promise<boolean> {
   return (await readEnv()).ALLOW_INDEXING === "true";
 }
+
+/** Cloudflare Web Analytics site token, or null when not configured. */
+export async function getWebAnalyticsToken(): Promise<string | null> {
+  return (await readEnv()).CF_WEB_ANALYTICS_TOKEN?.trim() || null;
+}

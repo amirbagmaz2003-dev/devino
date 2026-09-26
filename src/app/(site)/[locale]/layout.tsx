@@ -7,7 +7,7 @@ import { headingFont, bodyFont, headingFontFa, bodyFontFa } from "@/lib/fonts";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { getSiteSettings } from "@/db/queries";
-import { getSiteUrl } from "@/lib/site";
+import { getSiteUrl, getWebAnalyticsToken } from "@/lib/site";
 import { BRAND_NAME, pageMetadata } from "@/lib/seo";
 import "../../globals.css";
 
@@ -60,6 +60,9 @@ export default async function LocaleLayout({
   }
 
   setRequestLocale(locale);
+  // Public site only — the /admin tree has its own root layout, so the
+  // beacon never loads there. Cookieless; nothing rendered without a token.
+  const analyticsToken = await getWebAnalyticsToken();
 
   const heading = locale === "fa" ? headingFontFa : headingFont;
   const body = locale === "fa" ? bodyFontFa : bodyFont;
@@ -76,6 +79,13 @@ export default async function LocaleLayout({
           <main className="flex-1">{children}</main>
           <Footer />
         </NextIntlClientProvider>
+        {analyticsToken && (
+          <script
+            defer
+            src="https://static.cloudflareinsights.com/beacon.min.js"
+            data-cf-beacon={JSON.stringify({ token: analyticsToken })}
+          />
+        )}
       </body>
     </html>
   );

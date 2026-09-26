@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { getSiteSettings } from "@/db/queries";
+import { Link } from "@/i18n/navigation";
 import Logo from "./Logo";
 
 interface SocialLink {
@@ -68,11 +69,18 @@ export default async function Footer() {
           )}
         </div>
       </div>
-      <div className="border-matte-black/10 text-matte-black/50 flex items-center justify-center gap-2 border-t px-6 py-4 text-center text-xs">
+      <div className="border-matte-black/10 text-matte-black/50 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 border-t px-6 py-4 text-center text-xs">
         <Logo variant="black" className="h-4" />
         <span>
           &copy; {year} — {t("rights")}
         </span>
+        <span aria-hidden>·</span>
+        <Link
+          href="/terms"
+          className="hover:text-matte-black inline-flex min-h-11 items-center underline underline-offset-4 transition-colors"
+        >
+          {t("termsLink")}
+        </Link>
       </div>
     </footer>
   );

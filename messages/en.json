@@ -1,6 +1,5 @@
 {
   "nav": {
-    "home": "Home",
     "collections": "Collections",
     "about": "About",
     "contact": "Contact",
@@ -72,15 +71,15 @@
       "telegram": "Telegram",
       "instagram": "Instagram"
     },
-    "rights": "All rights reserved."
+    "rights": "All rights reserved.",
+    "termsLink": "Terms & Privacy"
   },
   "meta": {
     "homeDescription": "A Presence of Her Own.",
     "collectionsTitle": "Collections",
     "collectionsDescription": "Explore the deVino evening-wear collections up close.",
     "aboutTitle": "About deVino",
-    "aboutDescription": "The world is not short of clothes.",
-    "notFoundTitle": "Page not found"
+    "aboutDescription": "The world is not short of clothes."
   },
   "notFound": {
     "title": "Page not found",
@@ -124,6 +123,48 @@
       "whatsapp": "WhatsApp",
       "telegram": "Telegram"
     },
-    "backToCollections": "Back to collections"
+    "backToCollections": "Back to collections",
+    "privacyNote": "Your information is used only to follow up on your order.",
+    "termsLink": "Terms & Privacy"
+  },
+  "terms": {
+    "title": "Terms & Privacy",
+    "intro": "Your trust matters to us as much as the details of a dress. This page explains how ordering works at deVino and what we do with your information.",
+    "process": {
+      "heading": "How ordering works",
+      "steps": {
+        "1": "You choose a piece and fill in the order form.",
+        "2": "We contact you through the channel you chose (phone call, WhatsApp or Telegram).",
+        "3": "During that conversation, we finalize the size, shipping cost, delivery time and payment method together.",
+        "4": "Once you confirm and payment is made, your order is prepared and shipped."
+      },
+      "note": "Submitting the form alone is not a final purchase or a commitment to pay. You can cancel your order at any time before the final confirmation during our call."
+    },
+    "pricing": {
+      "heading": "Prices, sizes and colors",
+      "items": {
+        "1": "Prices are in Toman. Shipping is calculated separately and shared during our call.",
+        "2": "Our pieces come in sizes 36, 38 and 40. If you're unsure about your size, we'll guide you during our call.",
+        "3": "Colors in photos may look slightly different depending on your screen."
+      }
+    },
+    "data": {
+      "heading": "Your information",
+      "items": {
+        "1": "What we collect: your name, mobile number, size, preferred contact channel, Telegram username (if you choose Telegram), and any notes you write.",
+        "2": "Why: only to follow up on and fulfil your order.",
+        "3": "Who sees it: we never sell or share this information with any person or company. We ask for your address during our call, and it is shared only with the person handling delivery.",
+        "4": "Deleting your data: you can ask us to delete your information at any time through our contact channels."
+      }
+    },
+    "stats": {
+      "heading": "Visit statistics",
+      "body": "To improve the site, we collect overall visit statistics (such as page view counts) without cookies and without identifying you personally."
+    },
+    "contact": {
+      "heading": "Contact us",
+      "body": "For any question about this page or your order, reach us through our <link>contact channels</link>."
+    },
+    "updated": "Last updated: September 2026"
   }
 }

@@ -24,6 +24,9 @@
   "vars": {
     "SITE_URL": "https://devino.amirbagmaz2003.workers.dev",
     "ALLOW_INDEXING": "false",
+    // Cloudflare Web Analytics site token (public by design — it ships in
+    // the page). Empty = no beacon.
+    "CF_WEB_ANALYTICS_TOKEN": "7dba1a33ba54456a891a2fb0becbb661",
   },
   "d1_databases": [
     {

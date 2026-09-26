@@ -346,6 +346,15 @@ export default function OrderForm({
         >
           {t("submit")}
         </button>
+        <p className="text-matte-black/60 text-xs leading-relaxed">
+          {t("privacyNote")}{" "}
+          <Link
+            href="/terms"
+            className="hover:text-matte-black underline underline-offset-4"
+          >
+            {t("termsLink")}
+          </Link>
+        </p>
       </form>
     </>
   );
