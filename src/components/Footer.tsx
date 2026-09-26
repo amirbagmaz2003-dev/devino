@@ -51,7 +51,7 @@ export default async function Footer() {
 
   return (
     <footer className="bg-pearl-white text-matte-black">
-      <div className="mx-auto grid max-w-7xl gap-10 px-6 py-12 sm:grid-cols-2">
+      <div className="mx-auto max-w-7xl px-6 py-12">
         <div>
           <h2 className="font-heading text-lg">{t("stayClose.heading")}</h2>
           <p className="text-matte-black/70 mt-2 max-w-sm text-sm">
@@ -67,18 +67,6 @@ export default async function Footer() {
             </ul>
           )}
         </div>
-        {links.length > 0 && (
-          <div className="sm:text-end">
-            <h2 className="font-heading text-lg">{t("social.heading")}</h2>
-            <ul className="mt-1 flex flex-col text-sm sm:items-end">
-              {links.map((link) => (
-                <li key={link.href}>
-                  <ExternalLink href={link.href}>{link.label}</ExternalLink>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
       </div>
       <div className="border-matte-black/10 text-matte-black/50 flex items-center justify-center gap-2 border-t px-6 py-4 text-center text-xs">
         <Logo variant="black" className="h-4" />

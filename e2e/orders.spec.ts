@@ -132,7 +132,7 @@ const TEXT = {
     submit: "ثبت سفارش",
     intro:
       "برای ثبت سفارش، فرم زیر را پر کنید. پس از ثبت، برای نهایی کردن سفارش از راهی که انتخاب می‌کنید با شما تماس می‌گیریم.",
-    methodLegend: "از چه راهی با شما هماهنگ کنیم؟",
+    methodLegend: "راه تماس را مشخص کنید",
     telegramLabel: "آیدی تلگرام",
     success: (m: string) =>
       `سفارش شما ثبت شد. برای نهایی کردن آن، به‌زودی از طریق ${m} با شما در ارتباط خواهیم بود.`,
@@ -153,7 +153,7 @@ const TEXT = {
     submit: "Send order",
     intro:
       "Fill in the form below to place your order. Once it's received, we'll contact you through the channel you choose to finalize it.",
-    methodLegend: "How should we reach you?",
+    methodLegend: "Choose how we should contact you",
     telegramLabel: "Telegram username",
     success: (m: string) =>
       `Your order has been received. We'll be in touch shortly via ${m} to finalize it.`,
@@ -585,6 +585,81 @@ test("admin: size and contact method, WhatsApp and Telegram links, no address; s
   await expect(card(rows[1].name)).toHaveCount(0);
   await context.close();
 });
+
+// ---------- follow-up fixes ----------
+
+for (const locale of ["fa", "en"] as const) {
+  test(`${locale}: new contact-method label; after submit only the success message and the back link`, async ({
+    browser,
+  }) => {
+    const { context, page } = await visitor(browser);
+    await page.goto(`/${locale}/order?product=merlot`);
+    await expect(page.locator("legend")).toHaveText(TEXT[locale].methodLegend);
+
+    await fillOrder(
+      page,
+      { name: `Success ${locale} ${RUN}`, phone: "09121234567" },
+      locale,
+    );
+    await page.getByRole("button", { name: TEXT[locale].submit }).click();
+    const status = page.getByRole("status");
+    await expect(status).toHaveText(
+      TEXT[locale].success(TEXT[locale].successMethod.phone),
+    );
+    await expect(status).toBeFocused();
+    await expect(status).toHaveCSS("text-align", "center");
+    // Heading, intro, product summary and form are gone.
+    await expect(page.getByRole("heading", { level: 1 })).toHaveCount(0);
+    await expect(
+      page.getByText(TEXT[locale].intro, { exact: true }),
+    ).toHaveCount(0);
+    await expect(page.getByTestId("order-summary")).toHaveCount(0);
+    await expect(page.locator("main form")).toHaveCount(0);
+    const back = page.getByRole("link", {
+      name: locale === "fa" ? "بازگشت به کالکشن‌ها" : "Back to collections",
+    });
+    await expect(back).toHaveAttribute("href", `/${locale}/collections`);
+    // Nothing else visible in the page content.
+    expect(
+      (await page.locator("main").innerText()).replace(/\s+/g, " ").trim(),
+    ).toBe(
+      `${TEXT[locale].success(TEXT[locale].successMethod.phone)} ${locale === "fa" ? "بازگشت به کالکشن‌ها" : "Back to collections"}`,
+    );
+    await context.close();
+  });
+
+  test(`${locale}: the footer has no Follow column, Stay Close stays`, async ({
+    page,
+  }) => {
+    const before = sql<{
+      telegram_url: string | null;
+      instagram_url: string | null;
+    }>("SELECT telegram_url, instagram_url FROM site_settings WHERE id = 1")[0];
+    sql(
+      "UPDATE site_settings SET telegram_url = 'https://t.me/devino', instagram_url = 'https://instagram.com/devinomaison' WHERE id = 1",
+    );
+    await page.goto(`/${locale}`);
+    const footer = page.locator("footer");
+    await expect(footer.getByRole("heading")).toHaveText([
+      locale === "fa" ? "همراه ما بمانید" : "Stay Close",
+    ]);
+    await expect(
+      footer.getByText(locale === "fa" ? "دنبال کنید" : "Follow", {
+        exact: true,
+      }),
+    ).toHaveCount(0);
+    // Each channel appears once (in Stay Close), no longer twice.
+    await expect(footer.locator('a[href="https://t.me/devino"]')).toHaveCount(
+      1,
+    );
+    await expect(
+      footer.locator('a[href="https://instagram.com/devinomaison"]'),
+    ).toHaveCount(1);
+    sql(
+      `UPDATE site_settings SET telegram_url = ${q(before.telegram_url)}, instagram_url = ${q(before.instagram_url)} WHERE id = 1`,
+    );
+  });
+}
 
 // ---------- contact page & wording ----------
 

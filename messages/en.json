@@ -69,7 +69,6 @@
       "text": "Follow new collections and behind-the-scenes moments on Telegram and Instagram."
     },
     "social": {
-      "heading": "Follow",
       "telegram": "Telegram",
       "instagram": "Instagram"
     },
@@ -101,7 +100,7 @@
       "sizePlaceholder": "Choose a size",
       "sizeHint": "Between two sizes? Mention it in the notes.",
       "note": "Notes (optional)",
-      "contactMethod": "How should we reach you?",
+      "contactMethod": "Choose how we should contact you",
       "telegramUsername": "Telegram username"
     },
     "submit": "Send order",
@@ -124,6 +123,7 @@
       "phone": "a phone call",
       "whatsapp": "WhatsApp",
       "telegram": "Telegram"
-    }
+    },
+    "backToCollections": "Back to collections"
   }
 }
