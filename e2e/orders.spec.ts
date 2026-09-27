@@ -709,7 +709,10 @@ test("contact page: no form, prominent channels, order hint links to the collect
     ).toHaveAttribute("href", "https://instagram.com/devinomaison");
     expect(
       Number.parseFloat(
-        await phone.evaluate((el) => getComputedStyle(el).fontSize),
+        await phone
+          .locator("span")
+          .first()
+          .evaluate((el) => getComputedStyle(el).fontSize),
       ),
     ).toBeGreaterThanOrEqual(24);
     await expect(page.getByRole("link", { name: hint })).toHaveAttribute(
@@ -719,6 +722,44 @@ test("contact page: no form, prominent channels, order hint links to the collect
   }
   sql(
     `UPDATE site_settings SET contact_phone = ${q(before.contact_phone)}, telegram_url = ${q(before.telegram_url)}, instagram_url = ${q(before.instagram_url)} WHERE id = 1`,
+  );
+});
+
+test("contact page: the phone number itself is visible text, on desktop and mobile", async ({
+  browser,
+}) => {
+  const before = sql<{ contact_phone: string | null }>(
+    "SELECT contact_phone FROM site_settings WHERE id = 1",
+  )[0];
+  sql("UPDATE site_settings SET contact_phone = '09124896882' WHERE id = 1");
+  for (const [locale, label, number] of [
+    ["fa", "تماس تلفنی", "۰۹۱۲ ۴۸۹ ۶۸۸۲"],
+    ["en", "Call", "0912 489 6882"],
+  ] as const) {
+    for (const viewport of [
+      { width: 1440, height: 900 },
+      { width: 375, height: 812 },
+    ]) {
+      const context = await browser.newContext({ viewport });
+      const page = await context.newPage();
+      await page.goto(`/${locale}/contact`);
+      const phone = page.locator("main").getByRole("link", { name: label });
+      await expect(phone).toHaveAttribute("href", "tel:09124896882");
+      // Not just a tel: href — the digits are on screen, read left to right.
+      const shown = phone.getByText(number, { exact: true });
+      await expect(shown).toBeVisible();
+      await expect(shown).toBeInViewport({ ratio: 1 });
+      await expect(shown).toHaveAttribute("dir", "ltr");
+      expect(
+        Number.parseFloat(
+          await shown.evaluate((el) => getComputedStyle(el).fontSize),
+        ),
+      ).toBeGreaterThanOrEqual(16);
+      await context.close();
+    }
+  }
+  sql(
+    `UPDATE site_settings SET contact_phone = ${q(before.contact_phone)} WHERE id = 1`,
   );
 });
 

@@ -10,24 +10,37 @@ export async function generateMetadata({
 }: PageProps<"/[locale]/contact">): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "contact" });
-  return pageMetadata({ locale, path: "/contact", title: t("title"), description: t("intro") });
+  return pageMetadata({
+    locale,
+    path: "/contact",
+    title: t("title"),
+    description: t("intro"),
+  });
 }
 
 /** Contact channels only (brief 04) — orders go through /order from each piece's page. */
-export default async function ContactPage({ params }: PageProps<"/[locale]/contact">) {
+export default async function ContactPage({
+  params,
+}: PageProps<"/[locale]/contact">) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [t, settings] = await Promise.all([getTranslations("contact"), getSiteSettings()]);
+  const [t, settings] = await Promise.all([
+    getTranslations("contact"),
+    getSiteSettings(),
+  ]);
 
   return (
     <div className="mx-auto max-w-2xl px-6 pt-[calc(var(--header-h)+3rem)] pb-24">
       <h1 className="font-heading text-4xl sm:text-5xl">{t("title")}</h1>
       <span aria-hidden className="bg-olive-accent mt-6 block h-px w-10" />
-      <p className="font-heading text-matte-black/70 mt-6 text-lg italic">{t("lead")}</p>
+      <p className="font-heading text-matte-black/70 mt-6 text-lg italic">
+        {t("lead")}
+      </p>
       <p className="text-matte-black/70 mt-4 leading-relaxed">{t("intro")}</p>
 
       <ContactChannels
         prominent
+        locale={locale === "fa" ? "fa" : "en"}
         phone={settings?.contactPhone}
         telegramUrl={settings?.telegramUrl}
         instagramUrl={settings?.instagramUrl}
@@ -37,7 +50,10 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
       />
 
       <p className="text-matte-black/70 mt-12 text-sm">
-        <Link href="/collections" className="hover:text-olive-accent underline underline-offset-4">
+        <Link
+          href="/collections"
+          className="hover:text-olive-accent underline underline-offset-4"
+        >
           {t("orderHint")}
         </Link>
       </p>

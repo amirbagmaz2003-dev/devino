@@ -1,6 +1,10 @@
+import { toPersianDigits } from "@/lib/jalali";
+
 interface ContactChannel {
   label: string;
   href: string;
+  /** Visible detail under the label (the phone number itself). */
+  detail?: string;
 }
 
 interface ContactChannelsProps {
@@ -14,6 +18,24 @@ interface ContactChannelsProps {
   instagramLabel: string;
   /** Contact page: larger, stacked links as the page's main content. */
   prominent?: boolean;
+  /** For the phone number's digits (Persian on /fa). */
+  locale?: "fa" | "en";
+}
+
+/**
+ * The number as people read it: Iranian mobiles grouped 0912 345 6789
+ * (or +98 912 345 6789); anything else is shown as entered.
+ */
+function formatPhone(phone: string, locale: "fa" | "en") {
+  const compact = phone.replace(/[\s-]/g, "");
+  const local = /^09\d{9}$/.exec(compact)?.[0];
+  const intl = /^\+989\d{9}$/.exec(compact)?.[0];
+  const grouped = local
+    ? `${local.slice(0, 4)} ${local.slice(4, 7)} ${local.slice(7)}`
+    : intl
+      ? `+98 ${intl.slice(3, 6)} ${intl.slice(6, 9)} ${intl.slice(9)}`
+      : phone.trim();
+  return locale === "fa" ? toPersianDigits(grouped) : grouped;
 }
 
 /**
@@ -33,9 +55,16 @@ export default function ContactChannels({
   telegramLabel,
   instagramLabel,
   prominent = false,
+  locale = "en",
 }: ContactChannelsProps) {
   const channels: ContactChannel[] = [
-    phone ? { label: phoneLabel, href: `tel:${phone}` } : null,
+    phone
+      ? {
+          label: phoneLabel,
+          href: `tel:${phone}`,
+          detail: formatPhone(phone, locale),
+        }
+      : null,
     telegramUrl ? { label: telegramLabel, href: telegramUrl } : null,
     instagramUrl ? { label: instagramLabel, href: instagramUrl } : null,
   ].filter((channel): channel is ContactChannel => channel !== null);
@@ -53,9 +82,21 @@ export default function ContactChannels({
                 href={channel.href}
                 target={isExternal ? "_blank" : undefined}
                 rel={isExternal ? "noopener noreferrer" : undefined}
-                className="font-heading hover:text-olive-accent decoration-matte-black/25 inline-flex min-h-12 items-center text-2xl underline underline-offset-8 transition-colors sm:text-3xl"
+                className="group hover:text-olive-accent inline-flex min-h-12 flex-col items-start justify-center transition-colors"
               >
-                {channel.label}
+                <span className="font-heading decoration-matte-black/25 text-2xl underline underline-offset-8 sm:text-3xl">
+                  {channel.label}
+                </span>
+                {/* Visible on every screen size: on desktop there's no
+                    tap-to-call, so the number itself must be readable. */}
+                {channel.detail && (
+                  <span
+                    dir="ltr"
+                    className="text-matte-black/70 group-hover:text-olive-accent mt-3 text-base tracking-wide transition-colors"
+                  >
+                    {channel.detail}
+                  </span>
+                )}
               </a>
             </li>
           );
