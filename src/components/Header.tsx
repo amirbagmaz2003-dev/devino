@@ -27,20 +27,32 @@ export default function Header() {
       style={{ height: "var(--header-h)" }}
     >
       <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6">
-        <Link href="/">
+        <Link href="/" className="inline-flex min-h-11 items-center">
           <Logo className="h-6 sm:h-8" />
         </Link>
         <nav
           aria-label="Primary"
-          className="font-body flex items-center gap-3 text-xs sm:gap-8 sm:text-sm"
+          className="font-body flex items-center gap-1 text-xs sm:gap-6 sm:text-sm"
         >
-          <Link href="/collections" className="hover:opacity-70">
+          {/* Each link is a 44×44px tap target at least (WCAG 2.5.5): the
+              padding widens short labels, min-h/min-w guarantee the box;
+              the small gap keeps all four inside 320px. */}
+          <Link
+            href="/collections"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center px-1 hover:opacity-70"
+          >
             {t("collections")}
           </Link>
-          <Link href="/about" className="hover:opacity-70">
+          <Link
+            href="/about"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center px-1 hover:opacity-70"
+          >
             {t("about")}
           </Link>
-          <Link href="/contact" className="hover:opacity-70">
+          <Link
+            href="/contact"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center px-1 hover:opacity-70"
+          >
             {t("contact")}
           </Link>
           {/* Small, subtle locale switch — inherits the same color
@@ -54,7 +66,7 @@ export default function Header() {
             aria-label={t("switchLanguage")}
             // Visible text stays a tiny "EN"/"FA"; the box around it is a
             // full 44×44px tap target (WCAG 2.5.5).
-            className="-mx-2 inline-flex min-h-11 min-w-11 items-center justify-center text-[10px] tracking-widest uppercase opacity-70 hover:opacity-100 sm:text-xs"
+            className="-me-2 inline-flex min-h-11 min-w-11 items-center justify-center text-[10px] tracking-widest uppercase opacity-70 hover:opacity-100 sm:text-xs"
           >
             {otherLocale}
           </Link>
