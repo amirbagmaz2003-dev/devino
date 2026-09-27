@@ -236,6 +236,32 @@ for (const locale of ["fa", "en"] as const) {
   }
 }
 
+for (const locale of ["fa", "en"] as const) {
+  for (const viewport of [
+    { name: "mobile", width: 375, height: 812 },
+    { name: "desktop", width: 1440, height: 900 },
+  ]) {
+    test(`${locale} ${viewport.name}: the fixed header doesn't cover the top of the hero image`, async ({
+      browser,
+    }) => {
+      const context = await browser.newContext({ viewport });
+      const page = await context.newPage();
+      await page.goto(`/${locale}`);
+      const [header, media] = await Promise.all([
+        page.locator("[data-site-header]").boundingBox(),
+        // MediaBox's root: the image/video frame (its overflow clips the zoom).
+        page.locator("section").first().locator("img").locator(".."),
+      ]).then(async ([h, m]) => [h, await m.boundingBox()]);
+      expect(header!.y).toBe(0);
+      expect(media!.y).toBeGreaterThanOrEqual(header!.y + header!.height - 1);
+      // Still fills the rest of the first screen.
+      expect(media!.y + media!.height).toBeCloseTo(viewport.height, 0);
+      expect(media!.width).toBe(viewport.width);
+      await context.close();
+    });
+  }
+}
+
 test("home metadata description is still the tagline; closing line unchanged", async ({
   page,
 }) => {

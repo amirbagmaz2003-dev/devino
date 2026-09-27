@@ -10,7 +10,7 @@ import { getHeroMedia, getSiteSettings } from "@/db/queries";
 // "محتوای موقت"). An admin hero may be an image or a video; MediaBox
 // handles both, so nothing here changes when it switches.
 const HERO_IMAGE_URL = "/photos/hero-editorial-bw.jpg";
-const HERO_FOCAL_POINT = { x: 0.42, y: 0.18 };
+const HERO_FOCAL_POINT = { x: 0.42, y: 0.08 };
 
 export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const { locale } = await params;
@@ -29,10 +29,13 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
     <>
       <HeroScrollController />
 
-      <section className="relative h-dvh w-full overflow-hidden">
+      {/* The image starts below the fixed header (pt + top offset) so the
+          header never covers its top — the subject's face in portrait
+          photos. The strip behind the header stays the page's own black. */}
+      <section className="relative h-dvh w-full overflow-hidden pt-[var(--header-h)]">
         {/* Out of flow, so the title below sits over the image instead of
             after it (where overflow-hidden would clip it away). */}
-        <div className="absolute inset-0">
+        <div className="absolute inset-x-0 top-[var(--header-h)] bottom-0">
           {hero ? (
             <MediaBox {...hero} priority sizes="100vw" />
           ) : (
@@ -46,7 +49,11 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           )}
         </div>
         <div className="text-pearl-white relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
-          <h1 className="font-heading text-5xl md:text-6xl">{t("title")}</h1>
+          {/* Soft black glow keeps the title legible where it crosses light
+              skin or a bright backdrop (the photo moves under the zoom). */}
+          <h1 className="font-heading text-5xl text-shadow-[0_1px_2px_rgb(0_0_0/0.7),0_0_18px_rgb(0_0_0/0.75)] md:text-6xl">
+            {t("title")}
+          </h1>
         </div>
       </section>
 
