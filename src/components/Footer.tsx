@@ -69,7 +69,7 @@ export default async function Footer() {
           )}
         </div>
       </div>
-      <div className="border-matte-black/10 text-matte-black/50 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 border-t px-6 py-4 text-center text-xs">
+      <div className="border-matte-black/10 text-matte-black/60 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 border-t px-6 py-4 text-center text-xs">
         <Logo variant="black" className="h-4" />
         <span>
           &copy; {year} — {t("rights")}

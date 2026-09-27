@@ -11,7 +11,7 @@ export default async function LocaleNotFound() {
   const t = await getTranslations("notFound");
   return (
     <div className="mx-auto flex min-h-[70dvh] max-w-xl flex-col items-center justify-center px-6 pt-[calc(var(--header-h)+2rem)] pb-24 text-center">
-      <p aria-hidden className="font-heading text-matte-black/20 text-7xl">
+      <p aria-hidden className="font-heading text-matte-black/45 text-7xl">
         404
       </p>
       <span aria-hidden className="bg-olive-accent mt-6 block h-px w-10" />
