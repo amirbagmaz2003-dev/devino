@@ -763,6 +763,77 @@ test("contact page: the phone number itself is visible text, on desktop and mobi
   );
 });
 
+test("order form: invalid fields are unmistakably red, focused or not; focus alone never is", async ({
+  browser,
+}) => {
+  const RED = "rgb(179, 38, 30)";
+  for (const locale of ["fa", "en"] as const) {
+    for (const viewport of [
+      { width: 375, height: 812 },
+      { width: 1440, height: 900 },
+    ]) {
+      const context = await browser.newContext({ viewport });
+      const page = await context.newPage();
+      await page.goto(`/${locale}/order?product=merlot`);
+      const submit = page.getByRole("button", {
+        name: locale === "fa" ? "ثبت سفارش" : "Send order",
+      });
+      const name = page.locator("#order-name");
+      const phone = page.locator("#order-phone");
+      const size = page.locator("#order-size");
+      const product = page.locator("#order-product");
+      const border = (l: typeof name) =>
+        l.evaluate((el) => {
+          const s = getComputedStyle(el);
+          return { color: s.borderTopColor, shadow: s.boxShadow };
+        });
+
+      // Focus alone (no error yet): black border, no red anywhere.
+      await name.focus();
+      await expect
+        .poll(async () => (await border(name)).color)
+        .toBe("rgb(0, 0, 0)");
+
+      // Empty submit: name, phone and size are invalid.
+      await submit.click();
+      await expect(name).toHaveAttribute("aria-invalid", "true");
+      await expect(name).toBeFocused(); // focus moves to the first error
+      for (const field of [name, phone, size]) {
+        await expect(field).toHaveAttribute("aria-invalid", "true");
+        // …focused (name) and blurred alike; polled, since the border
+        // colour animates (transition-colors).
+        await expect.poll(async () => (await border(field)).color).toBe(RED);
+        // Doubled by an inset ring: 2px visually.
+        expect((await border(field)).shadow).toContain("179, 38, 30");
+        const message = page.locator(
+          `#${await field.getAttribute("id")}-error`,
+        );
+        await expect(message).toBeVisible();
+        await expect(message).toHaveCSS("color", RED);
+      }
+      // A valid field keeps its normal border, focused or not.
+      await expect
+        .poll(async () => (await border(product)).color)
+        .not.toBe(RED);
+      await product.focus();
+      await expect
+        .poll(async () => (await border(product)).color)
+        .toBe("rgb(0, 0, 0)");
+
+      // Name filled, phone invalid: only phone (and size) stay red.
+      await name.fill(locale === "fa" ? "سارا" : "Sara");
+      await phone.fill("12345");
+      await submit.click();
+      await expect(name).not.toHaveAttribute("aria-invalid", "true");
+      await expect(phone).toHaveAttribute("aria-invalid", "true");
+      await expect(phone).toBeFocused();
+      await expect.poll(async () => (await border(phone)).color).toBe(RED);
+      await expect.poll(async () => (await border(name)).color).not.toBe(RED);
+      await context.close();
+    }
+  }
+});
+
 test("no fitting/booking wording remains in pages, titles or the admin nav", async ({
   browser,
 }) => {

@@ -190,7 +190,7 @@ export default function OrderForm({
         {state.status === "error" && state.generic && (
           <p
             role="alert"
-            className="border-matte-black border-s-2 ps-4 text-sm"
+            className="border-error-red text-error-red border-s-2 ps-4 text-sm"
           >
             {t("errors.generic")}
           </p>
@@ -381,11 +381,11 @@ function Field({
         <p
           id={`${id}-error`}
           role="alert"
-          className="mt-2 flex items-center gap-2 text-sm"
+          className="text-error-red mt-2 flex items-center gap-2 text-sm"
         >
           <span
             aria-hidden
-            className="bg-olive-accent inline-block h-1.5 w-1.5 shrink-0 rounded-full"
+            className="bg-error-red inline-block h-1.5 w-1.5 shrink-0 rounded-full"
           />
           {error}
         </p>
