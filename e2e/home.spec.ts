@@ -195,6 +195,47 @@ for (const locale of ["fa", "en"] as const) {
   });
 }
 
+for (const locale of ["fa", "en"] as const) {
+  for (const viewport of [
+    { name: "mobile", width: 375, height: 812 },
+    { name: "desktop", width: 1440, height: 900 },
+  ]) {
+    test(`${locale} ${viewport.name}: hero title is actually on screen, not clipped below the hero`, async ({
+      browser,
+    }) => {
+      const context = await browser.newContext({ viewport });
+      const page = await context.newPage();
+      await page.goto(`/${locale}`);
+      const title = page.locator("section").first().locator("h1");
+      await expect(title).toHaveText(locale === "fa" ? "دوینو" : "deVino");
+      // toBeVisible() alone passes for an element clipped by overflow:hidden,
+      // so check the box against the viewport and the hero itself…
+      const [box, hero] = await Promise.all([
+        title.boundingBox(),
+        page.locator("section").first().boundingBox(),
+      ]);
+      expect(box!.y).toBeGreaterThanOrEqual(0);
+      expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
+      expect(box!.x).toBeGreaterThanOrEqual(0);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
+      expect(box!.y).toBeGreaterThanOrEqual(hero!.y);
+      expect(box!.y + box!.height).toBeLessThanOrEqual(hero!.y + hero!.height);
+      // …and that the pixel at its center really belongs to the title.
+      expect(
+        await title.evaluate((h1) => {
+          const r = h1.getBoundingClientRect();
+          const hit = document.elementFromPoint(
+            r.left + r.width / 2,
+            r.top + r.height / 2,
+          );
+          return h1 === hit || h1.contains(hit);
+        }),
+      ).toBe(true);
+      await context.close();
+    });
+  }
+}
+
 test("home metadata description is still the tagline; closing line unchanged", async ({
   page,
 }) => {

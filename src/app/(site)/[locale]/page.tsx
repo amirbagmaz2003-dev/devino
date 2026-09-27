@@ -30,17 +30,21 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       <HeroScrollController />
 
       <section className="relative h-dvh w-full overflow-hidden">
-        {hero ? (
-          <MediaBox {...hero} priority sizes="100vw" />
-        ) : (
-          <MediaBox
-            type="image"
-            asset={{ url: HERO_IMAGE_URL }}
-            focalPoint={HERO_FOCAL_POINT}
-            alt={t("heroAlt")}
-            priority
-          />
-        )}
+        {/* Out of flow, so the title below sits over the image instead of
+            after it (where overflow-hidden would clip it away). */}
+        <div className="absolute inset-0">
+          {hero ? (
+            <MediaBox {...hero} priority sizes="100vw" />
+          ) : (
+            <MediaBox
+              type="image"
+              asset={{ url: HERO_IMAGE_URL }}
+              focalPoint={HERO_FOCAL_POINT}
+              alt={t("heroAlt")}
+              priority
+            />
+          )}
+        </div>
         <div className="text-pearl-white relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
           <h1 className="font-heading text-5xl md:text-6xl">{t("title")}</h1>
         </div>
