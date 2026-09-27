@@ -33,8 +33,6 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           header never covers its top — the subject's face in portrait
           photos. The strip behind the header stays the page's own black. */}
       <section className="relative h-dvh w-full overflow-hidden pt-[var(--header-h)]">
-        {/* Out of flow, so the title below sits over the image instead of
-            after it (where overflow-hidden would clip it away). */}
         <div className="absolute inset-x-0 top-[var(--header-h)] bottom-0">
           {hero ? (
             <MediaBox {...hero} priority sizes="100vw" />
@@ -48,13 +46,10 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             />
           )}
         </div>
-        <div className="text-pearl-white relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
-          {/* Soft black glow keeps the title legible where it crosses light
-              skin or a bright backdrop (the photo moves under the zoom). */}
-          <h1 className="font-heading text-5xl text-shadow-[0_1px_2px_rgb(0_0_0/0.7),0_0_18px_rgb(0_0_0/0.75)] md:text-6xl">
-            {t("title")}
-          </h1>
-        </div>
+        {/* No text over the hero — the image alone (owner's decision). The
+            page's h1 stays for SEO and screen readers, visually hidden
+            (sr-only: clipped 1px box, not display:none). */}
+        <h1 className="sr-only">{t("title")}</h1>
       </section>
 
       <section className="mx-auto flex min-h-[60dvh] max-w-3xl flex-col items-center justify-center px-6 py-24 text-center">

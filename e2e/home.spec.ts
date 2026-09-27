@@ -200,37 +200,57 @@ for (const locale of ["fa", "en"] as const) {
     { name: "mobile", width: 375, height: 812 },
     { name: "desktop", width: 1440, height: 900 },
   ]) {
-    test(`${locale} ${viewport.name}: hero title is actually on screen, not clipped below the hero`, async ({
+    test(`${locale} ${viewport.name}: hero is image only; its h1 is visually hidden but present`, async ({
       browser,
     }) => {
       const context = await browser.newContext({ viewport });
       const page = await context.newPage();
       await page.goto(`/${locale}`);
-      const title = page.locator("section").first().locator("h1");
+      const hero = page.locator("section").first();
+      // The page's only h1, non-empty and exposed to assistive tech/SEO…
+      await expect(page.locator("h1")).toHaveCount(1);
+      const title = page.getByRole("heading", { level: 1 });
       await expect(title).toHaveText(locale === "fa" ? "دوینو" : "deVino");
-      // toBeVisible() alone passes for an element clipped by overflow:hidden,
-      // so check the box against the viewport and the hero itself…
-      const [box, hero] = await Promise.all([
-        title.boundingBox(),
-        page.locator("section").first().boundingBox(),
-      ]);
-      expect(box!.y).toBeGreaterThanOrEqual(0);
-      expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
-      expect(box!.x).toBeGreaterThanOrEqual(0);
-      expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
-      expect(box!.y).toBeGreaterThanOrEqual(hero!.y);
-      expect(box!.y + box!.height).toBeLessThanOrEqual(hero!.y + hero!.height);
-      // …and that the pixel at its center really belongs to the title.
+      await expect(hero.locator("h1")).toHaveCount(1);
+      // …but visually hidden the sr-only way (1px clipped box, still
+      // rendered — not display:none / visibility:hidden, which would drop
+      // it from the accessibility tree).
+      const style = await title.evaluate((h1) => {
+        const s = getComputedStyle(h1);
+        const r = h1.getBoundingClientRect();
+        return {
+          display: s.display,
+          visibility: s.visibility,
+          position: s.position,
+          clip: s.clip,
+          clipPath: s.clipPath,
+          width: r.width,
+          height: r.height,
+        };
+      });
+      expect(style.display).not.toBe("none");
+      expect(style.visibility).toBe("visible");
+      expect(style.position).toBe("absolute");
+      // Tailwind v4's sr-only clips with clip-path; older ones with clip.
       expect(
-        await title.evaluate((h1) => {
-          const r = h1.getBoundingClientRect();
-          const hit = document.elementFromPoint(
-            r.left + r.width / 2,
-            r.top + r.height / 2,
-          );
-          return h1 === hit || h1.contains(hit);
-        }),
+        style.clipPath === "inset(50%)" ||
+          style.clip === "rect(0px, 0px, 0px, 0px)",
       ).toBe(true);
+      expect(style.width).toBeLessThanOrEqual(1);
+      expect(style.height).toBeLessThanOrEqual(1);
+      // No visible text anywhere over the hero image.
+      expect(
+        await hero.evaluate(
+          (section) =>
+            [...section.querySelectorAll("*")].filter((el) => {
+              const r = el.getBoundingClientRect();
+              const own = [...el.childNodes].some(
+                (n) => n.nodeType === Node.TEXT_NODE && n.textContent!.trim(),
+              );
+              return own && r.width > 1 && r.height > 1;
+            }).length,
+        ),
+      ).toBe(0);
       await context.close();
     });
   }
