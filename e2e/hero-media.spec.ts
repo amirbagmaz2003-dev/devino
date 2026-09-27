@@ -653,6 +653,79 @@ test.describe("gallery and image variants", () => {
     await context.close();
   });
 
+  test("gallery alt text: empty admin alts default to the product name; the public gallery never has nameless images", async ({
+    browser,
+  }) => {
+    const product = sql<{ id: string; name_fa: string; name_en: string }>(
+      "SELECT id, name_fa, name_en FROM products WHERE slug = 'merlot'",
+    )[0];
+    const { context, page } = await adminPage(browser);
+    await page.goto(`/admin/products/${product.id}/edit`);
+    const before = sql<{ media_id: string }>(
+      `SELECT media_id FROM product_media WHERE product_id = '${product.id}'`,
+    );
+    await page.setInputFiles('input[name="imageFile"]', {
+      name: "no-alt.jpg",
+      mimeType: "image/jpeg",
+      buffer: await makeJpeg(page, 1200, 1600),
+    });
+    // Alt fields left empty (fa: only spaces) -> the product's name is saved.
+    await page.fill('input[name="imageAltFa"]', "   ");
+    await page.getByRole("button", { name: "افزودن این عکس به گالری" }).click();
+    await expect(page.locator("ul img")).toHaveCount(before.length + 1);
+    const added = sql<{
+      id: string;
+      r2_key: string;
+      alt_fa: string;
+      alt_en: string;
+    }>(
+      `SELECT m.id, m.r2_key, m.alt_fa, m.alt_en FROM media m JOIN product_media pm ON pm.media_id = m.id
+       WHERE pm.product_id = '${product.id}' AND m.id NOT IN (${before.map((b) => `'${b.media_id}'`).join(",") || "''"})`,
+    )[0];
+    expect(added.alt_fa).toBe(product.name_fa);
+    expect(added.alt_en).toBe(product.name_en);
+
+    // Older images may still have no alt at all (as on the live site):
+    // the public gallery must name them anyway.
+    sql(`UPDATE media SET alt_fa = '', alt_en = '' WHERE id = '${added.id}'`);
+    const total = before.length + 1;
+    const persian = (n: number) =>
+      String(n).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)]);
+    for (const locale of ["fa", "en"] as const) {
+      const visitor = await context.newPage();
+      await visitor.goto(`/${locale}/products/merlot`);
+      const thumbs = visitor.locator("button[aria-current]");
+      await expect(thumbs).toHaveCount(total);
+      for (let i = 0; i < total; i++)
+        expect(
+          (await thumbs.nth(i).getAttribute("aria-label"))?.trim(),
+        ).toBeTruthy();
+      const last = thumbs.nth(total - 1);
+      await expect(last).toHaveAttribute(
+        "aria-label",
+        locale === "fa"
+          ? `عکس ${persian(total)} از ${persian(total)}`
+          : `Image ${total} of ${total}`,
+      );
+      await last.click();
+      await expect(last).toHaveAttribute("aria-current", "true");
+      const main = visitor
+        .locator("div.aspect-\\[3\\/4\\] > div > img")
+        .first();
+      await expect(main).toHaveAttribute(
+        "alt",
+        locale === "fa" ? product.name_fa : product.name_en,
+      );
+      await visitor.close();
+    }
+
+    const cards = page.locator("ul li");
+    await cards.nth(before.length).getByRole("button", { name: "حذف" }).click();
+    await expect(page.locator("ul img")).toHaveCount(before.length);
+    mediaGone(added);
+    await context.close();
+  });
+
   test("old images fall back to the original; the backfill button creates their variants", async ({
     browser,
     request,

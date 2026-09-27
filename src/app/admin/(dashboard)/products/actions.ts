@@ -74,8 +74,10 @@ function readImageMeta(
   return {
     focalX: Number(formData.get("imageFocalX") ?? 0.5),
     focalY: Number(formData.get("imageFocalY") ?? 0.5),
-    altFa: String(formData.get("imageAltFa") ?? "") || fallbackAltFa,
-    altEn: String(formData.get("imageAltEn") ?? "") || fallbackAltEn,
+    // Left empty (or only spaces) -> the product's name, so no image is
+    // ever saved without alt text.
+    altFa: String(formData.get("imageAltFa") ?? "").trim() || fallbackAltFa,
+    altEn: String(formData.get("imageAltEn") ?? "").trim() || fallbackAltEn,
   };
 }
 
@@ -186,17 +188,18 @@ export async function addProductImageAction(
   const upload = readUploadedFile(formData, "imageFile");
   if (upload.error) return { fieldErrors: { file: upload.error } };
   // Used to return silently here, which looked like the button did nothing.
-  if (!upload.file) return { fieldErrors: { file: "لطفاً یک عکس انتخاب کنید." } };
+  if (!upload.file)
+    return { fieldErrors: { file: "لطفاً یک عکس انتخاب کنید." } };
 
   try {
-    if (!(await getProductAdmin(productId)))
-      return { error: MESSAGES.saveFailed };
+    const product = await getProductAdmin(productId);
+    if (!product) return { error: MESSAGES.saveFailed };
     const existing = await getProductMedia(productId);
     const mediaId = await uploadMedia({
       type: "image",
       file: upload.file,
       variants: upload.variants,
-      ...readImageMeta(formData),
+      ...readImageMeta(formData, product.name_fa, product.name_en),
     });
     try {
       await addProductMedia(productId, mediaId, existing.length);

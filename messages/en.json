@@ -33,6 +33,7 @@
   },
   "productDetail": {
     "currencyUnit": "Toman",
+    "imageOf": "Image {n} of {total}",
     "inStock": "In stock",
     "outOfStock": "Out of stock",
     "placeOrder": "Place an order"

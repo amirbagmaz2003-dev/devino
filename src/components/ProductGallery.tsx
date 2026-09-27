@@ -1,10 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { toPersianDigits } from "@/lib/jalali";
 import MediaBox, { type MediaBoxProps } from "./MediaBox";
 
 interface ProductGalleryProps {
   images: MediaBoxProps[];
+  /** Fallback alt for the main image when a photo has none. */
+  productName: string;
 }
 
 /**
@@ -12,18 +16,31 @@ interface ProductGalleryProps {
  * clickable thumbnails, no external carousel library. Static (no zoom):
  * the Ken Burns effect is reserved for full-bleed hero surfaces.
  */
-export default function ProductGallery({ images }: ProductGalleryProps) {
+export default function ProductGallery({
+  images,
+  productName,
+}: ProductGalleryProps) {
+  const t = useTranslations("productDetail");
+  const locale = useLocale();
   const [activeIndex, setActiveIndex] = useState(0);
 
   if (images.length === 0) return null;
 
   const active = images[Math.min(activeIndex, images.length - 1)];
+  const digits = (n: number) =>
+    locale === "fa" ? toPersianDigits(n) : String(n);
+  // A photo saved without alt text still gets a name: the main image
+  // falls back to the product's name, each thumbnail to "Image 2 of 3".
+  const thumbnailLabel = (image: MediaBoxProps, index: number) =>
+    image.alt?.trim() ||
+    t("imageOf", { n: digits(index + 1), total: digits(images.length) });
 
   return (
     <div>
       <div className="bg-matte-black/5 relative aspect-[3/4] overflow-hidden">
         <MediaBox
           {...active}
+          alt={active.alt?.trim() || productName}
           zoom={false}
           priority
           // One column of the product page's max-w-6xl (1152px) two-column
@@ -39,7 +56,7 @@ export default function ProductGallery({ images }: ProductGalleryProps) {
               type="button"
               onClick={() => setActiveIndex(index)}
               aria-current={index === activeIndex}
-              aria-label={image.alt}
+              aria-label={thumbnailLabel(image, index)}
               className={`relative aspect-[3/4] overflow-hidden transition-opacity ${
                 index === activeIndex
                   ? "ring-matte-black opacity-100 ring-1"

@@ -33,6 +33,7 @@
   },
   "productDetail": {
     "currencyUnit": "تومان",
+    "imageOf": "عکس {n} از {total}",
     "inStock": "موجود",
     "outOfStock": "ناموجود",
     "placeOrder": "ثبت سفارش"

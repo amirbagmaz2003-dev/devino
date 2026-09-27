@@ -45,7 +45,7 @@ export default async function ProductDetailPage({
   return (
     <div className="mx-auto max-w-6xl px-6 pt-[calc(var(--header-h)+2rem)] pb-24">
       <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
-        <ProductGallery images={product.images} />
+        <ProductGallery images={product.images} productName={product.name} />
 
         <div>
           <h1 className="font-heading text-3xl sm:text-4xl">{product.name}</h1>
@@ -67,7 +67,6 @@ export default async function ProductDetailPage({
           >
             {t("placeOrder")}
           </Link>
-
         </div>
       </div>
     </div>
