@@ -7,6 +7,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import { Link } from "@/i18n/navigation";
 import MediaBox, { type MediaBoxProps } from "@/components/MediaBox";
 import CarouselArrows from "./CarouselArrows";
+import CarouselCounter from "./CarouselCounter";
 import { useCarouselKeyboardNav } from "./useCarouselKeyboardNav";
 import { useDragClickGuard } from "./useDragClickGuard";
 
@@ -155,6 +156,14 @@ export default function CollectionPosterCarousel({
           prevLabel={prevLabel}
           nextLabel={nextLabel}
           variant="overlay"
+        />
+      )}
+      {collections.length > 1 && (
+        <CarouselCounter
+          current={selectedIndex}
+          total={collections.length}
+          variant="overlay"
+          className="pointer-events-none absolute inset-x-0 bottom-5 z-10 text-center sm:bottom-7"
         />
       )}
     </div>

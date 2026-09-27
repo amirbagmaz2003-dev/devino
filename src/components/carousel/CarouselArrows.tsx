@@ -29,10 +29,12 @@ export default function CarouselArrows({
   variant = "plain",
 }: CarouselArrowsProps) {
   const base =
-    "absolute top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full transition-opacity disabled:pointer-events-none disabled:opacity-0 sm:h-11 sm:w-11";
+    "absolute top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full transition-[opacity,background-color,border-color] disabled:pointer-events-none disabled:opacity-0";
+  // 44×44px at every width (WCAG 2.5.5 tap target, same as the header).
+  // Understated: a thin outline over a faint scrim, never a solid button.
   const theme =
     variant === "overlay"
-      ? "bg-matte-black/30 text-pearl-white backdrop-blur-sm hover:bg-matte-black/50"
+      ? "border border-pearl-white/40 bg-matte-black/20 text-pearl-white backdrop-blur-sm hover:border-pearl-white/80 hover:bg-matte-black/40"
       : "border border-matte-black/20 text-matte-black hover:border-matte-black/60";
 
   return (

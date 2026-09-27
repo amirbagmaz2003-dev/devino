@@ -6,6 +6,7 @@ import { localeDirection, type Locale } from "@/i18n/routing";
 import useEmblaCarousel from "embla-carousel-react";
 import ProductCard from "@/components/ProductCard";
 import CarouselArrows from "./CarouselArrows";
+import CarouselCounter from "./CarouselCounter";
 import { useCarouselKeyboardNav } from "./useCarouselKeyboardNav";
 import { useDragClickGuard } from "./useDragClickGuard";
 import type { MediaBoxProps } from "@/components/MediaBox";
@@ -75,6 +76,7 @@ export default function ProductCarousel({
     };
   }, [emblaApi]);
 
+  const selectedIndex = emblaApi?.selectedScrollSnap() ?? 0;
   const canScrollPrev = emblaApi?.canScrollPrev() ?? false;
   const canScrollNext = emblaApi?.canScrollNext() ?? false;
 
@@ -140,6 +142,13 @@ export default function ProductCarousel({
             variant="overlay"
           />
         </div>
+      )}
+      {products.length > 1 && (
+        <CarouselCounter
+          current={selectedIndex}
+          total={products.length}
+          className="mt-6 text-center"
+        />
       )}
     </div>
   );
