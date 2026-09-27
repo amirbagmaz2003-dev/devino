@@ -1,0 +1,520 @@
+{
+  "home-fa-mobile": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [
+      "a \"\" 71×33",
+      "a \"کالکشن‌ها\" 48×16",
+      "a \"درباره‌ی ما\" 46×16",
+      "a \"تماس\" 28×16",
+      "a \"تلگرام\" 32×44"
+    ],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "collections-fa-mobile": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [
+      "a \"\" 71×33",
+      "a \"کالکشن‌ها\" 48×16",
+      "a \"درباره‌ی ما\" 46×16",
+      "a \"تماس\" 28×16",
+      "button \"قبلی\" 40×40",
+      "button \"بعدی\" 40×40",
+      "a \"تلگرام\" 32×44"
+    ],
+    "brokenImages": [],
+    "clippedText": [
+      "h1 \"کالکشن‌ها\""
+    ],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "collection-fa-mobile": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [
+      "a \"\" 71×33",
+      "a \"کالکشن‌ها\" 48×16",
+      "a \"درباره‌ی ما\" 46×16",
+      "a \"تماس\" 28×16",
+      "button \"قبلی\" 40×40",
+      "button \"بعدی\" 40×40",
+      "a \"تلگرام\" 32×44"
+    ],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "product-fa-mobile": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [
+      "a \"\" 71×33",
+      "a \"کالکشن‌ها\" 48×16",
+      "a \"درباره‌ی ما\" 46×16",
+      "a \"تماس\" 28×16",
+      "a \"تلگرام\" 32×44"
+    ],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "about-fa-mobile": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [
+      "a \"\" 71×33",
+      "a \"کالکشن‌ها\" 48×16",
+      "a \"درباره‌ی ما\" 46×16",
+      "a \"تماس\" 28×16",
+      "a \"تلگرام\" 32×44"
+    ],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "contact-fa-mobile": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [
+      "a \"\" 71×33",
+      "a \"کالکشن‌ها\" 48×16",
+      "a \"درباره‌ی ما\" 46×16",
+      "a \"تماس\" 28×16",
+      "a \"تلگرام\" 43×48",
+      "a \"برای ثبت سفارش، در صفحه‌ی هر لباس دکمه‌ی\" 287×42",
+      "a \"تلگرام\" 32×44"
+    ],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "order-fa-mobile": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [
+      "a \"\" 71×33",
+      "a \"کالکشن‌ها\" 48×16",
+      "a \"درباره‌ی ما\" 46×16",
+      "a \"تماس\" 28×16",
+      "a \"قوانین و حریم خصوصی\" 305×38",
+      "a \"تلگرام\" 32×44"
+    ],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "terms-fa-mobile": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [
+      "a \"\" 71×33",
+      "a \"کالکشن‌ها\" 48×16",
+      "a \"درباره‌ی ما\" 46×16",
+      "a \"تماس\" 28×16",
+      "a \"راه‌های تماس\" 84×25",
+      "a \"تلگرام\" 32×44"
+    ],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "404-fa-mobile": {
+    "status": 404,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [
+      "a \"\" 71×33",
+      "a \"کالکشن‌ها\" 48×16",
+      "a \"درباره‌ی ما\" 46×16",
+      "a \"تماس\" 28×16",
+      "a \"تلگرام\" 32×44"
+    ],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ]
+  },
+  "home-en-mobile": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [
+      "a \"\" 71×30",
+      "a \"Collections\" 63×16",
+      "a \"About\" 34×16",
+      "a \"Contact\" 45×16"
+    ],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "collections-en-mobile": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [
+      "a \"\" 71×30",
+      "a \"Collections\" 63×16",
+      "a \"About\" 34×16",
+      "a \"Contact\" 45×16",
+      "button \"Previous\" 40×40",
+      "button \"Next\" 40×40"
+    ],
+    "brokenImages": [],
+    "clippedText": [
+      "h1 \"Collections\""
+    ],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "collection-en-mobile": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [
+      "a \"\" 71×30",
+      "a \"Collections\" 63×16",
+      "a \"About\" 34×16",
+      "a \"Contact\" 45×16",
+      "button \"Previous\" 40×40",
+      "button \"Next\" 40×40"
+    ],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "product-en-mobile": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [
+      "a \"\" 71×30",
+      "a \"Collections\" 63×16",
+      "a \"About\" 34×16",
+      "a \"Contact\" 45×16"
+    ],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "about-en-mobile": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [
+      "a \"\" 71×30",
+      "a \"Collections\" 63×16",
+      "a \"About\" 34×16",
+      "a \"Contact\" 45×16"
+    ],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "contact-en-mobile": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [
+      "a \"\" 71×30",
+      "a \"Collections\" 63×16",
+      "a \"About\" 34×16",
+      "a \"Contact\" 45×16",
+      "a \"Call\" 39×48",
+      "a \"To place an order, use the \"Place an ord\" 284×37"
+    ],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "order-en-mobile": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [
+      "a \"\" 71×30",
+      "a \"Collections\" 63×16",
+      "a \"About\" 34×16",
+      "a \"Contact\" 45×16",
+      "a \"Terms & Privacy\" 92×15"
+    ],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "terms-en-mobile": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [
+      "a \"\" 71×30",
+      "a \"Collections\" 63×16",
+      "a \"About\" 34×16",
+      "a \"Contact\" 45×16"
+    ],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "404-en-mobile": {
+    "status": 404,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [
+      "a \"\" 71×30",
+      "a \"Collections\" 63×16",
+      "a \"About\" 34×16",
+      "a \"Contact\" 45×16"
+    ],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ]
+  },
+  "home-fa-desktop": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "collections-fa-desktop": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [],
+    "brokenImages": [],
+    "clippedText": [
+      "h1 \"کالکشن‌ها\""
+    ],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "collection-fa-desktop": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "product-fa-desktop": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "about-fa-desktop": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "contact-fa-desktop": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "order-fa-desktop": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "terms-fa-desktop": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "404-fa-desktop": {
+    "status": 404,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ]
+  },
+  "home-en-desktop": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "collections-en-desktop": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [],
+    "brokenImages": [],
+    "clippedText": [
+      "h1 \"Collections\""
+    ],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "collection-en-desktop": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "product-en-desktop": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "about-en-desktop": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "contact-en-desktop": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "order-en-desktop": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "terms-en-desktop": {
+    "status": 200,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+    ]
+  },
+  "404-en-desktop": {
+    "status": 404,
+    "horizontalOverflow": 0,
+    "wideElements": [],
+    "smallTargets": [],
+    "brokenImages": [],
+    "clippedText": [],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ]
+  }
+}
