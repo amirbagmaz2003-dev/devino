@@ -110,3 +110,53 @@ test("fa pages show only Persian digits; prices use ٬, en keeps Latin", async (
     sql(`UPDATE products SET price = ${merlot.price} WHERE slug = 'merlot'`);
   }
 });
+
+// ---------- 2. No italic on Persian text ----------
+
+test("the italic lines are italic on /en only; Persian never gets a synthetic italic", async ({
+  page,
+}) => {
+  const lines = {
+    "/collections/first-harvest": {
+      fa: "لباس، حضور را نمی‌سازد؛ کاملش می‌کند.",
+      en: "A dress doesn't create a presence. It completes one.",
+    },
+    "/contact": {
+      fa: "لباسی که فقط تماشا نمی‌شود؛ گفت‌وگویی را آغاز می‌کند.",
+      en: "Not a dress to be looked at, but one that begins a conversation.",
+    },
+    "": {
+      fa: "کمال، در جزئیات زندگی می‌کند.",
+      en: "Perfection lives in the details.",
+    },
+    "/about": {
+      fa: "زیبایی از رابطه‌ی زن و لباس زاده می‌شود، نه از غلبه‌ی یکی بر دیگری.",
+      en: "Beauty is born of the relationship between a woman and her dress, never from one overpowering the other.",
+    },
+  } as const;
+  for (const [path, text] of Object.entries(lines))
+    for (const locale of ["fa", "en"] as const) {
+      await page.goto(`/${locale}${path}`);
+      const line = page.getByText(text[locale], { exact: true });
+      await expect(line).toHaveCSS(
+        "font-style",
+        locale === "en" ? "italic" : "normal",
+      );
+      if (locale === "fa")
+        await expect(line).toHaveCSS("font-synthesis", "none");
+    }
+  // No other italic anywhere on those Persian pages.
+  for (const path of Object.keys(lines)) {
+    await page.goto(`/fa${path}`);
+    expect(
+      await page.evaluate(
+        () =>
+          [...document.querySelectorAll("body *")].filter(
+            (el) =>
+              getComputedStyle(el).fontStyle === "italic" &&
+              el.textContent?.trim(),
+          ).length,
+      ),
+    ).toBe(0);
+  }
+});

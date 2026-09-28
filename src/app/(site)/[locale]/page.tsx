@@ -90,7 +90,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
       <section className="px-6 pt-24 pb-16 text-center">
         <span aria-hidden className="bg-olive-accent mx-auto block h-px w-10" />
-        <p className="font-heading text-matte-black/70 mt-6 text-base italic sm:text-lg">
+        <p className="font-heading text-matte-black/70 en:italic mt-6 text-base sm:text-lg">
           {t("closing")}
         </p>
       </section>

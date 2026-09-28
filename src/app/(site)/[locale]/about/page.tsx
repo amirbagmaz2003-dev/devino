@@ -41,7 +41,7 @@ export default async function AboutPage({
 
       <footer className="mt-20 text-center sm:mt-24">
         <span aria-hidden className="bg-olive-accent mx-auto block h-px w-10" />
-        <p className="font-heading mt-8 text-xl leading-relaxed italic sm:text-2xl">
+        <p className="font-heading mt-8 text-xl leading-relaxed en:italic sm:text-2xl">
           {t("closing")}
         </p>
       </footer>

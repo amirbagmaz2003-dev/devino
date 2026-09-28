@@ -6,6 +6,16 @@
   --font-body: var(--font-body);
 }
 
+/* `en:` — styles for English pages only (from <html lang>). Italic is
+   written `en:italic`: the Persian fonts have no italic, and a browser-
+   slanted Persian script looks broken. */
+@custom-variant en (&:lang(en));
+
+/* Never fake a bold/italic the Persian fonts don't have. */
+:lang(fa) {
+  font-synthesis: none;
+}
+
 body {
   @apply bg-pearl-white text-matte-black font-body antialiased;
 }
