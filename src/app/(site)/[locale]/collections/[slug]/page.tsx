@@ -44,7 +44,7 @@ export default async function CollectionDetailPage({
         {collection.description && (
           <p className="text-matte-black/70 mt-4">{collection.description}</p>
         )}
-        <p className="font-heading text-matte-black/60 en:italic mt-6 text-base">
+        <p className="font-heading text-matte-black/60 en:italic mt-6 text-base text-balance">
           {t("presenceLine")}
         </p>
       </div>

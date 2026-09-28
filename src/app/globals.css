@@ -29,6 +29,26 @@ h6 {
   @apply font-heading;
 }
 
+/* No single word alone on a last line, in any language or width:
+   headings balance their lines; body text wraps "pretty". Short centered
+   lines opt into balance with `text-balance`. In the base layer so those
+   utilities still win. */
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    text-wrap: balance;
+  }
+
+  p,
+  li {
+    text-wrap: pretty;
+  }
+}
+
 /* Fixed site header — height is shared with pages that need to offset its
    overlay (see each non-hero page's top padding). */
 :root {

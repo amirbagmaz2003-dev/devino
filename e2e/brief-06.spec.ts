@@ -195,3 +195,83 @@ for (const locale of ["fa", "en"] as const)
       expect(Math.abs(dotTop - wordTop)).toBeLessThanOrEqual(4);
       await context.close();
     });
+
+// ---------- 4. No widowed last words ----------
+
+/** Multi-line headings/paragraphs/list items (3+ words) whose last line is a single word. */
+function widows(page: Page) {
+  return page.evaluate(() => {
+    const out: string[] = [];
+    for (const el of document.querySelectorAll("h1,h2,h3,h4,h5,h6,p,li")) {
+      if (!el.getBoundingClientRect().width) continue;
+      const words: { word: string; top: number }[] = [];
+      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      let node: Node | null;
+      while ((node = walker.nextNode())) {
+        const text = node.textContent ?? "";
+        for (const match of text.matchAll(/\S+/g)) {
+          const range = document.createRange();
+          range.setStart(node, match.index!);
+          range.setEnd(node, match.index! + match[0].length);
+          const rects = [...range.getClientRects()].filter((r) => r.width);
+          if (rects.length)
+            words.push({
+              word: match[0],
+              top: Math.round(rects[rects.length - 1].top),
+            });
+        }
+      }
+      const lines = [...new Set(words.map((w) => w.top))];
+      // Two words that don't fit on one line can only break one way.
+      if (lines.length < 2 || words.length < 3) continue;
+      const last = words.filter((w) => w.top === lines[lines.length - 1]);
+      if (last.length === 1)
+        out.push(
+          `${el.tagName}: …${last[0].word} (${el.textContent!.trim().slice(0, 30)})`,
+        );
+    }
+    return out;
+  });
+}
+
+for (const locale of ["fa", "en"] as const)
+  for (const width of [320, 390, 1280])
+    test(`${locale} ${width}px: no single word alone on a last line`, async ({
+      browser,
+    }) => {
+      const context = await browser.newContext({
+        viewport: { width, height: 800 },
+      });
+      const page = await context.newPage();
+      for (const path of [
+        "",
+        "/collections",
+        "/collections/first-harvest",
+        "/products/merlot",
+        "/about",
+        "/contact",
+        "/order?product=merlot",
+        "/terms",
+        "/does-not-exist",
+      ]) {
+        await page.goto(`/${locale}${path}`);
+        await page.evaluate(() => document.fonts.ready);
+        expect(await widows(page), `/${locale}${path}`).toEqual([]);
+      }
+      // The rule is general CSS, not per string.
+      await page.goto(`/${locale}`);
+      await expect(page.getByTestId("home-tagline")).toHaveCSS(
+        "text-wrap-style",
+        "balance",
+      );
+      await expect(page.locator("h2").first()).toHaveCSS(
+        "text-wrap-style",
+        "balance",
+      );
+      await page.goto(`/${locale}/about`);
+      await expect(page.locator("main p").first()).toHaveCSS(
+        "text-wrap-style",
+        "pretty",
+      );
+      await context.close();
+    });

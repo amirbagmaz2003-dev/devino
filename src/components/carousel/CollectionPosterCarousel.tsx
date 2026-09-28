@@ -136,7 +136,7 @@ export default function CollectionPosterCarousel({
                       {collection.name}
                     </h2>
                     {collection.description && (
-                      <p className="text-pearl-white/85 mt-3 max-w-md text-sm sm:text-base">
+                      <p className="text-pearl-white/85 mt-3 max-w-md text-sm text-balance sm:text-base">
                         {collection.description}
                       </p>
                     )}

@@ -56,7 +56,10 @@ export default async function ProductDetailPage({
             {product.inStock ? t("inStock") : t("outOfStock")}
           </p>
           {product.description && (
-            <p className="text-matte-black/80 mt-6 leading-relaxed whitespace-pre-line">
+            // balance, not the site-wide pretty: Chrome's pretty still left
+            // "remembered." alone on the last line at 320px; these
+            // descriptions are short enough (≤6 lines) for balance.
+            <p className="text-matte-black/80 mt-6 leading-relaxed text-balance whitespace-pre-line">
               {product.description}
             </p>
           )}
