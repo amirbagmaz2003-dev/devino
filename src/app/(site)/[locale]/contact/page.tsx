@@ -49,13 +49,18 @@ export default async function ContactPage({
         instagramLabel={t("instagramLabel")}
       />
 
+      {/* Plain sentence; only "any piece's page" links to the collections. */}
       <p className="text-matte-black/70 mt-12 text-sm">
-        <Link
-          href="/collections"
-          className="hover:text-olive-accent underline underline-offset-4"
-        >
-          {t("orderHint")}
-        </Link>
+        {t.rich("orderHint", {
+          link: (chunks) => (
+            <Link
+              href="/collections"
+              className="hover:text-olive-accent underline underline-offset-4"
+            >
+              {chunks}
+            </Link>
+          ),
+        })}
       </p>
     </div>
   );

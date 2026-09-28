@@ -58,7 +58,7 @@
     "title": "Contact",
     "lead": "Not a dress to be looked at, but one that begins a conversation.",
     "intro": "For questions about our pieces, sizing or an existing order, reach us through any of the channels below.",
-    "orderHint": "To place an order, use the \"Place an order\" button on any piece's page.",
+    "orderHint": "To place an order, use the \"Place an order\" button on <link>any piece's page</link>.",
     "phoneLabel": "Call",
     "telegramLabel": "Telegram",
     "instagramLabel": "Instagram"

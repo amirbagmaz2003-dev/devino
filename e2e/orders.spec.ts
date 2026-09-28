@@ -663,7 +663,7 @@ for (const locale of ["fa", "en"] as const) {
 
 // ---------- contact page & wording ----------
 
-test("contact page: no form, prominent channels, order hint links to the collections", async ({
+test("contact page: no form, prominent channels, only the hint's \"any piece's page\" links to the collections", async ({
   page,
 }) => {
   const before = sql<{
@@ -715,10 +715,15 @@ test("contact page: no form, prominent channels, order hint links to the collect
           .evaluate((el) => getComputedStyle(el).fontSize),
       ),
     ).toBeGreaterThanOrEqual(24);
-    await expect(page.getByRole("link", { name: hint })).toHaveAttribute(
-      "href",
-      `/${locale}/collections`,
+    // The sentence is plain text; only "any piece's page" is the link.
+    const hintLine = page.locator("main p", { hasText: hint });
+    await expect(hintLine).toHaveText(hint);
+    const link = hintLine.getByRole("link");
+    await expect(link).toHaveCount(1);
+    await expect(link).toHaveText(
+      locale === "fa" ? "صفحه‌ی هر لباس" : "any piece's page",
     );
+    await expect(link).toHaveAttribute("href", `/${locale}/collections`);
   }
   sql(
     `UPDATE site_settings SET contact_phone = ${q(before.contact_phone)}, telegram_url = ${q(before.telegram_url)}, instagram_url = ${q(before.instagram_url)} WHERE id = 1`,
