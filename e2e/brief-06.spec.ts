@@ -275,3 +275,50 @@ for (const locale of ["fa", "en"] as const)
       );
       await context.close();
     });
+
+// ---------- 6. Homepage vertical rhythm ----------
+
+for (const locale of ["fa", "en"] as const)
+  for (const [width, gap] of [
+    [320, 96],
+    [390, 96],
+    [1280, 160],
+  ] as const)
+    test(`${locale} ${width}px: home sections are ${gap}px apart`, async ({
+      browser,
+    }) => {
+      const context = await browser.newContext({
+        viewport: { width, height: 800 },
+      });
+      const page = await context.newPage();
+      await page.goto(`/${locale}`);
+      await page.evaluate(() => document.fonts.ready);
+      const gaps = await page.evaluate(() => {
+        const top = (el: Element) => el.getBoundingClientRect().top;
+        const bottom = (el: Element) => el.getBoundingClientRect().bottom;
+        const [hero, teaser, statement, closing] =
+          document.querySelectorAll("main section");
+        return {
+          // hero image -> "The Collections" heading
+          heroToTeaser: top(teaser.querySelector("h2")!) - bottom(hero),
+          // "View collections" button -> statement sentence
+          teaserToStatement:
+            top(statement.querySelector("p")!) -
+            bottom(teaser.querySelector("a")!),
+          // shoulder line -> the closing section's olive rule
+          statementToClosing:
+            top(closing.firstElementChild!) -
+            bottom(statement.querySelector("svg")!),
+          // closing line -> footer's first text
+          closingToFooter:
+            top(document.querySelector("footer h2")!) -
+            bottom(closing.querySelector("p")!),
+        };
+      });
+      for (const [name, value] of Object.entries(gaps))
+        expect(
+          Math.abs(value - gap),
+          `${name} = ${value}px`,
+        ).toBeLessThanOrEqual(4);
+      await context.close();
+    });

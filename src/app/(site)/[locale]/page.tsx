@@ -52,7 +52,12 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         <h1 className="sr-only">{t("title")}</h1>
       </section>
 
-      <section className="mx-auto flex min-h-[60dvh] max-w-3xl flex-col items-center justify-center px-6 py-24 text-center">
+      {/* One vertical rhythm for every home section: 96px between sections
+          on phones, 160px on desktop. Each section pads half of that on
+          each side (py-12 / md:py-20); the first one after the hero and
+          the last one before the footer (which adds its own 48px) take
+          the rest on their outer side. */}
+      <section className="mx-auto flex max-w-3xl flex-col items-center px-6 pt-24 pb-12 text-center md:pt-40 md:pb-20">
         <h2 className="text-3xl">{t("teaser.heading")}</h2>
         {/* The tagline: the first sentence a visitor reads after the brand name. */}
         <p
@@ -71,7 +76,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
       <section
         data-testid="home-statement"
-        className="bg-pearl-white text-matte-black px-6 py-24 sm:py-32"
+        className="bg-pearl-white text-matte-black px-6 py-12 md:py-20"
       >
         {/* Secondary to the tagline: lighter weight (300 where the font has
             it; Markazi Text's lightest is 400) and a clearly smaller size.
@@ -88,7 +93,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         <ShoulderLine className="mx-auto mt-10 max-w-[18rem] sm:mt-12 sm:max-w-sm" />
       </section>
 
-      <section className="px-6 pt-24 pb-16 text-center">
+      <section className="px-6 pt-12 pb-12 text-center md:pt-20 md:pb-28">
         <span aria-hidden className="bg-olive-accent mx-auto block h-px w-10" />
         <p className="font-heading text-matte-black/70 en:italic mt-6 text-base text-balance sm:text-lg">
           {t("closing")}
