@@ -541,7 +541,11 @@ for (const locale of ["fa", "en"] as const) {
     // 3. closing line with the olive rule, just above the footer.
     const closing = page.locator("section").nth(3);
     await expect(closing.locator("p")).toHaveText(c.closing);
-    await expect(closing.locator("p")).toHaveCSS("font-style", "italic");
+    await expect(closing.locator("p")).toHaveCSS(
+      "font-style",
+      // Persian has no italic (brief 06): upright on /fa.
+      locale === "en" ? "italic" : "normal",
+    );
     await expect(closing.locator("span[aria-hidden]")).toHaveCSS(
       "background-color",
       "rgb(85, 107, 47)",
@@ -551,11 +555,19 @@ for (const locale of ["fa", "en"] as const) {
     await page.goto(`/${locale}/collections/first-harvest`);
     const line = page.getByText(c.collection, { exact: true });
     await expect(line).toBeVisible();
-    await expect(line).toHaveCSS("font-style", "italic");
+    await expect(line).toHaveCSS(
+      "font-style",
+      // Persian has no italic (brief 06): upright on /fa.
+      locale === "en" ? "italic" : "normal",
+    );
 
     await page.goto(`/${locale}/contact`);
     const lead = page.getByText(c.lead, { exact: true });
-    await expect(lead).toHaveCSS("font-style", "italic");
+    await expect(lead).toHaveCSS(
+      "font-style",
+      // Persian has no italic (brief 06): upright on /fa.
+      locale === "en" ? "italic" : "normal",
+    );
     const leadY = (await lead.boundingBox())!.y;
     const intro = page.locator("p", {
       hasText:
@@ -577,7 +589,11 @@ for (const locale of ["fa", "en"] as const) {
       c.aboutBodyStart,
     );
     const aboutClosing = page.getByText(c.aboutClosing, { exact: true });
-    await expect(aboutClosing).toHaveCSS("font-style", "italic");
+    await expect(aboutClosing).toHaveCSS(
+      "font-style",
+      // Persian has no italic (brief 06): upright on /fa.
+      locale === "en" ? "italic" : "normal",
+    );
     await expect(aboutClosing).toHaveCSS("text-align", "center");
     expect(
       await page.locator('meta[name="description"]').getAttribute("content"),
