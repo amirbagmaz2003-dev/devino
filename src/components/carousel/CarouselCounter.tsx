@@ -1,5 +1,5 @@
 import { useLocale, useTranslations } from "next-intl";
-import { toPersianDigits } from "@/lib/jalali";
+import { formatNumber } from "@/lib/formatNumber";
 
 interface CarouselCounterProps {
   /** 0-based selected slide. */
@@ -25,8 +25,7 @@ export default function CarouselCounter({
 }: CarouselCounterProps) {
   const t = useTranslations("carousel");
   const locale = useLocale();
-  const digits = (n: number) =>
-    locale === "fa" ? toPersianDigits(n) : String(n);
+  const digits = (n: number) => formatNumber(n, locale, { grouping: false });
   const color =
     variant === "overlay" ? "text-pearl-white/85" : "text-matte-black/60";
 

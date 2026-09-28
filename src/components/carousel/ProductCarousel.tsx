@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { localeDirection, type Locale } from "@/i18n/routing";
 import useEmblaCarousel from "embla-carousel-react";
 import ProductCard from "@/components/ProductCard";
+import { formatNumber } from "@/lib/formatNumber";
 import CarouselArrows from "./CarouselArrows";
 import CarouselCounter from "./CarouselCounter";
 import { useCarouselKeyboardNav } from "./useCarouselKeyboardNav";
@@ -107,8 +108,10 @@ export default function ProductCarousel({
               role="group"
               aria-roledescription="slide"
               aria-label={tCarousel("slideStatus", {
-                current: index + 1,
-                total: products.length,
+                current: formatNumber(index + 1, locale, { grouping: false }),
+                total: formatNumber(products.length, locale, {
+                  grouping: false,
+                }),
               })}
               className="min-w-0 flex-[0_0_100%]"
             >

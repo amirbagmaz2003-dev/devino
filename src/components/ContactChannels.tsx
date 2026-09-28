@@ -1,4 +1,4 @@
-import { toPersianDigits } from "@/lib/jalali";
+import { localizeDigits } from "@/lib/formatNumber";
 
 interface ContactChannel {
   label: string;
@@ -35,7 +35,7 @@ function formatPhone(phone: string, locale: "fa" | "en") {
     : intl
       ? `+98 ${intl.slice(3, 6)} ${intl.slice(6, 9)} ${intl.slice(9)}`
       : phone.trim();
-  return locale === "fa" ? toPersianDigits(grouped) : grouped;
+  return localizeDigits(grouped, locale);
 }
 
 /**

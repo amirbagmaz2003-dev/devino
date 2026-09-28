@@ -6,6 +6,7 @@ import { localeDirection, type Locale } from "@/i18n/routing";
 import useEmblaCarousel from "embla-carousel-react";
 import { Link } from "@/i18n/navigation";
 import MediaBox, { type MediaBoxProps } from "@/components/MediaBox";
+import { formatNumber } from "@/lib/formatNumber";
 import CarouselArrows from "./CarouselArrows";
 import CarouselCounter from "./CarouselCounter";
 import { useCarouselKeyboardNav } from "./useCarouselKeyboardNav";
@@ -49,7 +50,8 @@ export default function CollectionPosterCarousel({
   // right-to-left and push them off-screen under LTR positioning. Only
   // each slide's content follows the locale direction, so Persian text
   // still renders and aligns RTL.
-  const contentDir = localeDirection[useLocale() as Locale];
+  const locale = useLocale();
+  const contentDir = localeDirection[locale as Locale];
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     direction: "ltr",
@@ -102,8 +104,10 @@ export default function CollectionPosterCarousel({
                 role="group"
                 aria-roledescription="slide"
                 aria-label={tCarousel("slideStatus", {
-                  current: index + 1,
-                  total: collections.length,
+                  current: formatNumber(index + 1, locale, { grouping: false }),
+                  total: formatNumber(collections.length, locale, {
+                    grouping: false,
+                  }),
                 })}
                 className="relative h-full min-w-0 flex-[0_0_100%]"
               >

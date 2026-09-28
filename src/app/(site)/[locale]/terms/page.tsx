@@ -44,7 +44,9 @@ export default async function TermsPage({
         <h2 id="terms-process" className={heading}>
           {t("process.heading")}
         </h2>
-        <ol className={`${list} list-decimal ps-6`}>
+        <ol
+          className={`${list} ps-6 ${locale === "fa" ? "[list-style-type:persian]" : "list-decimal"}`}
+        >
           {STEPS.map((step) => (
             <li key={step}>{t(`process.steps.${step}`)}</li>
           ))}

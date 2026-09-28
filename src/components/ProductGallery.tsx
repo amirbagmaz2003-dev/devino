@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { toPersianDigits } from "@/lib/jalali";
+import { formatNumber } from "@/lib/formatNumber";
 import MediaBox, { type MediaBoxProps } from "./MediaBox";
 
 interface ProductGalleryProps {
@@ -27,8 +27,7 @@ export default function ProductGallery({
   if (images.length === 0) return null;
 
   const active = images[Math.min(activeIndex, images.length - 1)];
-  const digits = (n: number) =>
-    locale === "fa" ? toPersianDigits(n) : String(n);
+  const digits = (n: number) => formatNumber(n, locale, { grouping: false });
   // A photo saved without alt text still gets a name: the main image
   // falls back to the product's name, each thumbnail to "Image 2 of 3".
   const thumbnailLabel = (image: MediaBoxProps, index: number) =>

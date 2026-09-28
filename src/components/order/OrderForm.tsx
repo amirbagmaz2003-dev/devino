@@ -16,6 +16,7 @@ import type {
   OrderFormState,
 } from "@/app/(site)/[locale]/order/orderForm";
 import MediaBox, { type MediaBoxProps } from "@/components/MediaBox";
+import { formatNumber, localizeDigits } from "@/lib/formatNumber";
 import { formatPrice } from "@/lib/formatPrice";
 import {
   CONTACT_METHODS,
@@ -221,7 +222,7 @@ export default function OrderForm({
             inputMode="tel"
             autoComplete="tel"
             dir="ltr"
-            placeholder={locale === "fa" ? "۰۹۱۲ ۳۴۵ ۶۷۸۹" : "0912 345 6789"}
+            placeholder={localizeDigits("0912 345 6789", locale)}
             aria-invalid={invalid("phone")}
             aria-describedby={describe("phone")}
             className={`${FIELD_CLASS} ${locale === "fa" ? "text-end" : ""}`}
@@ -270,7 +271,7 @@ export default function OrderForm({
             <option value="">{t("fields.sizePlaceholder")}</option>
             {ORDER_SIZES.map((size) => (
               <option key={size} value={size}>
-                {locale === "fa" ? size.toLocaleString("fa-IR") : size}
+                {formatNumber(size, locale, { grouping: false })}
               </option>
             ))}
           </select>

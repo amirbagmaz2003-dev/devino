@@ -1,4 +1,5 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { formatNumber } from "@/lib/formatNumber";
 import { getSiteSettings } from "@/db/queries";
 import { Link } from "@/i18n/navigation";
 import Logo from "./Logo";
@@ -35,11 +36,14 @@ function ExternalLink({
  * simply not rendered.
  */
 export default async function Footer() {
-  const [t, settings] = await Promise.all([
+  const [t, settings, locale] = await Promise.all([
     getTranslations("footer"),
     getSiteSettings(),
+    getLocale(),
   ]);
-  const year = new Date().getFullYear();
+  const year = formatNumber(new Date().getFullYear(), locale, {
+    grouping: false,
+  });
 
   const links: SocialLink[] = [
     settings?.telegramUrl

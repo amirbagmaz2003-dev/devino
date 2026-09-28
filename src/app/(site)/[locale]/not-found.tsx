@@ -1,4 +1,5 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { formatNumber } from "@/lib/formatNumber";
 import { Link } from "@/i18n/navigation";
 
 /**
@@ -8,11 +9,14 @@ import { Link } from "@/i18n/navigation";
  * RTL/LTR like every other page.
  */
 export default async function LocaleNotFound() {
-  const t = await getTranslations("notFound");
+  const [t, locale] = await Promise.all([
+    getTranslations("notFound"),
+    getLocale(),
+  ]);
   return (
     <div className="mx-auto flex min-h-[70dvh] max-w-xl flex-col items-center justify-center px-6 pt-[calc(var(--header-h)+2rem)] pb-24 text-center">
       <p aria-hidden className="font-heading text-matte-black/45 text-7xl">
-        404
+        {formatNumber(404, locale, { grouping: false })}
       </p>
       <span aria-hidden className="bg-olive-accent mt-6 block h-px w-10" />
       <h1 className="font-heading mt-6 text-3xl sm:text-4xl">{t("title")}</h1>
