@@ -160,3 +160,38 @@ test("the italic lines are italic on /en only; Persian never gets a synthetic it
     ).toBe(0);
   }
 });
+
+// ---------- 3. Footer separator never alone on a line ----------
+
+for (const locale of ["fa", "en"] as const)
+  for (const width of [320, 390, 1280])
+    test(`${locale} ${width}px: the footer "·" stays on the line of the text before it`, async ({
+      browser,
+    }) => {
+      const context = await browser.newContext({
+        viewport: { width, height: 800 },
+      });
+      const page = await context.newPage();
+      await page.goto(`/${locale}/about`);
+      const dot = page
+        .getByRole("contentinfo")
+        .locator('span[aria-hidden]:text-is("·")');
+      await expect(dot).toHaveCount(1);
+      const [dotTop, wordTop] = await dot.evaluate((el) => {
+        // The last visible character before the dot (React splits the
+        // text into several nodes, the no-break space being one of them).
+        let text = el.previousSibling!;
+        while (!text.textContent!.replace(/\s/g, ""))
+          text = text.previousSibling!;
+        const at = text.textContent!.trimEnd().length - 1;
+        const range = document.createRange();
+        range.setStart(text, at);
+        range.setEnd(text, at + 1);
+        return [
+          el.getBoundingClientRect().top,
+          range.getBoundingClientRect().top,
+        ];
+      });
+      expect(Math.abs(dotTop - wordTop)).toBeLessThanOrEqual(4);
+      await context.close();
+    });

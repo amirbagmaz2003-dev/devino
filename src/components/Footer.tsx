@@ -75,10 +75,15 @@ export default async function Footer() {
       </div>
       <div className="border-matte-black/10 text-matte-black/60 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 border-t px-6 py-4 text-center text-xs">
         <Logo variant="black" className="h-4" />
+        {/* The "·" is glued to the text before it with a no-break space,
+            so when the terms link wraps it never sits alone at a line end. */}
         <span>
           &copy; {year} — {t("rights")}
+          {"\u00A0"}
+          <span aria-hidden className="ms-1">
+            ·
+          </span>
         </span>
-        <span aria-hidden>·</span>
         <Link
           href="/terms"
           className="hover:text-matte-black inline-flex min-h-11 items-center underline underline-offset-4 transition-colors"
